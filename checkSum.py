@@ -1,37 +1,22 @@
-import sys
-import hashlib
+import process
 
-BUF_SIZE = 32768
+while True:
+  ff = input('File path to be checked -> ')
+  tp = input('Type of Sum: [a]MD5, [b]SHA1, [c]SHA256 -> ')
+  ss = input('Write/paste your Sum text -> ')
 
-md5 = hashlib.md5()
-sha1 = hashlib.sha1()
-sha256 = hashlib.sha256()
+  print('-' * 60) # jump one line 
+  process.processing(ff, tp)
+  process.results(tp, ss)
+  print('-' * 60) # jump another line 
 
-## if you wanna check other file from their directory uncomment the text below --
-## -- and comment (#) the next code.
-# file_to_check = input('Input the file path -> ')
-file_to_check = 'testfile_original.png'
-
-with open(file_to_check, 'rb') as f:
-  while True:
-    data = f.read(BUF_SIZE)
-    if not data:
-      break
-    md5.update(data)
-    sha1.update(data)
-    sha256.update(data)
-print()
-print("MD5: {0}".format(md5.hexdigest()))
-print("SHA1: {0}".format(sha1.hexdigest()))
-print("SHA256: {0}".format(sha256.hexdigest()))
-print()
-
-if sha1.hexdigest() == '634a24348c8d7a5c78f589356972d3a2b2fcac23':
-  print('SHA1 ok!')
-else:
-  print('SHA1 failed!')
-
-if md5.hexdigest() == '4c5858561a6dcc461a6103d0ab5c1b43':
-  print('MD5 ok!')
-else:
-  print('MD5 failed!')
+  q = input('Do you wanna continue? [Y/n] -> ').lower()
+  if q == 'n' or q == 'no':
+    break
+  else:
+    continue
+# file to testing below
+# file_to_check = 'testfile_original.png' #SHA1 = 634a24348c8d7a5c78f589356972d3a2b2fcac23
+                                          #MD5 = 4c5858561a6dcc461a6103d0ab5c1b43
+                                          #SHA256 = 07f58a47af48e10ea501ae827784fe51b1433adf70ae16ec9cba3da6884376fe
+ 
