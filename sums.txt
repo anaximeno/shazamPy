@@ -4,5 +4,5 @@ SHA1 = 634a24348c8d7a5c78f589356972d3a2b2fcac23
 MD5 = 4c5858561a6dcc461a6103d0ab5c1b43
 SHA256 = 07f58a47af48e10ea501ae827784fe51b1433adf70ae16ec9cba3da6884376fe
 
-Note that 'testfile_fake.png' is very similiar to 'testfile_original.png', 
+Note that 'testfile_fake.png' is very similiar to 'testfile_original.png' 
 but it have some litle differences, which will result differents sums!!
