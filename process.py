@@ -26,18 +26,19 @@ def processing(file, tipo):
 
 
 def results(tipo, ssum):
+  x = int(ssum, 16)
   if tipo == 'a':
-    if md5.hexdigest() == ssum:
+    if int(md5.hexdigest(), 16) == x:
       print(" MD5 check goes well, everything is OK!")
     else:
       print('Sum not matching!')
   elif tipo == 'b':
-    if sha1.hexdigest() == ssum:
+    if int(sha1.hexdigest(), 16) == x:
       print(" SHA1 check goes well, everything is OK!")
     else:
-      print('Sum not matching!')  
+      print('Sum not matching!')
   elif tipo == 'c':
-    if sha256.hexdigest() == ssum:
+    if int(sha256.hexdigest(), 16) == x:
       print(" SHA256 check goes well, everything is OK!")
     else:
       print('Sum not matching!')
