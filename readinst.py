@@ -8,14 +8,14 @@ def instruction(inst):
     state = ['md5', 'sha1', 'sha256']
 
 
-    def ins0(index): # check the initialization
+    def ini_call(index): # check the initialization
         if index != "checksum":
             return False
         else:
             return index
 
 
-    def ins1(index): # check the type of sum
+    def sum_type(index): # check the type of sum
             if index in state:
                 return index # fiz assim para evitar o caso de
                                  # colocarem mais de um tipo de sum
@@ -23,7 +23,7 @@ def instruction(inst):
                 return False
     
 
-    def ins2(index): # check the existence of the file
+    def file_exists(index): # check the existence of the file
         try:
             f = open(index, 'rb')
             f.read()
@@ -33,9 +33,9 @@ def instruction(inst):
             return False
 
     
-    def ins3(index): # read the sum file or text
-        if not ins2(index):
-            return ins2(index)
+    def original_sum(index): # read the sum file or text
+        if not file_exists(index):
+            return file_exists(index)
 
 
         def analyze_file(x):
@@ -60,6 +60,6 @@ def instruction(inst):
 
     
     # return the values for the processment
-    return ins1(reader[1]), ins2(reader[2]), ins3(reader[3]), ins0(reader[0])
+    return sum_type(reader[1]), file_exists(reader[2]), original_sum(reader[3]), ini_call(reader[0])
 
 # checksum sha1 testfile.png sha1.txt
