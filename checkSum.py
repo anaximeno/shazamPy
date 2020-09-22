@@ -31,10 +31,9 @@ try:
 
         ''')
 except IndexError:
-    print(''' ERROR!!
+    print(''' Bad Syntax!
+    
     usage: checksum [type of check] [file path] [file sum]
-
-    types of check that you can use: sha1, sha256, md5
 
     ''')
 
