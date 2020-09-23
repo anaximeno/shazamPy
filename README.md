@@ -13,7 +13,7 @@ Currentlly I am testing and improving the python codes that will be used to the 
 so I would like suggestions and principally help to make the bash scripts for the program.
 
 You can talk with me by sending an email to:
-  -> <p style="text-decoration: underline; color: #00b300;">anaximenobrito@gmail.com
+&#00009; anaximenobrito@gmail.com
 
 
 
