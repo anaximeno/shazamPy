@@ -1,39 +1,41 @@
 import os
+from process import hashlist
 
+erros = []
 
 # checksum "type of check" "file_path"  "original file sum or path"
 # reader = ['checksum', 'type of check', 'file_path', 'file sum']
 def instruction(inst):
     reader = inst.split()
-    state = ['md5', 'sha1', 'sha256']
 
-
-    def ini_call(index): # check the initialization
+    # check the if the first word == checksum
+    def ini_call(index):
         if index != "checksum":
             return False
         else:
             return index
 
-
-    def sum_type(index): # check the type of sum
-            if index in state:
-                return index # fiz assim para evitar o caso de
-                                 # colocarem mais de um tipo de sum
+    # check the type of sum
+    def sum_type(index):
+            if index in hashlist:
+                return index
             else:
+                erros.append(f"{index} hash sum type was not regognized!")
                 return False
 
-
-    def file_exists(index): # check the existence of the file
+    # check the existence of the file
+    def file_exists(index):
         try:
             f = open(index, 'rb')
             f.read()
             f.close()
             return index
         except IOError:
+            erros.append(f"{index} was not found")
             return False
 
-
-    def original_sum(index): # read the sum file or text
+    # read the sum file or text
+    def original_sum(index):
         def analyze_file(x):
             def ext(y):
                 file_name, file_extension = os.path.splitext(y)
@@ -44,12 +46,16 @@ def instruction(inst):
                 needTo = False
             return needTo
         if analyze_file(index) is True:
-            with open(index, "rt") as m:
-                while True:
-                    sum_text = m.read()
-                    if not sum_text:
-                        break
-                    return sum_text
+            try:
+                with open(index, "rt") as m:
+                    while True:
+                        sum_text = m.read()
+                        if not sum_text:
+                            break
+                        return sum_text
+            except FileNotFoundError:
+                erros.append(f"{index} was not found!")
+                return False
         else:
             return index
 
