@@ -2,42 +2,36 @@ import sys
 import hashlib
 
 
-md5 = hashlib.md5()
-sha1 = hashlib.sha1()
-sha256 = hashlib.sha256()
+hashlist = {
+  "-md5": hashlib.md5(),
+  "-sha1": hashlib.sha1(),
+  "-sha224": hashlib.sha224(),
+  "-sha256": hashlib.sha256(),
+  "-sha384": hashlib.sha384(),
+  "-sha512": hashlib.sha512()
+  }
 
 
 def get_data(file, tipo):
-  state = {
-    "md5": md5,
-    "sha1": sha1,
-    "sha256": sha256
-  }
   BUF_SIZE = 32768
   with open(file, 'rb') as f:
     while True:
       data = f.read(BUF_SIZE)
       if not data:
         break
-      elif tipo in state: 
-        state[tipo].update(data)
+      elif tipo in hashlist:
+        hashlist[tipo].update(data)
       else:
-        print('ERR: any error ocurred')
+        print(f'ERRor: {tipo} is not in the hashlist supported!')
         break
 
 
 def results(tipo, fsum):
   x = int(fsum, 16)
-  state = {
-    "md5": md5,
-    "sha1": sha1,
-    "sha256": sha256
-  }
-  if tipo in state:
-      if int(state[tipo].hexdigest(), 16) == x:
-        print(f"  SUCESS, {tipo}sum did match!")
+  if tipo in hashlist:
+      if int(hashlist[tipo].hexdigest(), 16) == x:
+        print(f"  #SUCESS, the {tipo}sum did match!")
       else:
-        print(f"  FAIL, {tipo}sum didn't match!")
+        print(f"  %FAIL, the {tipo}sum didn't match!")
   else:
-      print("Error in process.results()")
-
+      print(f"ERRor: {tipo} is unknown!")
