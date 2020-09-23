@@ -16,13 +16,15 @@ try:
         tipo = readed[0]
         fdir = readed[1]
         fsum = readed[2]
-
-        print('-' * 60) # jump one line
+        
+        print("") # jump one line
+        print('-' * 65)
 
         get_data(fdir, tipo)
         results(tipo, fsum)
 
-        print('-' * 60) # jump another line
+        print('-' * 65)
+        print("") # jump one line
     else:
         print(''' ERROR!!
         usage: checksum [type of check] [file path] [file sum]

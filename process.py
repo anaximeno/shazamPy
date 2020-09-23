@@ -35,9 +35,9 @@ def results(tipo, fsum):
   }
   if tipo in state:
       if int(state[tipo].hexdigest(), 16) == x:
-        print(f"SUCESS, {tipo}sum did match!")
+        print(f"  SUCESS, {tipo}sum did match!")
       else:
-        print(f"FAIL, {tipo}sum didn't match!")
+        print(f"  FAIL, {tipo}sum didn't match!")
   else:
       print("Error in process.results()")
 

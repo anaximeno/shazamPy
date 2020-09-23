@@ -21,7 +21,7 @@ def instruction(inst):
                                  # colocarem mais de um tipo de sum
             else:
                 return False
-    
+
 
     def file_exists(index): # check the existence of the file
         try:
@@ -32,12 +32,8 @@ def instruction(inst):
         except IOError:
             return False
 
-    
+
     def original_sum(index): # read the sum file or text
-        if not file_exists(index):
-            return file_exists(index)
-
-
         def analyze_file(x):
             def ext(y):
                 file_name, file_extension = os.path.splitext(y)
@@ -58,7 +54,7 @@ def instruction(inst):
             return index
 
 
-    
+
     # return the values for the processment
     return sum_type(reader[1]), file_exists(reader[2]), original_sum(reader[3]), ini_call(reader[0])
 
