@@ -19,7 +19,7 @@ Usage:
 
         *If you are in the file_to_be_checked's path you can just write the file's file_name
 
-        *In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code/text itself
+        *In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code itself
 
         *EXAMPLE:*
             -> checksum sha1 testfile.png sha1.txt
