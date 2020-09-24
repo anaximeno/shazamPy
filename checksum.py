@@ -6,19 +6,19 @@ help = '''
         *Usage: checksum -hash [file path] [file/hash sum]
 
         *Types of hash that you can currently use:
-            -md5
-            -sha1
-            -sha224
-            -sha256
-            -sha384
-            -sha512
+            md5
+            sha1
+            sha224
+            sha256
+            sha384
+            sha512
 
         *If you are in the file_to_be_checked's path you can just write the file's file_name
 
         *In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code/text itself
 
         *EXAMPLE:*
-            -> checksum -sha1 testfile.png sha1.txt
+            -> checksum sha1 testfile.png sha1.txt
      '''
 
 try:

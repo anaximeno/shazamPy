@@ -1,6 +1,6 @@
 # Integrity checker
 
-The objective is to make an open source terminal program (shell script) and graphical program to check the integrity of the hash
+The objective is to make an open source terminal program (in shell script) and graphical program to check the integrity of the hash
 of one file.
 
 It uses python to make the checks and converts the file to especifics types of hashes. The program convert the file
@@ -8,6 +8,21 @@ to the hash chosen and compare it with the original sum hash that is given where
 
 Usage:
   checksum [type_of_check] [file_path]  [original_sum]
+
+*Types of hash that you can currently use:
+            md5
+            sha1
+            sha224
+            sha256
+            sha384
+            sha512
+
+        *If you are in the file_to_be_checked's path you can just write the file's file_name
+
+        *In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code/text itself
+
+        *EXAMPLE:*
+            -> checksum sha1 testfile.png sha1.txt
 
 Currentlly I am testing and improving the python codes that will be used to the process of the program,
 so I would like suggestions and principally help to make the bash scripts for the program.
