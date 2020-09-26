@@ -1,4 +1,4 @@
-# Integrity checker
+# CHECKSUM
 
 The objective is to make an open source terminal program (in shell script) and graphical program to check the integrity of the hash
 of one file.
