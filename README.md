@@ -6,7 +6,6 @@ of one file.
 It uses python to make the checks and converts the file to especifics types of hashes. The program convert the file
 to the hash chosen and compare it with the original sum hash that is given where you downloaded the file.
 
-If you want to test it please check INSTALL.md inside Install directory.
 
 Usage:
   checksum [type_of_check] [file_path]  [original_sum]
