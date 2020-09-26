@@ -6,7 +6,7 @@ Checksum is a **terminal program** made in python that check the integrity of on
  * It convert the file to the hash chosen and compares it with the given hash
 
 ### Usage:
-  * checksum type_of_check file_path  original_sum
+  * checksum *type_of_check*  *file_path*   *original_sum*
 
 Types of hash that you can currently use:
  - md5
