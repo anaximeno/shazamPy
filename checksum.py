@@ -1,64 +1,60 @@
-from process import get_data, results
-from readinst import instruction, erros
+#!/usr/bin/env python3
+import sys
 
-help = '''
+# the comment below is for tests and when upgrading
+# sys.path.append('/usr/share/checksum')
 
-        *Usage: checksum -hash [file path] [file/hash sum]
+import process
+from readinst import check_vars
 
-        *Types of hash that you can currently use:
-            md5
-            sha1
-            sha224
-            sha256
-            sha384
-            sha512
+# list of hashes usables
+hashlist = process.hashlist
+t = ""
+for i in hashlist:
+    t += "\n " + i
 
-        *If you are in the file_to_be_checked's path you can just write the file's file_name
+help = f'''
+Usage: checksum [hash] [file path] [file/hash sum]
 
-        *In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code/text itself
+EXAMPLE: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
 
-        *EXAMPLE:*
-            -> checksum sha1 testfile.png sha1.txt
-     '''
+Types of hash that you can currently use: {t}
+
+*If you are in the file_to_be_checked's path you can just write the file's file_name
+
+*In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code/text itself
+'''
 
 try:
-    # read the instructions of the input
-    readed = instruction(input(' -> '))
+    var = sys.argv
 
-    stop_check = False
-
-    #check if we get all the data from instructions
-    for i in range(3):
-        if not readed[i]:
-            stop_check = True
-            break
-
-    if not stop_check:
-        tipo = readed[0]
-        fdir = readed[1]
-        fsum = readed[2]
-
-        print("") # jump one line
-        print('-' * 65)
-
-        get_data(fdir, tipo)
-        results(tipo, fsum)
-
-        print('-' * 65)
-        print("") # jump one line
-
-        print("")
+    if var[1] == "--help":
+        print(help)
     else:
-        print("")
-        print(f' %Err: {erros[0]} , check if you folowed the usage as below.' + help)
+        # read the instructions of the input
+        while check_vars(var[1], var[2], var[3]):
+            stype = var[1]
+            fdir = var[2]
+            fsum = process.original_sum(var[3])
+
+            print("")
+            print('-' * 65)
+
+            process.get_data(fdir, stype)
+            process.results(stype, fsum)
+
+            print('-' * 65)
+            print("")
+            print("")
+            break
 except IndexError:
     print('''
-            Bad Syntax!
+Usage: checksum [type of check] [file path] [file sum]
 
-    Usage: checksum [type of check] [file path] [file sum]
+You can also use for:
+    help: --help
+''')
 
-    ''')
 
-
-# checksum "type of check" "file_path" "original file sum or path"
-# checksum sha1 testfile.png sha1.txt
+        # checksum "type of check" "file_path" "original file sum or path"
+        # checksum sha1 testfile.png sha1.txt

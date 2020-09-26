@@ -1,26 +1,21 @@
 import os
 from process import hashlist
 
-erros = []
 
 # checksum "type of check" "file_path"  "original file sum or path"
-# reader = ['checksum', 'type of check', 'file_path', 'file sum']
-def instruction(inst):
-    reader = inst.split()
-
-    # check the if the first word == checksum
-    def ini_call(index):
-        if index != "checksum":
-            return False
-        else:
-            return index
+# readed = ['type of check', 'file_path', 'file sum']
+def check_vars(stype, fdir, fsum):
 
     # check the type of sum
     def sum_type(index):
             if index in hashlist:
-                return index
+                return True
             else:
-                erros.append(f"{index} hash sum type was not regognized!")
+                print(f"\n{index} hash type is not supported already!")
+                t = ""
+                for i in hashlist:
+                    t += "\n " + i
+                print("\nTypes of hash that you can currently use: {}".format(t))
                 return False
 
     # check the existence of the file
@@ -29,39 +24,28 @@ def instruction(inst):
             f = open(index, 'rb')
             f.read()
             f.close()
-            return index
+            return True
         except IOError:
-            erros.append(f"{index} was not found")
+            print(f"\nFile {index} was not found")
             return False
 
-    # read the sum file or text
-    def original_sum(index):
-        def analyze_file(x):
-            def ext(y):
-                file_name, file_extension = os.path.splitext(y)
-                return file_extension
-            if ext(x) == ".txt":
-                needTo = True
-            else:
-                needTo = False
-            return needTo
-        if analyze_file(index) is True:
+    def analyze_file(file):
+        file_name, file_extension = os.path.splitext(file)
+        if file_extension == ".txt":
+            return True
+        elif not file_extension:
             try:
-                with open(index, "rt") as m:
-                    while True:
-                        sum_text = m.read()
-                        if not sum_text:
-                            break
-                        return sum_text
-            except FileNotFoundError:
-                erros.append(f"{index} was not found!")
+                int(file_name, 16)
+                return True
+            except ValueError:
+                print(f"{file_name} is not an hexadecimal value!")
                 return False
         else:
-            return index
+            print(f"\nCan't read {file}, \nIt must be: A file_sum.txt or the hexadecimal file sum")
+            return False
 
-
-
+    
     # return the values for the processment
-    return sum_type(reader[1]), file_exists(reader[2]), original_sum(reader[3]), ini_call(reader[0])
+    return sum_type(stype) * file_exists(fdir) * analyze_file(fsum)
 
 # checksum sha1 testfile.png sha1.txt
