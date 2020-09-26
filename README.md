@@ -11,13 +11,13 @@ If you want to test it please check INSTALL.md inside Install directory.
 Usage:
   checksum [type_of_check] [file_path]  [original_sum]
 
-Types of hash that you can currently use:
-  md5
-  sha1
-  sha224
-  sha256
-  sha384
-  sha512
+Types of hash that you can currently use: <br>
+  md5<br>
+  sha1<br>
+  sha224<br>
+  sha256<br>
+  sha384<br>
+  sha512<br>
 
 *If you are in the file_to_be_checked's path you can just write the file's file_name
 
