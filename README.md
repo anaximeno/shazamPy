@@ -22,8 +22,7 @@ In file/hash sum you can use an file(.txt) that currently has the sum or the sum
 
 **This program is in tests currently, if you have suggestion let me know ;), if you want to contribute go ahead!**
 
-You can talk with me by sending an email to: 
-  > anaximenobrito@gmail.com
+You can talk with me by sending an email to: anaximenobrito@gmail.com
 
 Fonts I've used to study:
  - https://www.tutorialspoint.com/How-to-Find-Hash-of-File-using-Python
