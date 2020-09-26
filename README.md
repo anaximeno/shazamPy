@@ -2,11 +2,13 @@
 
 Checksum is a **terminal program** made in python that checks the integrity of one file by comparing the file hash to the given hash.
 
-## How does it work
+## General Infos
+
+### How does it work
 
 * It converts the file to the hash chosen and compares it with the given hash
 
-## Usage
+### Usage
 
   > checksum "*type_of_check*" "*file_path*" "*original_sum*"
 
