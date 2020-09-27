@@ -12,6 +12,16 @@ hashlist = {
 }
 
 
+def file_exists(index):
+        try:
+            f = open(index, 'rb')
+            f.read()
+            f.close()
+            return True
+        except IOError:
+            print(f"\nFile {index} was not found")
+            return False
+            
 # read the sum file or text
 def original_sum(index):
     def analyze_file(x):
@@ -21,20 +31,25 @@ def original_sum(index):
         if ext(x) == ".txt":
             return True
         else:
-            return False
+            print(f'{x} is not an .txt file!')
+            return False, False
     if analyze_file(index):
+        fileBase = {}
         try:
             with open(index, "rt") as m:
-                while True:
-                    sum_text = m.read()
-                    if not sum_text:
-                        break
-                    return sum_text
+                for line in m:
+                  file_sum, file_name = line.split()
+                  fileBase[file_name] = file_sum
+            for file in fileBase:
+              if file_exists(file):
+                return file, fileBase[file]
+              else:
+                continue
         except FileNotFoundError:
             print(f"{index} was not found!")
-            return False
+            return False, False
     else:
-        return index
+        return False, False
 
 
 def get_data(file, tipo):
