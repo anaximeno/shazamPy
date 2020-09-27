@@ -14,7 +14,8 @@ for i in hashlist:
     t += "\n " + i
 
 help = f'''
-Usage: checksum [hash] [file path] [file/hash sum]
+Usage: checksum [hash_type] [file path] [hash sum]
+   or: checksum [hash_type] -f [hash_sum.txt]
 
 EXAMPLE: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
 
@@ -26,16 +27,34 @@ Types of hash that you can currently use: {t}
 '''
 
 try:
+    
     var = sys.argv
 
     if var[1] == "--help":
         print(help)
+    elif var[2] == "-f":
+        fdir, fsum = process.original_sum(var[3])
+        stype = var[1]
+        if fdir and fsum:
+            while check_vars(stype, fdir, fsum):
+                print("")
+                print('-' * 65)
+
+                process.get_data(fdir, stype)
+                process.results(stype, fsum)
+
+                print('-' * 65)
+                print("")
+                print("")
+                break
+        else:
+            pass
     else:
         # read the instructions of the input
         while check_vars(var[1], var[2], var[3]):
             stype = var[1]
             fdir = var[2]
-            fsum = process.original_sum(var[3])
+            fsum = var[3]
 
             print("")
             print('-' * 65)
