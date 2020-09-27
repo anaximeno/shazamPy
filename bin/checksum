@@ -6,6 +6,4 @@ sys.path.append('/usr/share/checksum')
 
 import checksum
 
-var = sys.argv
-
-checksum.__initial__(var)
+checksum.__initial__(sys.argv)
