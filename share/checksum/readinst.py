@@ -1,10 +1,7 @@
 import os
-
 from process import hashlist
 
 
-# checksum "type of check" "file_path"  "original file sum or path"
-# readed = ['type of check', 'file_path', 'file sum']
 def check_vars(stype, fdir, fsum):
 
     # check the type of sum
@@ -30,16 +27,15 @@ def check_vars(stype, fdir, fsum):
             print(f"\nFile {index} was not found")
             return False
 
-    def analyze_hex(hex):
+    # check if the value is an hexadecimal value
+    def analyze_hex(hexa):
         try:
             int(hex, 16)
             return True
         except ValueError:
-            print(f"{hex} is not an hexadecimal value!")
+            print(f"{hexa} is not an hexadecimal value!")
             return False
 
     
     # return the values for the processment
     return sum_type(stype) * file_exists(fdir) * analyze_hex(fsum)
-
-# checksum sha1 testfile.png sha1.txt

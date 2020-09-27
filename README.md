@@ -13,6 +13,8 @@ Checksum is a **terminal program** made in python that checks the integrity of o
   > checksum "*hash_type*" "*file_path*" "*original_sum*" <br>
   > checksum "*hash_type*" -f "*hash_sum.txt*"
   
+The second type of checksum must be called at the same dir of the file which will be checked
+
 Types of hash that you can currently use:
 
 * md5
@@ -21,10 +23,6 @@ Types of hash that you can currently use:
 * sha256
 * sha384
 * sha512
-
-If you are in the file_to_be_checked's path you can just write the file's name
-
-In file/hash sum you can use an file(.txt) that currently has the sum or the sum code itself
 
 **This program is in tests currently, if you have suggestion let me know ;), if you want to contribute go ahead!**
 

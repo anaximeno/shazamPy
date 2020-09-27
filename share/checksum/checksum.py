@@ -11,7 +11,7 @@ def __initial__(var):
 
     help = f'''
     Usage: checksum [hash_type] [file path] [hash sum]
-    or: checksum [hash_type] -f [hash_sum.txt]
+    Or:    checksum [hash_type] -f [hash_sum.txt]
 
     EXAMPLE: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
 
@@ -64,7 +64,8 @@ def __initial__(var):
     except IndexError:
         print('''
     Usage: checksum [type of check] [file path] [file sum]
-
+    Or:    checksum [hash_type] -f [hash_sum.txt]
+    
     You can also use for:
         help: --help
     ''')
