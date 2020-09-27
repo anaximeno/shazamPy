@@ -10,7 +10,7 @@ Checksum is a **terminal program** made in python that checks the integrity of o
 
 ### Usage
 
-  > checksum "*type_of_check*" "*file_path*" "*original_sum*"
+  > checksum "*type_of_check*" "*file_path*" "*original_sum*" <br>
   > checksum "*hash_type*" -f "*hash_sum.txt*"
   
 Types of hash that you can currently use:
