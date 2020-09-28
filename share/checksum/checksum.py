@@ -20,30 +20,28 @@ Types of hash that you can currently use: {t}
 
 '''
 
-    try: 
-
+    try:
         if var[1] == "--help":
             print(help)
         elif var[2] == "-f":
-            file, fsum = process.original_sum(var[3])
-            stype = var[1]
-            if file and fsum:
-                while check_vars(stype, file, fsum):
-
-                    process.get_data(file, stype)
-                    process.results(stype, fsum, file)
+            file, f_sum = process.original_sum(var[3])
+            s_type = var[1]
+            if file and f_sum:
+                while check_vars(s_type, file, f_sum):
+                    process.get_data(file, s_type)
+                    process.results(s_type, f_sum, file)
                     break
             else:
                 pass
         else:
             # read the instructions of the input
             while check_vars(var[1], var[2], var[3]):
-                stype = var[1]
+                s_type = var[1]
                 file = var[2]
-                fsum = var[3]
+                f_sum = var[3]
 
-                process.get_data(file, stype)
-                process.results(stype, fsum, file)
+                process.get_data(file, s_type)
+                process.results(s_type, f_sum, file)
                 break
     except IndexError:
         print('''

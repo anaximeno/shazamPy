@@ -2,20 +2,20 @@ import os
 from process import hashlist
 
 
-def check_vars(stype, fdir, fsum):
+def check_vars(s_type, file, f_sum):
 
     # check the type of sum
     def sum_type(index):
-            if index in hashlist:
-                return True
-            else:
-                print(f"\n{index} hash type is not supported already!")
-                t = ""
-                for i in hashlist:
-                    t += "\n " + i
-                print("\nTypes of hash that you can currently use: {}".format(t))
-                print('\nCan\'t checksum!')
-                return False
+        if index in hashlist:
+            return True
+        else:
+            print(f"\n{index} hash type is not supported already!")
+            t = ""
+            for i in hashlist:
+                t += "\n " + i
+            print("\nTypes of hash that you can currently use: {}".format(t))
+            print('\nCan\'t checksum!')
+            return False
 
     # check the existence of the file
     def file_exists(index):
@@ -37,6 +37,5 @@ def check_vars(stype, fdir, fsum):
             print(f"{hexa} is not an hexadecimal value!\n\nCan\'t checksum!")
             return False
 
-    
     # return the values for the processment
-    return sum_type(stype) * file_exists(fdir) * analyze_hex(fsum)
+    return sum_type(s_type) * file_exists(file) * analyze_hex(f_sum)
