@@ -24,7 +24,7 @@ Types of hash that you can currently use:
 * sha384
 * sha512
 
-**This program is in tests currently, if you have suggestion or you want to contribute let me know!**
+**This program is in tests currently, if you have suggestion or you want to contribute let me know!** <br>
 **I also want to make this an open source program!**
 
 You can talk with me by sending an email to: anaximenobrito@gmail.com
