@@ -19,7 +19,6 @@ def file_exists(index):
             f.close()
             return True
         except IOError:
-            print(f"\nFile {index} was not found")
             return False
             
 # read the sum file or text
@@ -34,19 +33,28 @@ def original_sum(index):
             print(f'{x} is not an .txt file!')
             return False, False
     if analyze_file(index):
-        fileBase = {}
         try:
+            fileBase = {}
             with open(index, "rt") as m:
-                for line in m:
-                  file_sum, file_name = line.split()
-                  fileBase[file_name] = file_sum
-            for file in fileBase:
-              if file_exists(file):
-                return file, fileBase[file]
-              else:
-                continue
+              for line in m:
+                file_sum, file_name = line.split()
+                fileBase[file_name] = file_sum
+              notFound = []
+              for file in fileBase:
+                if file_exists(file):
+                  return file, fileBase[file]
+                elif not file_exists(file):
+                  notFound.append(file)
+                  if len(notFound) == len(fileBase):
+                    t = ''
+                    for n in notFound:
+                        t += '\n ' + n
+                    print(f'\nNone of these file(s) below was found in this directory: {t}\n\nCan\'t checksum!')
+                    return False, False
+                else:
+                  continue
         except FileNotFoundError:
-            print(f"{index} was not found!")
+            print(f"{index} was not found!\n\nCan\'t checksum!")
             return False, False
     else:
         return False, False
@@ -62,7 +70,7 @@ def get_data(file, tipo):
       elif tipo in hashlist:
         hashlist[tipo].update(data)
       else:
-        print(f'ERRor: {tipo} is not in the hashlist!')
+        print(f'ERRor: {tipo} is not in the hashlist!\n\nCan\'t checksum!')
         break
 
 
@@ -74,4 +82,5 @@ def results(tipo, fsum):
       else:
         print(f"  %FAIL, the {tipo}sum didn't match!")
   else:
-      print(f"ERRor: {tipo} is unknown!")
+      print(f"ERRor: {tipo} is unknown!\n\nCan\'t checksum!")
+

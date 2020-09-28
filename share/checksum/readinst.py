@@ -14,6 +14,7 @@ def check_vars(stype, fdir, fsum):
                 for i in hashlist:
                     t += "\n " + i
                 print("\nTypes of hash that you can currently use: {}".format(t))
+                print('\nCan\'t checksum!')
                 return False
 
     # check the existence of the file
@@ -24,16 +25,16 @@ def check_vars(stype, fdir, fsum):
             f.close()
             return True
         except IOError:
-            print(f"\nFile {index} was not found")
+            print(f"\nFile {index} was not found\n\nCan\'t checksum!")
             return False
 
     # check if the value is an hexadecimal value
     def analyze_hex(hexa):
         try:
-            int(hex, 16)
+            int(hexa, 16)
             return True
         except ValueError:
-            print(f"{hexa} is not an hexadecimal value!")
+            print(f"{hexa} is not an hexadecimal value!\n\nCan\'t checksum!")
             return False
 
     

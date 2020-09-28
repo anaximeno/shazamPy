@@ -10,20 +10,17 @@ def __initial__(var):
         t += "\n " + i
 
     help = f'''
-    Usage: checksum [hash_type] [file path] [hash sum]
-    Or:    checksum [hash_type] -f [hash_sum.txt]
+Usage: checksum [hash_type] [file path] [hash sum]
+Or:    checksum [hash_type] -f [hash_sum.txt]
 
-    EXAMPLE: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
+EX.1: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
+Ex.2: checksum sha1 -f sha1sum.txt
 
-    Types of hash that you can currently use: {t}
+Types of hash that you can currently use: {t}
 
-    *If you are in the file_to_be_checked's path you can just write the file's file_name
+'''
 
-    *In [file/hash sum] you can use an file(.txt) that currently has the sum or the sum code/text itself
-    '''
-
-    try:
-        var = sys.argv
+    try: 
 
         if var[1] == "--help":
             print(help)
@@ -63,11 +60,13 @@ def __initial__(var):
                 break
     except IndexError:
         print('''
-    Usage: checksum [type of check] [file path] [file sum]
-    Or:    checksum [hash_type] -f [hash_sum.txt]
+Can't checksum!
+
+Usage: checksum [type of check] [file path] [file sum]
+Or:    checksum [hash_type] -f [hash_sum.txt]
     
-    You can also use for:
-        help: --help
+You can also use for:
+    help: --help
     ''')
 
 
