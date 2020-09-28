@@ -26,12 +26,13 @@ def original_sum(index):
     def analyze_file(x):
         def ext(y):
             file_name, file_extension = os.path.splitext(y)
+            del file_name # not needed
             return file_extension
         if ext(x) == ".txt":
             return True
         else:
-            print(f'{x} is not an .txt file!')
-            return False, False
+            print(f'{x} is not an .txt file!\n\nCan\'t checksum!')
+            return False
     if analyze_file(index):
         try:
             fileBase = {}
@@ -74,13 +75,25 @@ def get_data(file, tipo):
         break
 
 
-def results(tipo, fsum):
+def results(tipo, fsum, file):
   x = int(fsum, 16)
   if tipo in hashlist:
       if int(hashlist[tipo].hexdigest(), 16) == x:
+        print("")
+        print('-' * 65)
         print(f"  #SUCESS, the {tipo}sum did match!")
+        print('-' * 65)
+        print("")
+        print(f"-> {file} {tipo}sum: {hashlist[tipo].hexdigest()}")
+        print(f"\n-> Match with the given sum: {fsum}")
       else:
+        print("")
+        print('-' * 65)
         print(f"  %FAIL, the {tipo}sum didn't match!")
+        print('-' * 65)
+        print("") 
+        print(f"-> {file} {tipo}sum: {hashlist[tipo].hexdigest()}")
+        print(f"\n-> Don't Match with the given sum: {fsum}")
   else:
       print(f"ERRor: {tipo} is unknown!\n\nCan\'t checksum!")
 

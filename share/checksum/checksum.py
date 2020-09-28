@@ -25,19 +25,13 @@ Types of hash that you can currently use: {t}
         if var[1] == "--help":
             print(help)
         elif var[2] == "-f":
-            fdir, fsum = process.original_sum(var[3])
+            file, fsum = process.original_sum(var[3])
             stype = var[1]
-            if fdir and fsum:
-                while check_vars(stype, fdir, fsum):
-                    print("")
-                    print('-' * 65)
+            if file and fsum:
+                while check_vars(stype, file, fsum):
 
-                    process.get_data(fdir, stype)
-                    process.results(stype, fsum)
-
-                    print('-' * 65)
-                    print("")
-                    print("")
+                    process.get_data(file, stype)
+                    process.results(stype, fsum, file)
                     break
             else:
                 pass
@@ -45,18 +39,11 @@ Types of hash that you can currently use: {t}
             # read the instructions of the input
             while check_vars(var[1], var[2], var[3]):
                 stype = var[1]
-                fdir = var[2]
+                file = var[2]
                 fsum = var[3]
 
-                print("")
-                print('-' * 65)
-
-                process.get_data(fdir, stype)
-                process.results(stype, fsum)
-
-                print('-' * 65)
-                print("")
-                print("")
+                process.get_data(file, stype)
+                process.results(stype, fsum, file)
                 break
     except IndexError:
         print('''
@@ -68,7 +55,3 @@ Or:    checksum [hash_type] -f [hash_sum.txt]
 You can also use for:
     help: --help
     ''')
-
-
-            # checksum "type of check" "file_path" "original file sum or path"
-            # checksum sha1 testfile.png sha1.txt
