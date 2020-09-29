@@ -38,8 +38,12 @@ def original_sum(index):
             fileBase = {}
             with open(index, "rt") as m:
                 for line in m:
-                    file_sum, file_name = line.split()
-                    fileBase[file_name] = file_sum
+                    try:
+                        file_sum, file_name = line.split()
+                        fileBase[file_name] = file_sum
+                    except ValueError:
+                        print(f'{index} must have the file sum and the file name in each line!\n\nCan\'t Checksum!')
+                        return False, False
                 notFound = []
                 for file in fileBase:
                     if file_exists(file):
