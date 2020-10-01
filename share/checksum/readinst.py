@@ -1,4 +1,3 @@
-from process import hashlist
 import os
 
 # check the existence of the file

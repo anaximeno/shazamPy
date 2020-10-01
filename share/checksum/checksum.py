@@ -1,6 +1,7 @@
-import process as p
+import process
+
 # list of hashes usables
-from process import hashlist
+hashlist = process.hashlist
 
 tp = ""
 # get all types of sums
@@ -27,7 +28,7 @@ def __initial__(var):
             s_type = var[1]
             text = var[3]
             if s_type in hashlist:
-                p.text_process(s_type, text)
+                process.text_process(s_type, text)
             else:
                 print(f"{s_type} is unsupported already!\n\nCan't checksum!!")
         else:
@@ -35,7 +36,7 @@ def __initial__(var):
             f_name = var[2]
             f_sum = var[3]
             if s_type in hashlist:
-                p.normal_process(s_type, f_name, f_sum)
+                process.normal_process(s_type, f_name, f_sum)
             else:
                 print(f"{s_type} is unsupported already!\n\nCan't checksum!!")
     except IndexError:

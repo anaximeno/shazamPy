@@ -1,6 +1,6 @@
 import sys
 import hashlib
-import readinst as r
+import readinst
 
 hashlist = {
     "md5": hashlib.md5(),
@@ -43,7 +43,7 @@ def check(f_sum, s_type, f_name):
 
 # if we have the file's name and sum
 def normal_process(s_type, f_name, f_sum):
-    if r.analyze_file(f_name, f_sum):
+    if readinst.analyze_file(f_name, f_sum):
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)    
     else:
@@ -51,7 +51,7 @@ def normal_process(s_type, f_name, f_sum):
 
 # if the file's name and sum is in a sum.txt file
 def text_process(s_type, text):
-    f_name, f_sum = r.analyze_text(text)
+    f_name, f_sum = readinst.analyze_text(text)
     if f_name and f_sum:
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
