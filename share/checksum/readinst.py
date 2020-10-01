@@ -1,41 +1,59 @@
-import os
 from process import hashlist
+import os
 
+# check the existence of the file
+def exists(file):
+    try:
+        with open(file, 'rb') as target:
+            if target:
+                return True
+            else:
+                IOError()
+    except IOError:
+        return False
 
-def check_vars(s_type, file, f_sum):
+# check if the value is an hexadecimal value
+def _hex(hexa):
+    try:
+        int(hexa, 16)
+        return True
+    except ValueError:
+        print(f"{hexa} is not an hexadecimal value!")
+        return False
 
-    # check the type of sum
-    def sum_type(index):
-        if index in hashlist:
-            return True
-        else:
-            print(f"\n{index} hash type is not supported already!")
-            t = ""
-            for i in hashlist:
-                t += "\n " + i
-            print("\nTypes of hash that you can currently use: {}".format(t))
-            print('\nCan\'t checksum!')
-            return False
+# analyze the existence and the sum conditions
+def analyze_file(f_name, f_sum):
+    if exists(f_name) and _hex(f_sum):
+        return True
+    elif not exists(f_name):
+        print(f"{f_name} wasn't found here!")
+    elif not _hex(f_sum):
+        print(f"{f_sum} is not an hexadecimal number, must be an hexadecimal number!")
 
-    # check the existence of the file
-    def file_exists(index):
-        try:
-            f = open(index, 'rb')
-            f.read()
-            f.close()
-            return True
-        except IOError:
-            print(f"\nFile {index} was not found\n\nCan\'t checksum!")
-            return False
-
-    # check if the value is an hexadecimal value
-    def analyze_hex(hexa):
-        try:
-            int(hexa, 16)
-            return True
-        except ValueError:
-            print(f"{hexa} is not an hexadecimal value!\n\nCan\'t checksum!")
-            return False
-
-    # return the values for the processment
-    return sum_type(s_type) * file_exists(file) * analyze_hex(f_sum)
+# analyze the content of the sum.txt given
+def analyze_text(text):
+    try:
+        fileBase = {}
+        with open(text, "rt") as t:
+            try:
+                for line in t:
+                    file_sum, file_name = line.split()
+                    fileBase[file_name] = file_sum
+            except ValueError:
+                print(f'{text} must have the file sum and the file name in each line!')
+                return False, False
+            notFound = []
+            for files in fileBase:
+                if exists(files):
+                    return files, fileBase[files]
+                elif not exists(files):
+                    notFound.append(files)
+                    if len(notFound) == len(fileBase):
+                        nfound = ""
+                        for nf in notFound:
+                            nfound += "\n " + nf
+                        print(f'None of these file(s) below was found in this directory: {nfound}')
+                        return False, False
+    except FileNotFoundError:
+        print(f"{text} was not found!")
+        return False, False
