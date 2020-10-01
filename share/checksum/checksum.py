@@ -1,4 +1,3 @@
-from readinst import exists
 import process as p
 # list of hashes usables
 from process import hashlist
