@@ -45,14 +45,14 @@ def check(f_sum, s_type, f_name):
 def normal_process(s_type, f_name, f_sum):
     if readinst.analyze_file(f_name, f_sum):
         readata(f_name, s_type)
-        check(f_sum, s_type, f_name)    
+        check(f_sum, s_type, f_name)
     else:
         print("\nCan't checksum!!")
 
 # if the file's name and sum is in a sum.txt file
-def text_process(s_type, text):
-    f_name, f_sum = readinst.analyze_text(text)
-    if f_name and f_sum:
+def text_process(text):
+    f_name, f_sum, s_type = readinst.analyze_text(text)
+    if f_name and f_sum and s_type:
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
     else:

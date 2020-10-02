@@ -10,8 +10,11 @@ Checksum is a **terminal program** made in python that checks the integrity of o
 
 ### Usage
 
-  > checksum "*hash_type*" "*file_path*" "*original_sum*" <br>
-  > checksum "*hash_type*" -f "*hash_sum.txt*"
+  > checksum "*hash_type*" "*file_path*" "*original_sum*"
+
+If you have a file with the sum and file name inside you can use the command below:
+
+  > checksum  -f "*typesum.txt*"
   
 The second type of checksum must be called at the same dir of the file which will be checked
 

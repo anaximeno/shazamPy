@@ -1,5 +1,14 @@
 import os
 
+sumslist = {
+    'md5sum': 'md5',
+    'sha1sum': 'sha1',
+    'sha224sum': 'sha224',
+    'sha256sum': 'sha256',
+    'sha384sum': 'sha384',
+    'sha512sum': 'sha512'
+}
+
 # check the existence of the file
 def exists(file):
     try:
@@ -29,6 +38,16 @@ def analyze_file(f_name, f_sum):
     elif not _hex(f_sum):
         print(f"{f_sum} is not an hexadecimal number, must be an hexadecimal number!")
 
+
+def type_of_sum(text):
+    sum_name, file_ext = os.path.splitext(text)
+    del file_ext # unneded already
+    if sum_name in sumslist:
+        return sumslist[sum_name]
+    else:
+        print(f"{sum_name} is unsupported already!")
+        return False
+
 # analyze the content of the sum.txt given
 def analyze_text(text):
     try:
@@ -40,11 +59,11 @@ def analyze_text(text):
                     fileBase[file_name] = file_sum
             except ValueError:
                 print(f'{text} must have the file sum and the file name in each line!')
-                return False, False
+                return False, False, False
             notFound = []
             for files in fileBase:
                 if exists(files):
-                    return files, fileBase[files]
+                    return files, fileBase[files], type_of_sum(text)
                 elif not exists(files):
                     notFound.append(files)
                     if len(notFound) == len(fileBase):
@@ -52,7 +71,7 @@ def analyze_text(text):
                         for nf in notFound:
                             nfound += "\n " + nf
                         print(f'None of these file(s) below was found in this directory: {nfound}')
-                        return False, False
+                        return False, False, False
     except FileNotFoundError:
         print(f"{text} was not found!")
-        return False, False
+        return False, False, False

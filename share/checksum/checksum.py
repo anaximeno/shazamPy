@@ -10,10 +10,10 @@ for item in hashlist:
 
 help = f'''
 Usage: checksum [hash_type] [file path] [hash sum]
-Or:    checksum [hash_type] -f [hash_sum.txt]
+Or:    checksum -f typesum.txt
 
 EX.1: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
-Ex.2: checksum sha1 -f sha1sum.txt
+Ex.2: checksum -f sha1sum.txt
 
 Types of hash that you can currently use: {tp}
 
@@ -24,13 +24,9 @@ def __initial__(var):
     try:
         if var[1] == "--help":
             print(help)
-        elif var[2] == "-f":
-            s_type = var[1]
-            text = var[3]
-            if s_type in hashlist:
-                process.text_process(s_type, text)
-            else:
-                print(f"{s_type} is unsupported already!\n\nCan't checksum!!")
+        elif var[1] == "-f":
+            text = var[2]
+            process.text_process(text)
         else:
             s_type = var[1]
             f_name = var[2]
