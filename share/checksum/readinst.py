@@ -1,4 +1,5 @@
 import os
+import sys
 
 sumslist = {
     'md5sum': 'md5',
@@ -8,6 +9,10 @@ sumslist = {
     'sha384sum': 'sha384',
     'sha512sum': 'sha512'
 }
+
+tp = '' # for posterior use
+for item in sumslist:
+    tp += '\n' + sumslist[item]
 
 # check the existence of the file
 def exists(file):
@@ -26,7 +31,6 @@ def _hex(hexa):
         int(hexa, 16)
         return True
     except ValueError:
-        print(f"{hexa} is not an hexadecimal value!")
         return False
 
 # analyze the existence and the sum conditions
@@ -34,9 +38,9 @@ def analyze_file(f_name, f_sum):
     if exists(f_name) and _hex(f_sum):
         return True
     elif not exists(f_name):
-        print(f"{f_name} wasn't found here!")
+        print(f"\r'{f_name}' wasn't found here!")
     elif not _hex(f_sum):
-        print(f"{f_sum} is not an hexadecimal number, must be an hexadecimal number!")
+        print(f"\r'{f_sum}' is not an hexadecimal number, must be an hexadecimal number!")
 
 
 def type_of_sum(text):
@@ -45,7 +49,7 @@ def type_of_sum(text):
     if sum_name in sumslist:
         return sumslist[sum_name]
     else:
-        print(f"{sum_name} is unsupported already!")
+        print(f"\r'{sum_name}' is unsupported already!\nSupported types: {tp}")
         return False
 
 # analyze the content of the sum.txt given
@@ -58,7 +62,7 @@ def analyze_text(text):
                     file_sum, file_name = line.split()
                     fileBase[file_name] = file_sum
             except ValueError:
-                print(f'{text} must have the file sum and the file name in each line!')
+                print(f"\r'{text}' must have the file sum and the file name in each line!")
                 return False, False, False
             notFound = []
             for files in fileBase:
@@ -70,8 +74,9 @@ def analyze_text(text):
                         nfound = ""
                         for nf in notFound:
                             nfound += "\n " + nf
-                        print(f'None of these file(s) below was found in this directory: {nfound}')
+            
+                        print(f'\rNone of these file(s) below was found in this directory: {nfound}')
                         return False, False, False
     except FileNotFoundError:
-        print(f"{text} was not found!")
+        print(f"\r'{text}' was not found!")
         return False, False, False

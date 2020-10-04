@@ -1,6 +1,7 @@
 import sys
-import hashlib
 import readinst
+import hashlib
+
 
 hashlist = {
     "md5": hashlib.md5(),
@@ -27,18 +28,18 @@ def check(f_sum, s_type, f_name):
     x = int(f_sum, 16)
     h = hashlist[s_type].hexdigest()
     if int(h, 16) == x:
-        print("")
+        print('\r          ') # skip one line
         print('-' * 65)
         print(f"  #SUCESS, the {s_type}sum did match!")
         print('-' * 65)
-        print(f"\n-> {f_name} {s_type}sum: {h}")
+        print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Match with the given sum: {f_sum}")
     else:
-        print("")
+        print('\r          ') # skip one line
         print('-' * 65)
         print(f"  %FAIL, the {s_type}sum didn't match!")
         print('-' * 65)
-        print(f"\n-> {f_name} {s_type}sum: {h}")
+        print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
 
 # if we have the file's name and sum

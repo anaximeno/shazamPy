@@ -1,4 +1,8 @@
 import process
+import sys
+import itertools
+import threading
+import time
 
 # list of hashes usables
 hashlist = process.hashlist
@@ -26,15 +30,52 @@ def __initial__(var):
             print(help)
         elif var[1] == "-f":
             text = var[2]
-            process.text_process(text)
+
+            done = False
+            #here is the animation
+            def animate():
+                for c in itertools.cycle(['   ', '.  ', '.. ', '...', '.. ', '.  ']):
+                    if done:
+                        break
+                    sys.stdout.write('\rloading' + c)
+                    sys.stdout.flush()
+                    time.sleep(1)
+                
+
+            t = threading.Thread(target=animate)
+            t.start()
+
+            process.text_process(text) #
+
+            print('\r          ') # skip one line
+
+            done = True
         else:
             s_type = var[1]
             f_name = var[2]
             f_sum = var[3]
             if s_type in hashlist:
-                process.normal_process(s_type, f_name, f_sum)
+                done = False
+                #here is the animation
+                def animate():
+                    for c in itertools.cycle(['   ', '.  ', '.. ', '...', '.. ', '.  ']):
+                        if done:
+                            break
+                        sys.stdout.write('\rloading' + c)
+                        sys.stdout.flush()
+                        time.sleep(1)
+                    
+
+                t = threading.Thread(target=animate)
+                t.start()
+                
+                process.normal_process(s_type, f_name, f_sum) #
+
+                print('\r          ') # skip one line
+
+                done = True
             else:
-                print(f"{s_type} is unsupported already!\n\nCan't checksum!!")
+                print(f"'{s_type}' is unsupported already!\nSupported types: {tp}\n\nCan't checksum!!")
     except IndexError:
         print('''
 Can't checksum!
