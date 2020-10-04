@@ -14,6 +14,18 @@ hashlist = {
 
 BUF_SIZE = 32768
 
+
+# read all sums
+def allSums(f_name):
+    with open(f_name, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            for s_type in hashlist:
+                hashlist[s_type].update(data)
+
+
 # read and set the file's sum
 def readata(f_name, s_type):
     with open(f_name, 'rb') as f:
@@ -22,6 +34,7 @@ def readata(f_name, s_type):
             if not data:
                 break
             hashlist[s_type].update(data)
+
 
 # check is the file's sum is equal to the given sum
 def check(f_sum, s_type, f_name):
@@ -42,16 +55,6 @@ def check(f_sum, s_type, f_name):
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
 
-# read all sums
-def allSums(f_name):
-    with open(f_name, 'rb') as f:
-        while True:
-            data = f.read(BUF_SIZE)
-            if not data:
-                break
-            for s_type in hashlist:
-                hashlist[s_type].update(data)
-
 
 # if we have the file's name and sum
 def normal_process(s_type, f_name, f_sum):
@@ -61,6 +64,7 @@ def normal_process(s_type, f_name, f_sum):
     else:
         print("\nCan't checksum!!")
 
+
 # if the file's name and sum is in a sum.txt file
 def text_process(text):
     f_name, f_sum, s_type = readinst.analyze_text(text)
@@ -69,6 +73,7 @@ def text_process(text):
         check(f_sum, s_type, f_name)
     else:
         print("\nCan't checksum!!")
+        
 
 # get all sums
 def allsums_process(f_name):

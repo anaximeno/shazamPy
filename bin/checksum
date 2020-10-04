@@ -13,7 +13,7 @@ import checksum
 done = False
 #here is the animation
 def animate():
-    for c in itertools.cycle(['   ', '.  ', '.. ', '...', '.. ', '.  ']):
+    for c in itertools.cycle(['.  ', '.. ', '...', '.. ', '.  ', '   ']):
         if done:
             break
         sys.stdout.write('\rloading' + c)
@@ -24,9 +24,8 @@ def animate():
 t = threading.Thread(target=animate)
 t.start()
 
-
-checksum.__initial__(sys.argv) #
-
+if __name__ == '__main__':
+    checksum.__initial__(sys.argv)
 
 # print('\r          ') # skip one line
 
