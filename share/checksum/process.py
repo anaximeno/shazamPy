@@ -42,7 +42,7 @@ def check(f_sum, s_type, f_name):
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
 
-
+# read all sums
 def allSums(f_name):
     with open(f_name, 'rb') as f:
         while True:
@@ -70,7 +70,7 @@ def text_process(text):
     else:
         print("\nCan't checksum!!")
 
-
+# get all sums
 def allsums_process(f_name):
     if readinst.exists(f_name):
         allSums(f_name)
