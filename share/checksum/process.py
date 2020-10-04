@@ -42,6 +42,17 @@ def check(f_sum, s_type, f_name):
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
 
+
+def allSums(f_name):
+    with open(f_name, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            for s_type in hashlist:
+                hashlist[s_type].update(data)
+
+
 # if we have the file's name and sum
 def normal_process(s_type, f_name, f_sum):
     if readinst.analyze_file(f_name, f_sum):
@@ -58,3 +69,15 @@ def text_process(text):
         check(f_sum, s_type, f_name)
     else:
         print("\nCan't checksum!!")
+
+
+def allsums_process(f_name):
+    if readinst.exists(f_name):
+        allSums(f_name)
+        output = ""
+        for tipo in hashlist:
+            output +=  f" {tipo}sum: {hashlist[tipo].hexdigest()}\n"
+        print(f"\rAll '{f_name}' sums below: ")
+        print(output)
+    else:
+        print(f"\r{f_name} was not found in this directory!\n\nCan't checksum!!")
