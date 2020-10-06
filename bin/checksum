@@ -1,32 +1,13 @@
 #!/usr/bin/env python3
 
 import sys
-import itertools
-import threading
-import time
 
 sys.path.append('/usr/share/checksum')
 
 import checksum
 
-
-done = False
-#here is the animation
-def animate():
-    for c in itertools.cycle(['.  ', '.. ', '...', '.. ', '.  ', '   ']):
-        if done:
-            break
-        sys.stdout.write('\rloading' + c)
-        sys.stdout.flush()
-        time.sleep(1)
-    
-
-t = threading.Thread(target=animate)
-t.start()
-
 if __name__ == '__main__':
-    checksum.__initial__(sys.argv)
+    checksum.__initial__()
 
-# print('\r          ') # skip one line
 
-done = True
+

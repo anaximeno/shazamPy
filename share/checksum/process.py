@@ -1,7 +1,11 @@
-import sys
 import readinst
 import hashlib
 
+try:
+    from termcolor import colored
+    colr = True
+except ImportError:
+    colr = False
 
 hashlist = {
     "md5": hashlib.md5(),
@@ -16,7 +20,7 @@ BUF_SIZE = 32768
 
 
 # read all sums
-def allSums(f_name):
+def all_sums(f_name):
     with open(f_name, 'rb') as f:
         while True:
             data = f.read(BUF_SIZE)
@@ -41,23 +45,29 @@ def check(f_sum, s_type, f_name):
     x = int(f_sum, 16)
     h = hashlist[s_type].hexdigest()
     if int(h, 16) == x:
-        print('\r          ') # skip one line
+        print('\r          ')  # skip one line
         print('-' * 65)
-        print(f"  #SUCESS, the {s_type}sum did match!")
+        if colr:
+            print(colored(f"  #SUCESS, the {s_type}sum did match!", "green"))
+        else:
+            print(f"  #SUCESS, the {s_type}sum did match!")
         print('-' * 65)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Match with the given sum: {f_sum}")
     else:
-        print('\r          ') # skip one line
+        print('\r          ')  # skip one line
         print('-' * 65)
-        print(f"  %FAIL, the {s_type}sum didn't match!")
+        if colr:
+            print(colored(f"  %FAIL, the {s_type}sum didn't match!", "red"))
+        else:
+            print(f"  %FAIL, the {s_type}sum didn't match!")
         print('-' * 65)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
 
 
 # if we have the file's name and sum
-def normal_process(s_type, f_name, f_sum):
+def normal(s_type, f_name, f_sum):
     if readinst.analyze_file(f_name, f_sum):
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
@@ -66,8 +76,8 @@ def normal_process(s_type, f_name, f_sum):
 
 
 # if the file's name and sum is in a sum.txt file
-def text_process(text):
-    f_name, f_sum, s_type = readinst.analyze_text(text)
+def text(txt):
+    f_name, f_sum, s_type = readinst.analyze_text(txt)
     if f_name and f_sum and s_type:
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
@@ -76,12 +86,12 @@ def text_process(text):
         
 
 # get all sums
-def allsums_process(f_name):
+def allsums(f_name):
     if readinst.exists(f_name):
-        allSums(f_name)
+        all_sums(f_name)
         output = ""
         for tipo in hashlist:
-            output +=  f" {tipo}sum: {hashlist[tipo].hexdigest()}\n"
+            output += f" {tipo}sum: {hashlist[tipo].hexdigest()}\n"
         print(f"\rAll '{f_name}' sums below: ")
         print(output)
     else:

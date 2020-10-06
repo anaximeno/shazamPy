@@ -10,9 +10,10 @@ sumslist = {
     'sha512sum': 'sha512'
 }
 
-tp = '' # for posterior use
+tp = ''  # for posterior use
 for item in sumslist:
     tp += '\n' + sumslist[item]
+
 
 # check the existence of the file
 def exists(file):
@@ -25,6 +26,7 @@ def exists(file):
     except IOError:
         return False
 
+
 # check if the value is an hexadecimal value
 def _hex(hexa):
     try:
@@ -32,6 +34,7 @@ def _hex(hexa):
         return True
     except ValueError:
         return False
+
 
 # analyze the existence and the sum conditions
 def analyze_file(f_name, f_sum):
@@ -45,34 +48,35 @@ def analyze_file(f_name, f_sum):
 
 def type_of_sum(text):
     sum_name, file_ext = os.path.splitext(text)
-    del file_ext # unneded already
+    del file_ext  # unneeded already
     if sum_name in sumslist:
         return sumslist[sum_name]
     else:
         print(f"\r'{sum_name}' is unsupported already!\nSupported types: {tp}")
         return False
 
+
 # analyze the content of the sum.txt given
 def analyze_text(text):
     try:
-        fileBase = {}
+        file_base = {}
         with open(text, "rt") as t:
             try:
                 for line in t:
                     file_sum, file_name = line.split()
-                    fileBase[file_name] = file_sum
+                    file_base[file_name] = file_sum
             except ValueError:
                 print(f"\r'{text}' must have the file sum and the file name in each line!")
                 return False, False, False
-            notFound = []
-            for files in fileBase:
+            not_found = []
+            for files in file_base:
                 if exists(files):
-                    return files, fileBase[files], type_of_sum(text)
+                    return files, file_base[files], type_of_sum(text)
                 elif not exists(files):
-                    notFound.append(files)
-                    if len(notFound) == len(fileBase):
+                    not_found.append(files)
+                    if len(not_found) == len(file_base):
                         nfound = ""
-                        for nf in notFound:
+                        for nf in not_found:
                             nfound += "\n " + nf
             
                         print(f'\rNone of these file(s) below was found in this directory: {nfound}')

@@ -1,60 +1,61 @@
+import argparse
 import process
-from readinst import sumslist
-# list of hashes usables
+
+
+# list of hashes usable
 hashlist = process.hashlist
 
 # get all types of sums
 tp = ""
 for item in hashlist:
-    tp += "\n " + item
+    tp += " " + item
 
-help = f'''\r          
-Usage: checksum [type_of_check] [file _name/path] [file_sum]
-Usage2:checksum -f typesum.txt
-
-EX.1: checksum sha1 testfile.png 634a24348c8d7a5c78f589356972d3a2b2fcac23
-Ex.2: checksum -f sha1sum.txt
-
-Types of hash that you can currently use: {tp}
-
-For others features you can use:
-
-    -f => if you have one file with the sums, see Usage2 
-    -A => to check and list all type of checksums supported
-
-'''
 
 # principal function
-def __initial__(var):
-    try:
-        if var[1] == "--help":
-            print(help)
-        elif var[1] == "-f":
-            text = var[2]
+def __initial__():
+    parser = argparse.ArgumentParser(
+        description="Check and Compare the sums.",
+        epilog=f"Types of sums allowed: {tp}",
+        usage="checksum [OPTION] file"
+    )
 
-            process.text_process(text) #
+    group = parser.add_mutually_exclusive_group()
 
-        elif var[1] == '-A':
-            f_name = var[2]
+    parser.add_argument("-a", "--archive", help="Check from an archive.txt \
+    which have the file's name and sum inside.", metavar="sum.txt")
+    parser.add_argument("-A", "--All", help="Print all the sum of the file",
+                        metavar="FILE")
+    for s in hashlist:
+        group.add_argument(f"-{s}", f"--{s}sum", help=f"Check the {s}sum",
+                           nargs=2, metavar=("FILE", "SUM"))
 
-            process.allsums_process(f_name)
-        else:
-            s_type = var[1]
-            f_name = var[2]
-            f_sum = var[3]
-            if s_type in hashlist:
-                process.normal_process(s_type, f_name, f_sum) #
-            elif s_type in sumslist:
-                process.normal_process(sumslist[s_type], f_name, f_sum)
-            else:
-                print(f"\r'{s_type}' is unsupported already!\nSupported types: {tp}\n\nCan't checksum!!")
-    except IndexError:
-        print('''\r          
-Can't checksum!
+    args = parser.parse_args()
 
-Usage: checksum [type_of_check] [file _name/path] [file_sum]
-Or:    checksum [hash_type] -f [hash_sum.txt]
-
-You can also use:
-    --help => to give you more instructions!
-''')
+    if args.archive:
+        process.text(args.archive)
+    elif args.All:
+        process.allsums(args.All)
+    elif args.md5sum:
+        sum_type = "md5"
+        file_name, file_sum = args.sha1sum
+        process.normal(sum_type, file_name, file_sum)
+    elif args.sha1sum:
+        sum_type = "sha1"
+        file_name, file_sum = args.sha1sum
+        process.normal(sum_type, file_name, file_sum)
+    elif args.sha224sum:
+        sum_type = "sha224"
+        file_name, file_sum = args.sha1sum
+        process.normal(sum_type, file_name, file_sum)
+    elif args.sha256sum:
+        sum_type = "sha256"
+        file_name, file_sum = args.sha1sum
+        process.normal(sum_type, file_name, file_sum)
+    elif args.sha384sum:
+        sum_type = "sha384"
+        file_name, file_sum = args.sha1sum
+        process.normal(sum_type, file_name, file_sum)
+    elif args.sha512sum:
+        sum_type = "sha512"
+        file_name, file_sum = args.sha1sum
+        process.normal(sum_type, file_name, file_sum)
