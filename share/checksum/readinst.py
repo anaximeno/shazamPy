@@ -1,5 +1,4 @@
 import os
-import sys
 
 sumslist = {
     'md5sum': 'md5',
@@ -41,9 +40,9 @@ def analyze_file(f_name, f_sum):
     if exists(f_name) and _hex(f_sum):
         return True
     elif not exists(f_name):
-        print(f"\r'{f_name}' wasn't found here!")
+        print(f"\rchecksum: error: '{f_name}' was not found here in this directory!")
     elif not _hex(f_sum):
-        print(f"\r'{f_sum}' is not an hexadecimal number, must be an hexadecimal number!")
+        print(f"\rchecksum: error: '{f_sum}' is not an hexadecimal number!")
 
 
 def type_of_sum(text):
@@ -52,7 +51,7 @@ def type_of_sum(text):
     if sum_name in sumslist:
         return sumslist[sum_name]
     else:
-        print(f"\r'{sum_name}' is unsupported already!\nSupported types: {tp}")
+        print(f"\rchecksum: error: '{sum_name}' is unsupported already!\nSupported types: {tp}")
         return False
 
 
@@ -66,7 +65,7 @@ def analyze_text(text):
                     file_sum, file_name = line.split()
                     file_base[file_name] = file_sum
             except ValueError:
-                print(f"\r'{text}' must have the file sum and the file name in each line!")
+                print(f"\rchecksum: error: '{text}' must have the file sum and the file name in each line!")
                 return False, False, False
             not_found = []
             for files in file_base:
@@ -79,8 +78,9 @@ def analyze_text(text):
                         for nf in not_found:
                             nfound += "\n " + nf
             
-                        print(f'\rNone of these file(s) below was found in this directory: {nfound}')
+                        print(f'\rchecksum: error: None of these file(s) below was found in this directory: {nfound}')
                         return False, False, False
     except FileNotFoundError:
-        print(f"\r'{text}' was not found!")
+        print(f"\rchecksum: error: '{text}' was not found!")
         return False, False, False
+

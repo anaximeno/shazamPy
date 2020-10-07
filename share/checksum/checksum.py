@@ -18,16 +18,17 @@ def __initial__():
         usage="checksum [OPTION] file"
     )
 
-    group = parser.add_mutually_exclusive_group()
+    option = parser.add_mutually_exclusive_group()
 
-    parser.add_argument("-a", "--archive", help="Check from an archive.txt \
-    which have the file's name and sum inside.", action="store_true")
-    parser.add_argument("-A", "--All", help="Print all the sum of the file",
+    option.add_argument("-a", "--archive", help="Check from an archive.txt which have the file's name and sum inside.",
                         action="store_true")
-    parser.add_argument("file", help="The file name")
+    option.add_argument("-A", "--All", help="Print all the sum of the file",
+                        action="store_true")
+
+    parser.add_argument("file/sum", help="The file name")
+
     for s in hashlist:
-        group.add_argument(f"-{s}", f"--{s}sum", help=f"Check the {s}sum",
-                           metavar="FILE")
+        option.add_argument(f"-{s}", f"--{s}sum", metavar="file sum")
 
     args = parser.parse_args()
 
@@ -37,7 +38,7 @@ def __initial__():
         process.allsums(args.file)
     elif args.md5sum:
         sum_type = "md5"
-        file_name = args.sha1sum
+        file_name = args.md5sum
         file_sum = args.file
         process.normal(sum_type, file_name, file_sum)
     elif args.sha1sum:
@@ -47,22 +48,22 @@ def __initial__():
         process.normal(sum_type, file_name, file_sum)
     elif args.sha224sum:
         sum_type = "sha224"
-        file_name = args.sha1sum
+        file_name = args.sha224sum
         file_sum = args.file
         process.normal(sum_type, file_name, file_sum)
     elif args.sha256sum:
         sum_type = "sha256"
-        file_name = args.sha1sum
+        file_name = args.sha256sum
         file_sum = args.file
         process.normal(sum_type, file_name, file_sum)
     elif args.sha384sum:
         sum_type = "sha384"
-        file_name = args.sha1sum
+        file_name = args.sha384sum
         file_sum = args.file
         process.normal(sum_type, file_name, file_sum)
     elif args.sha512sum:
         sum_type = "sha512"
-        file_name = args.sha1sum
+        file_name = args.sha512sum
         file_sum = args.file
         process.normal(sum_type, file_name, file_sum)
     else:

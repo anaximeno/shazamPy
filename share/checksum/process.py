@@ -95,4 +95,4 @@ def allsums(f_name):
         print(f"\rAll '{f_name}' sums below: ")
         print(output)
     else:
-        print(f"\r{f_name} was not found in this directory!\n\nCan't checksum!!")
+        print(f"\rchecksum: error: '{f_name}' was not found in this directory!\n\nCan't checksum!!")
