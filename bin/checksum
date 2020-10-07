@@ -8,6 +8,3 @@ import checksum
 
 if __name__ == '__main__':
     checksum.__initial__()
-
-
-
