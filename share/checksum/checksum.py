@@ -1,7 +1,6 @@
 import argparse
 import process
 
-
 # list of hashes usable
 hashlist = process.hashlist
 
