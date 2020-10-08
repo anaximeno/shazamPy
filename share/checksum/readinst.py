@@ -11,7 +11,7 @@ sumslist = {
 
 tp = ''  # for posterior use
 for item in sumslist:
-    tp += '\n' + sumslist[item]
+    tp += '\n' + item + ".txt"
 
 
 # check the existence of the file
@@ -40,23 +40,29 @@ def analyze_file(f_name, f_sum):
     if exists(f_name) and _hex(f_sum):
         return True
     elif not exists(f_name):
-        print(f"\rchecksum: error: '{f_name}' was not found here in this directory!")
+        print(f"checksum: error: '{f_name}' was not found here in this directory!")
     elif not _hex(f_sum):
-        print(f"\rchecksum: error: '{f_sum}' is not an hexadecimal number!")
+        print(f"checksum: error: '{f_sum}' is not an hexadecimal number!")
 
 
 def type_of_sum(text):
     sum_name, file_ext = os.path.splitext(text)
-    del file_ext  # unneeded already
-    if sum_name in sumslist:
+    if file_ext != ".txt":
+        print(f"checksum: error: '{text}' extension must be '.txt' to read!")
+        return False
+    elif sum_name in sumslist:
         return sumslist[sum_name]
     else:
-        print(f"\rchecksum: error: '{sum_name}' is unsupported already!\nSupported types: {tp}")
+        print(f"checksum: error: '{sum_name}' is unsupported already!")
+        print(f"'-a' method uses the file name to specify the type of sum \
+        that should be used, so the file name actually supported are: {tp}")
         return False
 
 
 # analyze the content of the sum.txt given
 def analyze_text(text):
+    if not type_of_sum(text):
+        return False, False, False
     try:
         file_base = {}
         with open(text, "rt") as t:
@@ -65,7 +71,8 @@ def analyze_text(text):
                     file_sum, file_name = line.split()
                     file_base[file_name] = file_sum
             except ValueError:
-                print(f"\rchecksum: error: '{text}' must have the file sum and the file name in each line!")
+                print(f"checksum: error: '{text}' must have the \
+                file sum and the file name in each line!")
                 return False, False, False
             not_found = []
             for files in file_base:
@@ -78,9 +85,10 @@ def analyze_text(text):
                         for nf in not_found:
                             nfound += "\n " + nf
             
-                        print(f'\rchecksum: error: None of these file(s) below was found in this directory: {nfound}')
+                        print(f'checksum: error: None of these file(s) \
+                        below was found in this directory: {nfound}')
                         return False, False, False
     except FileNotFoundError:
-        print(f"\rchecksum: error: '{text}' was not found!")
+        print(f"checksum: error: '{text}' was not found!")
         return False, False, False
 

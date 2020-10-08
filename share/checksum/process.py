@@ -45,7 +45,7 @@ def check(f_sum, s_type, f_name):
     x = int(f_sum, 16)
     h = hashlist[s_type].hexdigest()
     if int(h, 16) == x:
-        print('\r          ')  # skip one line
+        print('')  # jump one line
         print('-' * 65)
         if colr:
             print(colored(f"  #SUCESS, the {s_type}sum did match!", "green"))
@@ -55,7 +55,7 @@ def check(f_sum, s_type, f_name):
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Match with the given sum: {f_sum}")
     else:
-        print('\r          ')  # skip one line
+        print('')  # jump one line
         print('-' * 65)
         if colr:
             print(colored(f"  %FAIL, the {s_type}sum didn't match!", "red"))
@@ -71,8 +71,6 @@ def normal(s_type, f_name, f_sum):
     if readinst.analyze_file(f_name, f_sum):
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
-    else:
-        print("\nCan't checksum!!")
 
 
 # if the file's name and sum is in a sum.txt file
@@ -81,8 +79,6 @@ def text(txt):
     if f_name and f_sum and s_type:
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
-    else:
-        print("\nCan't checksum!!")
         
 
 # get all sums
@@ -90,9 +86,17 @@ def allsums(f_name):
     if readinst.exists(f_name):
         all_sums(f_name)
         output = ""
-        for tipo in hashlist:
-            output += f" {tipo}sum: {hashlist[tipo].hexdigest()}\n"
-        print(f"\rAll '{f_name}' sums below: ")
+        for typo in hashlist:
+            output += f" {typo}sum: {hashlist[typo].hexdigest()}\n"
+        print(f"All '{f_name}' sums below: ")
         print(output)
     else:
-        print(f"\rchecksum: error: '{f_name}' was not found in this directory!\n\nCan't checksum!!")
+        print(f"checksum: error: '{f_name}' was not found in this directory!")
+
+
+def only_sum(s_type, f_name):
+    if readinst.exists(f_name):
+        readata(f_name, s_type)
+        print(f"'{f_name}' {s_type}sum is {hashlist[s_type].hexdigest()}")
+    else:
+        print(f"checksum: error: '{f_name}' was not found in this directory!")
