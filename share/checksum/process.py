@@ -1,5 +1,6 @@
 import readinst
 import hashlib
+from time import sleep
 
 try:
     from termcolor import colored
@@ -28,6 +29,7 @@ def all_sums(f_name):
                 break
             for s_type in hashlist:
                 hashlist[s_type].update(data)
+                sleep(0.000001)  # some time for the CPU
 
 
 # read and set the file's sum
@@ -38,6 +40,7 @@ def readata(f_name, s_type):
             if not data:
                 break
             hashlist[s_type].update(data)
+            sleep(0.000001)  # some time for the CPU
 
 
 # check is the file's sum is equal to the given sum

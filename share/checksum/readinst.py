@@ -54,8 +54,8 @@ def type_of_sum(text):
         return sumslist[sum_name]
     else:
         print(f"checksum: error: '{sum_name}' is unsupported already!")
-        print(f"'-a' method uses the file name to specify the type of sum \
-        that should be used, so the file name actually supported are: {tp}")
+        print(f"'-a' method uses the file name to specify the type of sum that should be used," +
+              " so the file name actually supported are: {tp}")
         return False
 
 
@@ -67,12 +67,14 @@ def analyze_text(text):
         file_base = {}
         with open(text, "rt") as t:
             try:
+                l = 0
                 for line in t:
+                    l += 1
                     file_sum, file_name = line.split()
                     file_base[file_name] = file_sum
             except ValueError:
-                print(f"checksum: error: '{text}' must have the \
-                file sum and the file name in each line!")
+                print(f"checksum: error: '{text}' must have the " +
+                      f"file sum and the file name in each line!\nIrregularity in line {l}")
                 return False, False, False
             not_found = []
             for files in file_base:
@@ -83,10 +85,10 @@ def analyze_text(text):
                     if len(not_found) == len(file_base):
                         nfound = ""
                         for nf in not_found:
-                            nfound += "\n " + nf
+                            nfound += "\n -> " + nf
             
-                        print(f'checksum: error: None of these file(s) \
-                        below was found in this directory: {nfound}')
+                        print(f"checksum: error: None of these '{text}' file(s) " +
+                              f"below was found in this directory: {nfound}")
                         return False, False, False
     except FileNotFoundError:
         print(f"checksum: error: '{text}' was not found!")

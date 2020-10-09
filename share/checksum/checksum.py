@@ -20,16 +20,15 @@ def __initial__():
 
     option = parser.add_mutually_exclusive_group()
 
-    option.add_argument("-a", "--archive", help="Check from an archive.txt which\
-     have the file's name and sum inside.",
-                        action="store_true")
+    option.add_argument("-a", "--archive", help="Check from an archive.txt which " +
+                                                "have the file's name and sum inside.", action="store_true")
     option.add_argument("-A", "--All", help="Print all the sum of the file",
                         action="store_true")
 
     parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)
 
     for s in hashlist:
-        option.add_argument(f"-{s}", f"--{s}sum", metavar="file sum")
+        option.add_argument(f"-{s}", f"--{s}sum", metavar="")
 
     args = parser.parse_args()
 
@@ -46,9 +45,15 @@ def __initial__():
                 print("or: checksum -h, for more information.")
 
     if args.archive:
-        process.text(args.content)
+        if args.content:
+            process.text(args.content)
+        else:
+            parser.error("expected one argument")
     elif args.All:
-        process.allsums(args.content)
+        if args.content:
+            process.allsums(args.content)
+        else:
+            parser.error("expected one argument")
     elif args.md5sum:
         made_process(args.content, "md5", args.md5sum)
     elif args.sha1sum:
@@ -61,7 +66,7 @@ def __initial__():
         made_process(args.content, "sha384", args.sha384sum)
     elif args.sha512sum:
         made_process(args.content, "sha512", args.sha512sum)
-    elif args.content:
+    elif args.content:  # must be the penultimate
         want_all = input("Do you want to check all '{}' sums? [Y/n]: ".format(args.content))
         if not want_all or want_all.isspace() or want_all.lower() == ("yes" or "y"):
             print("")  # jump one line
