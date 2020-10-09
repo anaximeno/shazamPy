@@ -6,9 +6,9 @@ Checksum is a **terminal program** made in python that checks the integrity of o
 
 ### How does it work
 
-* It converts the file to the hash chosen and compares it with the given hash
+* It converts the file to the chosen hash type and compares it with the given hash.
 
-### Usage
+### Usage & More
 
   > checksum "*hash_type*" "*file_name*" "*original_sum*"
 
@@ -36,7 +36,7 @@ Types of hash that you can currently use:
 
 You can talk with me by sending an email to: anaximenobrito@gmail.com
 
-Fonts I've used to study:
+Fonts I've used to study at the beggining of the project:
 
 * <https://www.tutorialspoint.com/How-to-Find-Hash-of-File-using-Python>
 * <https://www.computerhope.com/issues/ch001721.htm>
