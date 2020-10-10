@@ -11,7 +11,7 @@ sumslist = {
 
 tp = ''  # for posterior use
 for item in sumslist:
-    tp += '\n' + item + ".txt"
+    tp += '\n ' + item + ".txt"
 
 
 # check the existence of the file
@@ -54,8 +54,8 @@ def type_of_sum(text):
         return sumslist[sum_name]
     else:
         print(f"checksum: error: '{sum_name}' is unsupported already!")
-        print(f"'-a' method uses the file name to specify the type of sum that should be used," +
-              " so the file name actually supported are: {tp}")
+        print("'-a' method uses the file name to specify the type of sum that should be used," +
+              f" so the file name actually supported are: {tp}")
         return False
 
 

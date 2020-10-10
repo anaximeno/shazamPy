@@ -41,7 +41,7 @@ def __initial__():
                 process.only_sum(st, fn)
             else:
                 print("Aborted!")
-                print("usage: checksum [sumtype] file sum")  # i can make a prompt to get the sum also
+                print("usage: checksum [sumtype] file sum")
                 print("or: checksum -h, for more information.")
 
     if args.archive:
