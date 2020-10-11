@@ -1,3 +1,5 @@
+# Author: Anaximeno Brito
+
 import os
 
 sumslist = {

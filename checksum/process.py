@@ -1,3 +1,5 @@
+# Author: Anaximeno Brito
+
 import readinst
 import hashlib
 import os
@@ -29,7 +31,7 @@ def all_sums(f_name):
                     if not data:
                         break
                     hashlist[s_type].update(data)
-                    sleep(0.000001)  # when lower is this value, faster will be the reading,
+                    sleep(0.00001)  # when lower is this value, faster will be the reading,
                                      # but it will use more CPU 
             bar()
 
@@ -74,7 +76,7 @@ def check(f_sum, s_type, f_name):
 def normal(s_type, f_name, f_sum):
     if readinst.analyze_file(f_name, f_sum):
         readata(f_name, s_type)
-        check(f_sum, s_type, f_name)
+        check(f_sum, s_type, f_name) 
 
 
 # if the file's name and sum is in a sum.txt file

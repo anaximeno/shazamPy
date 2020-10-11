@@ -1,3 +1,5 @@
+# Author: Anaximeno Brito
+
 import argparse
 import process
 
@@ -15,7 +17,7 @@ def __initial__():
     parser = argparse.ArgumentParser(
         description="Check and Compare the sums.",
         epilog=f"Types of sums allowed: {tp}",
-        usage="checksum [OPTION] content"
+        usage="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
     )
 
     option = parser.add_mutually_exclusive_group()
