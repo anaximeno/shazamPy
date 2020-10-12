@@ -44,8 +44,20 @@ def all_sums(f_name):
 
 # read and set the file's sum
 def readata(f_name, s_type):
-    size = round(os.path.getsize(f_name) / BUF_SIZE)
-    with alive_bar(size, bar='filling', spinner='dots') as bar:
+
+    def rep(s):
+        t = 0
+        while s > 0:
+            s -= BUF_SIZE
+            t += 1
+            yield t
+
+    size = os.path.getsize(f_name)
+    times = 0
+    for x in rep(size):
+        times = x
+
+    with alive_bar(times, bar='filling', spinner='dots') as bar:
         with open(f_name, 'rb') as f:
             while True:
                 try:
@@ -72,7 +84,7 @@ def check(f_sum, s_type, f_name):
     else:
         print('')  # jump one line
         print('-' * 65)
-        print(colored(f"  %FAIL, the {s_type}sum didn't match!", "red"))
+        print(colored(f"  %FAIL, the {s_type}sum did not match!", "red"))
         print('-' * 65)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")

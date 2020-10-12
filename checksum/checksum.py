@@ -15,9 +15,9 @@ for item in hashlist:
 # principal function
 def __initial__():
     parser = argparse.ArgumentParser(
-        description="Check and Compare the sums.",
-        epilog=f"Types of sums allowed: {tp}",
-        usage="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
+        description="Check and Compare the sums.", 
+        usage="checksum [OPTION] content...",
+        epilog="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
     )
 
     option = parser.add_mutually_exclusive_group()
@@ -43,7 +43,7 @@ def __initial__():
                 process.only_sum(st, fn)
             else:
                 print("Aborted!")
-                print("usage: checksum [sumtype] file sum")
+                print("usage: checksum [SUMTYPE] file_NAME file_SUM")
                 print("or: checksum -h, for more information.")
 
     if args.archive:
