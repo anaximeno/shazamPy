@@ -21,20 +21,25 @@ hashlist = {
 BUF_SIZE = 32768
 
 
+def gen_data(dt):
+    if dt:
+        yield dt
+
+
 # read all sums
 def all_sums(f_name):
     with alive_bar(len(hashlist)) as bar:
         for s_type in hashlist:
             with open(f_name, 'rb') as f:
                 while True:
-                    data = f.read(BUF_SIZE)
-                    if not data:
+                    try:
+                        data = gen_data(f.read(BUF_SIZE))
+                        hashlist[s_type].update(next(data))
+                        sleep(0.00001)  # when lower is this value, faster will be the reading,
+                        # but it will use more CPU
+                    except StopIteration:
                         break
-                    hashlist[s_type].update(data)
-                    sleep(0.00001)  # when lower is this value, faster will be the reading,
-                                     # but it will use more CPU 
             bar()
-
 
 
 # read and set the file's sum
@@ -43,13 +48,14 @@ def readata(f_name, s_type):
     with alive_bar(size, bar='filling') as bar:
         with open(f_name, 'rb') as f:
             while True:
-                data = f.read(BUF_SIZE)
-                if not data:
+                try:
+                    data = gen_data(f.read(BUF_SIZE))
+                    hashlist[s_type].update(next(data))
+                    sleep(0.00001)  # when lower is this value, faster will be the reading,
+                    # but it will use more CPU
+                    bar()
+                except StopIteration:
                     break
-                hashlist[s_type].update(data)
-                sleep(0.00001)  # when lower is this value, faster will be the reading,
-                                # but it will use more CPU  
-                bar()
 
 
 # check is the file's sum is equal to the given sum
@@ -76,16 +82,16 @@ def check(f_sum, s_type, f_name):
 def normal(s_type, f_name, f_sum):
     if readinst.analyze_file(f_name, f_sum):
         readata(f_name, s_type)
-        check(f_sum, s_type, f_name) 
+        check(f_sum, s_type, f_name)
 
 
 # if the file's name and sum is in a sum.txt file
 def text(txt):
     f_name, f_sum, s_type = readinst.analyze_text(txt)
-    if f_name and f_sum and s_type:  
+    if f_name and f_sum and s_type:
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
-        
+
 
 # get all sums
 def allsums(f_name):
@@ -100,7 +106,7 @@ def allsums(f_name):
         print(f"checksum: error: '{f_name}' was not found in this directory!")
 
 
-# if we want only show the sum and no to campare it
+# if we want only show the sum and no to compare it
 def only_sum(s_type, f_name):
     if readinst.exists(f_name):
         readata(f_name, s_type)
