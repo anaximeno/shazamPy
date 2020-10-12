@@ -28,7 +28,7 @@ def gen_data(dt):
 
 # read all sums
 def all_sums(f_name):
-    with alive_bar(len(hashlist)) as bar:
+    with alive_bar(len(hashlist), bar='blocks', spinner='dots') as bar:
         for s_type in hashlist:
             with open(f_name, 'rb') as f:
                 while True:
@@ -45,7 +45,7 @@ def all_sums(f_name):
 # read and set the file's sum
 def readata(f_name, s_type):
     size = round(os.path.getsize(f_name) / BUF_SIZE)
-    with alive_bar(size, bar='filling') as bar:
+    with alive_bar(size, bar='filling', spinner='dots') as bar:
         with open(f_name, 'rb') as f:
             while True:
                 try:
@@ -100,7 +100,7 @@ def allsums(f_name):
         output = ""
         for typo in hashlist:
             output += f" {typo}sum: {hashlist[typo].hexdigest()}\n"
-        print(f"All '{f_name}' sums below: ")
+        print(f"\nAll '{f_name}' sums below: ")
         print(output)
     else:
         print(f"checksum: error: '{f_name}' was not found in this directory!")
