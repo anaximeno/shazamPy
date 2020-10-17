@@ -30,7 +30,7 @@ def __initial__():
     parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)
 
     for s in hashlist:
-        option.add_argument(f"-{s}", f"--{s}sum", metavar="")
+        option.add_argument(f"-{s}", f"--{s}sum", metavar='')  # *metavar = empty
 
     args = parser.parse_args()
 

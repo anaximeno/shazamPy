@@ -70,22 +70,22 @@ def readata(f_name, s_type):
                     break
 
 
-# check is the file's sum is equal to the given sum
+# check if the file's sum is equal to the given sum
 def check(f_sum, s_type, f_name):
     x = int(f_sum, 16)
     h = hashlist[s_type].hexdigest()
+
+    lin = '-' * 65
     if int(h, 16) == x:
-        print('')  # jump one line
-        print('-' * 65)
+        print('\n' + lin)
         print(colored(f"  #SUCESS, the {s_type}sum did match!", "green"))
-        print('-' * 65)
+        print(lin)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Match with the given sum: {f_sum}")
     else:
-        print('')  # jump one line
-        print('-' * 65)
+        print('\n' + lin)
         print(colored(f"  %FAIL, the {s_type}sum did not match!", "red"))
-        print('-' * 65)
+        print(lin)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
 
