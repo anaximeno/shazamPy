@@ -1,8 +1,10 @@
 Package: checksum
 Priority: optional
-version: 0.2.0
+Version: 0.2.1
 Architecture: all
+Section: misc
 Maintainer: Anaxímeno Brito
-Depends: python3.8
+Installed-Size: 79.1
+Depends: python (>=3)
 Description: Checksum is an CLI aplication thats calculate and compare the sums of one file. For knowing the methods try: checksum -h or checksum --help.
 

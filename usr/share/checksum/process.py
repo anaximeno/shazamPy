@@ -1,21 +1,15 @@
 # Author: Anaximeno Brito
 
+
 import readinst
-import hashlib
 import os
+from hashes import *
 from time import sleep
 from alive_progress import alive_bar
 from termcolor import colored
+import py
 
-
-hashlist = {
-    "md5": hashlib.md5(),
-    "sha1": hashlib.sha1(),
-    "sha224": hashlib.sha224(),
-    "sha256": hashlib.sha256(),
-    "sha384": hashlib.sha384(),
-    "sha512": hashlib.sha512()
-}
+hashlist = hashes
 
 # don't change this number
 BUF_SIZE = 32768
@@ -31,6 +25,7 @@ def all_sums(f_name):
     with alive_bar(len(hashlist), bar='blocks', spinner='dots') as bar:
         for s_type in hashlist:
             with open(f_name, 'rb') as f:
+                hashlist["md5"] = hashlib.md5()
                 while True:
                     try:
                         data = gen_data(f.read(BUF_SIZE))
@@ -75,20 +70,27 @@ def check(f_sum, s_type, f_name):
     x = int(f_sum, 16)
     h = hashlist[s_type].hexdigest()
 
-    lin = '-' * 65
+    lin = '-' * 100
+
+    if int(h, 16) == x:
+        print(colored(f"#SUCESS, '{f_name}' {s_type}sum matched!", "green"))
+    else:
+        print(colored(f"%unsuccess, '{f_name}' {s_type}sum didn't matched!\n", "red"))
+
+    ''' * To make a verbose response *
     if int(h, 16) == x:
         print('\n' + lin)
-        print(colored(f"  #SUCESS, the {s_type}sum did match!", "green"))
+        print(colored(f"  #SUCESS, '{f_name}' {s_type}sum matched!", "green"))
         print(lin)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Match with the given sum: {f_sum}")
     else:
         print('\n' + lin)
-        print(colored(f"  %FAIL, the {s_type}sum did not match!", "red"))
+        print(colored(f"  %unsuccess, '{f_name}' {s_type}sum didn't matched!", "red"))
         print(lin)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
-
+    '''
 
 # if we have the file's name and sum
 def normal(s_type, f_name, f_sum):
@@ -99,8 +101,12 @@ def normal(s_type, f_name, f_sum):
 
 # if the file's name and sum is in a sum.txt file
 def text(txt):
-    f_name, f_sum, s_type = readinst.analyze_text(txt)
-    if f_name and f_sum and s_type:
+    found, not_found = readinst.analyze_text(txt)
+    del not_found  # unnecessary here
+
+    if found:
+        f_name, f_sum, s_type = found[0]
+
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
 
@@ -122,6 +128,25 @@ def allsums(f_name):
 def only_sum(s_type, f_name):
     if readinst.exists(f_name):
         readata(f_name, s_type)
-        print(f"'{f_name}' {s_type}sum is {hashlist[s_type].hexdigest()}")
+        print(f"'{f_name}' {s_type}sum is: {hashlist[s_type].hexdigest()}")
     else:
         print(f"checksum: error: '{f_name}' was not found in this directory!")
+
+
+def multi_files(text):
+    found, not_found = readinst.analyze_text(text)
+    if found:
+        for i in range(len(found)):
+            f_name, f_sum, s_type = found[i]
+
+            readata(f_name, s_type)
+            check(f_sum, s_type, f_name)
+
+            # reinitialize the sums data
+            del hashlist[s_type]
+            hashlist[s_type] = hashes_n2[s_type]
+        if not_found:
+            nf = ''
+            for n in not_found:
+                nf += not_found[n] + '\n '
+            print(f"\nThe file(s) below was not found: {nf}")

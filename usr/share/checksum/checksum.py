@@ -2,9 +2,8 @@
 
 import argparse
 import process
+from hashes import hashes as hashlist
 
-# list of hashes usable
-hashlist = process.hashlist
 
 # get all types of sums
 tp = ""
@@ -22,9 +21,11 @@ def __initial__():
 
     option = parser.add_mutually_exclusive_group()
 
-    option.add_argument("-a", "--archive", help="Check from an archive.txt which " +
-                                                "have the file's name and sum inside.", action="store_true")
-    option.add_argument("-A", "--All", help="Print all the sum of the file",
+    option.add_argument("-f", "--file", help="Check the sum of one object (file) which " +
+                                             "have the name and sum wrote in the file.", action="store_true")
+    option.add_argument("-F", "--Files", help="Check the sum of all objects (files) which " +
+                                               "have the name and sum wrote in the file.", action="store_true")
+    option.add_argument("-A", "--All", help="Print all the sum of one file",
                         action="store_true")
 
     parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)
@@ -38,7 +39,7 @@ def __initial__():
         if ac:
             process.normal(st, fn, ac)  # ac == file sum, fn == file name, st == sum type
         else:
-            only_sum = input("Do you only want check the sum? [Y/n]: ")
+            only_sum = input("Do you only want check the sum, without compare it? [Y/n]: ")
             if not only_sum or only_sum.isspace() or only_sum.lower() == ("yes" or "y"):
                 process.only_sum(st, fn)
             else:
@@ -46,9 +47,14 @@ def __initial__():
                 print("usage: checksum [SUMTYPE] file_NAME file_SUM")
                 print("or: checksum -h, for more information.")
 
-    if args.archive:
+    if args.file:
         if args.content:
             process.text(args.content)
+        else:
+            parser.error("expected one argument")
+    elif args.Files:
+        if args.content:
+            process.multi_files(args.content)
         else:
             parser.error("expected one argument")
     elif args.All:
@@ -75,7 +81,7 @@ def __initial__():
             process.allsums(args.content)
         else:
             print("Aborted!")
-            print("usage: checksum [OPTION] content")
+            print("usage: checksum [OPTION] content...")
             print("or: checksum -h, for more information.")
     else:
-        parser.error("No options was chosen!")
+        parser.error("No options was chosen, try: checksum -h, for more information.")
