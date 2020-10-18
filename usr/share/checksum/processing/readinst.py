@@ -1,6 +1,6 @@
 # Author: Anaximeno Brito
 
-from hashes import hashes as hashlist
+from .hashes import hashes as hashlist
 import os
 
 
@@ -60,13 +60,15 @@ def analyze_file(f_name, f_sum):
 
 def type_of_sum(text):
     if is_readable(text):
-        sum_name, file_ext = os.path.splitext(text)
+        text_path = text.split('/')
+        otxt = text_path[len(text_path) -1]
+        sum_name, file_ext = os.path.splitext(otxt)
         del file_ext  # unnecessary already
         if sum_name in sumslist:
             return sumslist[sum_name]
         else:
             print(f"checksum: error: '{sum_name}' is unsupported already!")
-            print("'-a' method uses the file name to specify the type of sum that should be used," +
+            print("'-f' and '-F' method uses the file name to specify the type of sum that should be used," +
                   f" so the file name actually supported are: {tp}")
             return False
 

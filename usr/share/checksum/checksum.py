@@ -1,8 +1,8 @@
 # Author: Anaximeno Brito
 
 import argparse
-import process
-from hashes import hashes as hashlist
+from .processing import process
+from .processing.hashes import hashes as hashlist
 
 
 # get all types of sums
@@ -12,7 +12,7 @@ for item in hashlist:
 
 
 # principal function
-def __initial__():
+def cli():
     parser = argparse.ArgumentParser(
         description="Check and Compare the sums.", 
         usage="checksum [OPTION] content...",
@@ -25,7 +25,7 @@ def __initial__():
                                              "have the name and sum wrote in the file.", action="store_true")
     option.add_argument("-F", "--Files", help="Check the sum of all objects (files) which " +
                                                "have the name and sum wrote in the file.", action="store_true")
-    option.add_argument("-A", "--All", help="Print all the sum of one file",
+    option.add_argument("-A", "--All", help="Print all the sums of one file",
                         action="store_true")
 
     parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)

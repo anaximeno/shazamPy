@@ -1,15 +1,6 @@
-__pycache__/readinst.cpython-38.pyc
-__pycache__/process.cpython-38.pyc
-__pycache__/pasted.cpython-38.pyc
-.vscode/.ropeproject/objectdb
-.vscode/.ropeproject/config.py
-.vscode/settings.json
-.idea/checksum.iml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/.gitignore
+# Personal ignores
+.vscode/
+.idea/
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python

@@ -4,7 +4,7 @@ import sys
 
 sys.path.append('/usr/share/checksum')
 
-import checksum
+from checksum import cli
 
 if __name__ == '__main__':
-    checksum.__initial__()
+    cli()

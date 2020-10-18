@@ -1,13 +1,12 @@
 # Author: Anaximeno Brito
 
 
-import readinst
+from . import readinst
 import os
-from hashes import *
+from .hashes import *
 from time import sleep
 from alive_progress import alive_bar
 from termcolor import colored
-import py
 
 hashlist = hashes
 
@@ -70,14 +69,14 @@ def check(f_sum, s_type, f_name):
     x = int(f_sum, 16)
     h = hashlist[s_type].hexdigest()
 
-    lin = '-' * 100
-
     if int(h, 16) == x:
         print(colored(f"#SUCESS, '{f_name}' {s_type}sum matched!", "green"))
     else:
-        print(colored(f"%unsuccess, '{f_name}' {s_type}sum didn't matched!\n", "red"))
+        print(colored(f"%FAIL, '{f_name}' {s_type}sum didn't matched!\n", "red"))
 
     ''' * To make a verbose response *
+    lin = '-' * 100
+    
     if int(h, 16) == x:
         print('\n' + lin)
         print(colored(f"  #SUCESS, '{f_name}' {s_type}sum matched!", "green"))
@@ -85,12 +84,13 @@ def check(f_sum, s_type, f_name):
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Match with the given sum: {f_sum}")
     else:
-        print('\n' + lin)
-        print(colored(f"  %unsuccess, '{f_name}' {s_type}sum didn't matched!", "red"))
+        print('\n' + lin) 
+        print(colored(f"  %FAIL, '{f_name}' {s_type}sum didn't matched!", "red"))
         print(lin)
         print(f"\n-> '{f_name}' {s_type}sum: {h}")
         print(f"\n-> Don't Match with the given sum: {f_sum}")
     '''
+
 
 # if we have the file's name and sum
 def normal(s_type, f_name, f_sum):
@@ -147,6 +147,7 @@ def multi_files(text):
             hashlist[s_type] = hashes_n2[s_type]
         if not_found:
             nf = ''
-            for n in not_found:
+            for n in range(len(not_found)):
                 nf += not_found[n] + '\n '
             print(f"\nThe file(s) below was not found: {nf}")
+
