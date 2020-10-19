@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("VERSION", "rt") as v:
     __version__ = v.read()
@@ -9,9 +9,9 @@ with open("README.md", "rt") as ld:
 setup(
     name='checksum',
     version=__version__,
-    packages=["checksum"],
+    packages=find_packages(),
+    package_dir={'': 'usr/share/'},
     py_modules=["checksum"],
-    package_dir={'': 'usr/share'},
     url='https://github.com/anaximeno/checksum',
     license='GPL-3.0 License',
     author='Anaximeno Brito',

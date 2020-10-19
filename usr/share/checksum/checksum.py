@@ -1,8 +1,8 @@
 # Author: Anaximeno Brito
 
 import argparse
-from .processing import process
-from .processing.hashes import hashes as hashlist
+from processing import process
+from processing.hashes import hashes as hashlist
 
 
 # get all types of sums
@@ -27,6 +27,7 @@ def cli():
                                                "have the name and sum wrote in the file.", action="store_true")
     option.add_argument("-A", "--All", help="Print all the sums of one file",
                         action="store_true")
+    option.add_argument("-v", "--version", help="Print the current version of this app.", action="store_true")
 
     parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)
 
@@ -47,7 +48,9 @@ def cli():
                 print("usage: checksum [SUMTYPE] file_NAME file_SUM")
                 print("or: checksum -h, for more information.")
 
-    if args.file:
+    if args.version:
+        print("checksum 0.2.2")
+    elif args.file:
         if args.content:
             process.text(args.content)
         else:
