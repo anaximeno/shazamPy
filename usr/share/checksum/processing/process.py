@@ -74,7 +74,7 @@ def check(f_sum, s_type, f_name):
     else:
         print(colored(f"%FAIL, '{f_name}' {s_type}sum didn't matched!\n", "red"))
 
-    ''' * To make a verbose response *
+    ''' * To make a verbose response after *
     lin = '-' * 100
     
     if int(h, 16) == x:
@@ -102,13 +102,15 @@ def normal(s_type, f_name, f_sum):
 # if the file's name and sum is in a sum.txt file
 def text(txt):
     found, not_found = readinst.analyze_text(txt)
-    del not_found  # unnecessary here
-
     if found:
         f_name, f_sum, s_type = found[0]
 
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
+    if not found:
+        print("None of these file(s) was/were found:")
+        for f in not_found:
+            print(" ", f)
 
 
 # get all sums
@@ -121,7 +123,7 @@ def allsums(f_name):
         print(f"\nAll '{f_name}' sums below: ")
         print(output)
     else:
-        print(f"checksum: error: '{f_name}' was not found in this directory!")
+        print(f"checksum: error: '{f_name}' was not found!")
 
 
 # if we want only show the sum and no to compare it
@@ -130,11 +132,11 @@ def only_sum(s_type, f_name):
         readata(f_name, s_type)
         print(f"'{f_name}' {s_type}sum is: {hashlist[s_type].hexdigest()}")
     else:
-        print(f"checksum: error: '{f_name}' was not found in this directory!")
+        print(f"checksum: error: '{f_name}' was not found!")
 
 
-def multi_files(text):
-    found, not_found = readinst.analyze_text(text)
+def multi_files(text_file):
+    found, unfound = readinst.analyze_text(text_file)
     if found:
         for i in range(len(found)):
             f_name, f_sum, s_type = found[i]
@@ -145,9 +147,11 @@ def multi_files(text):
             # reinitialize the sums data
             del hashlist[s_type]
             hashlist[s_type] = hashes_n2[s_type]
-        if not_found:
-            nf = ''
-            for n in range(len(not_found)):
-                nf += not_found[n] + '\n '
-            print(f"\nThe file(s) below was not found: {nf}")
-
+        if unfound:
+            print(f"The file(s) below was/were not found:")
+            for f in unfound:
+                print(" ", f)
+    if not found:
+        print("None of the file(s) below was/were found:")
+        for f in unfound:
+            print(" ", f)

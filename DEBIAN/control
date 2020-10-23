@@ -1,7 +1,7 @@
 Source: checksum
 Package: checksum
 Priority: optional
-Version: 0.2.2
+Version: 0.2.3
 Architecture: all
 Section: misc
 Maintainer: Anaxímeno Brito, <anaximenobrito@gmail.com>

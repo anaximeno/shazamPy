@@ -1,27 +1,22 @@
 # CHECKSUM
 
-Checksum is a **terminal program** made in python that checks the integrity of one file by comparing the file hash to the given hash.
+Checksum is a **CLI** application made principally in python. <br>
+It checks the integrity of one file by comparing it with a given hash.
 
-## General Infos
+## General Information
 
 ### How does it work
 
-* It converts the file to the chosen hash type and compares it with the given hash.
+It converts the file to the chosen hash type and compares it with a given hash.
 
 ### Usage & More
+You can use it as below:
 
-  > checksum "*hash_type*" "*file_name*" "*original_sum*"
+  > checksum *-sha1* "*file_name*" "*given_sum*"
 
-If you have a file with the sum and file name inside you can use the command below:
-
-  > checksum  -f "*typesum.txt*"
-
-If you want to see all sums:
-
-  > checksum -A "*file_name*"
+**OBS:** If you have a file with the hashes inside you can check it by using a short command.
+For more option after install it try: checksum -h/--help
   
-The second type of checksum must be called at the same dir of the file which will be checked
-
 Types of hash that you can currently use:
 
 * md5
@@ -31,14 +26,8 @@ Types of hash that you can currently use:
 * sha384
 * sha512
 
-**This program is in tests currently, if you have suggestion or you want to contribute let me know!** <br>
-**I also want to make this an open source program!**
+**This program is in tests currently, so the build is incomplete already, <br>
+if you have suggestions don't lose the chance to contribute!** <br>
+
 
 You can talk with me by sending an email to: anaximenobrito@gmail.com
-
-Fonts I've used to study at the beggining of the project:
-
-* <https://www.tutorialspoint.com/How-to-Find-Hash-of-File-using-Python>
-* <https://www.computerhope.com/issues/ch001721.htm>
-* <https://www.journaldev.com/32081/get-file-extension-in-python>
-* <https://www.kite.com/python/answers/how-to-convert-a-string-to-hex-in-python>

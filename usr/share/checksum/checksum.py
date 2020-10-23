@@ -1,4 +1,6 @@
 # Author: Anaximeno Brito
+# TODO: add verbose option
+
 
 import argparse
 from processing import process

@@ -75,42 +75,41 @@ def type_of_sum(text):
 
 # analyze the content of the sum.txt given
 def analyze_text(text):
+    print(text)  # for test
     if not type_of_sum(text):
         return False, False
     try:
         file_base = {}
         with open(text, "rt") as t:
             try:
-                l = 0
-                for line in t:
-                    l += 1
-                    file_sum, file_name = line.split()
-                    file_base[file_name] = file_sum
+                line = 0
+                for l in t:
+                    line += 1
+                    file_sum, file_name = l.split()
+                    if _hex(file_sum):
+                        file_base[file_name] = file_sum
+                    else:
+                        print(f"checksum: error: irregularity in the line {line} of '{text}', " +
+                              f"sum must be an hexadecimal value!")
+                        return False, False
             except ValueError:
                 print(f"checksum: error: '{text}' must have the " +
-                      f"file sum and the file name in each line!\nIrregularity in line {l}")
+                      f"file sum and the file name in each line!\nIrregularity in line {line}")
                 return False, False
+
             not_found = []
             found = []
-            t = 0
-            for files in file_base:
-                t += 1
-                if exists(files):
-                    found.append((files, file_base[files], type_of_sum(text)))
-                    if t == len(file_base):
-                        if found:
-                            return found, not_found
-                elif not exists(files):
-                    not_found.append(files)
-                    if len(not_found) == len(file_base):
-                        nfound = ""
-                        for nf in not_found:
-                            nfound += "\n -> " + nf
-            
-                        print(f"checksum: error: None of these '{text}' file(s) " +
-                              f"below was found in this directory: {nfound}")
 
-                        return False, False
+            def find_files(file):
+                if exists(file):
+                    found.append((file, file_base[file], type_of_sum(text)))
+                else:
+                    not_found.append(file)
+
+            for f in file_base:
+                find_files(f)
+
+            return found, not_found
     except FileNotFoundError:
         print(f"checksum: error: '{text}' was not found!")
         return False, False
