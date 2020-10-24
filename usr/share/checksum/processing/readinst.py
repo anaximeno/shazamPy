@@ -74,8 +74,7 @@ def type_of_sum(text):
 
 
 # analyze the content of the sum.txt given
-def analyze_text(text):
-    print(text)  # for test
+def analyze_text(text): 
     if not type_of_sum(text):
         return False, False
     try:
