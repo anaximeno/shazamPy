@@ -1,5 +1,7 @@
 # Author: Anaximeno Brito
-# TODO: add verbose option
+#
+# Calculates the file sum and compares it with an given sum
+# September 2020
 
 
 import argparse
@@ -14,7 +16,7 @@ for item in hashlist:
 
 
 # principal function
-def cli():
+def main():
     parser = argparse.ArgumentParser(
         description="Check and Compare the sums.", 
         usage="checksum [OPTION] content...",
@@ -27,11 +29,13 @@ def cli():
                                              "have the name and sum wrote in the file.", action="store_true")
     option.add_argument("-F", "--Files", help="Check the sum of all objects (files) which " +
                                                "have the name and sum wrote in the file.", action="store_true")
-    option.add_argument("-A", "--All", help="Print all the sums of one file",
+    option.add_argument("-A", "--all", help="Print all the sums of one file",
                         action="store_true")
     option.add_argument("-v", "--version", help="Print the current version of this app.", action="store_true")
 
     parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)
+
+    parser.add_argument("--verbose", help="Verbose response", action="store_true")
 
     for s in hashlist:
         option.add_argument(f"-{s}", f"--{s}sum", metavar='')  # *metavar = empty
@@ -41,6 +45,8 @@ def cli():
     def made_process(ac, st, fn):
         if ac:
             process.normal(st, fn, ac)  # ac == file sum, fn == file name, st == sum type
+            if args.verbose:
+                process.verbose(st, fn, ac)
         else:
             only_sum = input("Do you only want check the sum, without compare it? [Y/n]: ")
             if not only_sum or only_sum.isspace() or only_sum.lower() == ("yes" or "y"):
@@ -51,7 +57,7 @@ def cli():
                 print("or: checksum -h, for more information.")
 
     if args.version:
-        print("checksum 0.2.2")
+        print("checksum 0.2.4")  # must get of one txt file!!
     elif args.file:
         if args.content:
             process.text(args.content)
@@ -62,7 +68,7 @@ def cli():
             process.multi_files(args.content)
         else:
             parser.error("expected one argument")
-    elif args.All:
+    elif args.all:
         if args.content:
             process.allsums(args.content)
         else:

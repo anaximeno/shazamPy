@@ -1,5 +1,5 @@
-from .checksum import cli
+from .checksum import main
 
 
 if __name__ == '__main__':
-    cli()
+    main()

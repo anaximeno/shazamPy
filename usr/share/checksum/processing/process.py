@@ -23,8 +23,7 @@ def gen_data(dt):
 def all_sums(f_name):
     with alive_bar(len(hashlist), bar='blocks', spinner='dots') as bar:
         for s_type in hashlist:
-            with open(f_name, 'rb') as f:
-                hashlist["md5"] = hashlib.md5()
+            with open(f_name, 'rb') as f: 
                 while True:
                     try:
                         data = gen_data(f.read(BUF_SIZE))
@@ -72,24 +71,13 @@ def check(f_sum, s_type, f_name):
     if int(h, 16) == x:
         print(colored(f"#SUCESS, '{f_name}' {s_type}sum matched!", "green"))
     else:
-        print(colored(f"%FAIL, '{f_name}' {s_type}sum didn't matched!\n", "red"))
+        print(colored(f"%FAIL, '{f_name}' {s_type}sum did not match!\n", "red"))
 
-    ''' * To make a verbose response after *
-    lin = '-' * 100
-    
-    if int(h, 16) == x:
-        print('\n' + lin)
-        print(colored(f"  #SUCESS, '{f_name}' {s_type}sum matched!", "green"))
-        print(lin)
-        print(f"\n-> '{f_name}' {s_type}sum: {h}")
-        print(f"\n-> Match with the given sum: {f_sum}")
-    else:
-        print('\n' + lin) 
-        print(colored(f"  %FAIL, '{f_name}' {s_type}sum didn't matched!", "red"))
-        print(lin)
-        print(f"\n-> '{f_name}' {s_type}sum: {h}")
-        print(f"\n-> Don't Match with the given sum: {f_sum}")
-    '''
+
+def verbose(s_type, f_name, f_sum):
+    h = hashlist[s_type].hexdigest()
+    print(f"\n-> '{f_name}' {s_type}sum: {h}")
+    print(f"\n-> The given sum: {f_sum}")
 
 
 # if we have the file's name and sum
