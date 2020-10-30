@@ -1,5 +1,7 @@
 # Author: Anaximeno Brito
-
+#
+# Calculates the file sum and compares it with an given sum
+# September 2020
 
 from . import readinst
 import os
@@ -124,22 +126,18 @@ def only_sum(s_type, f_name):
 
 
 def multi_files(text_file):
-    found, unfound = readinst.analyze_text(text_file)
+    found, unfounded = readinst.analyze_text(text_file)
     if found:
         for i in range(len(found)):
             f_name, f_sum, s_type = found[i]
 
             readata(f_name, s_type)
             check(f_sum, s_type, f_name)
-
-            # reinitialize the sums data
-            del hashlist[s_type]
-            hashlist[s_type] = hashes_n2[s_type]
-        if unfound:
+        if unfounded:
             print(f"The file(s) below was/were not found:")
-            for f in unfound:
+            for f in unfounded:
                 print(" ", f)
     if not found:
         print("None of the file(s) below was/were found:")
-        for f in unfound:
+        for f in unfounded:
             print(" ", f)
