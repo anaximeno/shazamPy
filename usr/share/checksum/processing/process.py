@@ -91,15 +91,15 @@ def normal(s_type, f_name, f_sum):
 
 # if the file's name and sum is in a sum.txt file
 def text(txt):
-    found, not_found = readinst.analyze_text(txt)
+    found, unfounded = readinst.analyze_text(txt)
     if found:
         f_name, f_sum, s_type = found[0]
 
         readata(f_name, s_type)
         check(f_sum, s_type, f_name)
-    if not found:
+    else:
         print("None of these file(s) was/were found:")
-        for f in not_found:
+        for f in unfounded:
             print(" ", f)
 
 
@@ -137,7 +137,7 @@ def multi_files(text_file):
             print(f"The file(s) below was/were not found:")
             for f in unfounded:
                 print(" ", f)
-    if not found:
+    else:
         print("None of the file(s) below was/were found:")
         for f in unfounded:
             print(colored(f" {f}", "red"))

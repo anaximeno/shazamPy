@@ -4,7 +4,6 @@
 # September 2020
 
 from .hashes import hashes as hashlist
-import numpy as np
 import os
 
 
@@ -100,19 +99,19 @@ def analyze_text(text):
                       f"file sum and the file name in each line!\nIrregularity in line {line}")
                 return False, False
 
-            not_found = []
+            unfounded = []
             found = []
 
             def find_files(file):
                 if exists(file):
                     found.append((file, file_base[file], type_of_sum(text)))
                 else:
-                    not_found.append(file)
+                    unfounded.append(file)
 
             for f in file_base:
                 find_files(f)
 
-            return np.array(found), np.array(not_found)
+            return found, unfounded
     except FileNotFoundError:
         print(f"checksum: error: '{text}' was not found!")
         return False, False
