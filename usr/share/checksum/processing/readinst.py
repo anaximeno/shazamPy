@@ -4,6 +4,7 @@
 # September 2020
 
 from .hashes import hashes as hashlist
+import numpy as np
 import os
 
 
@@ -111,7 +112,7 @@ def analyze_text(text):
             for f in file_base:
                 find_files(f)
 
-            return found, not_found
+            return np.array(found), np.array(not_found)
     except FileNotFoundError:
         print(f"checksum: error: '{text}' was not found!")
         return False, False
