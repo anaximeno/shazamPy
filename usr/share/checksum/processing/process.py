@@ -1,11 +1,11 @@
 # Author: Anaximeno Brito
 #
 # Calculates the file sum and compares it with an given sum
-# September 2020
+# 2020
 
 from . import readinst
 import os
-from .hashes import *
+from .hashes import hashes
 from time import sleep
 from alive_progress import alive_bar
 from termcolor import colored
@@ -71,7 +71,7 @@ def check(f_sum, s_type, f_name):
     h = hashlist[s_type].hexdigest()
 
     if int(h, 16) == x:
-        print(colored(f"#SUCESS, '{f_name}' {s_type}sum matched!", "green"))
+        print(colored(f"#SUCCESS, '{f_name}' {s_type}sum matched!", "green"))
     else:
         print(colored(f"%FAIL, '{f_name}' {s_type}sum did not match!\n", "red"))
 
@@ -140,4 +140,4 @@ def multi_files(text_file):
     if not found:
         print("None of the file(s) below was/were found:")
         for f in unfounded:
-            print(" ", f)
+            print(colored(f" {f}", "red"))
