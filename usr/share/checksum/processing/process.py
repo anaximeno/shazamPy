@@ -76,68 +76,72 @@ def check(f_sum, s_type, f_name):
         print(colored(f"%FAIL, '{f_name}' {s_type}sum did not match!\n", "red"))
 
 
-def verbose(s_type, f_name, f_sum):
-    h = hashlist[s_type].hexdigest()
-    print(f"\n-> '{f_name}' {s_type}sum: {h}")
-    print(f"\n-> The given sum: {f_sum}")
+class Process():
+    
+    def __init__(self, file=False, sumType=False, hashSum=False):
+        self.file = file
+        self.sumType = sumType
+        self.hashSum = hashSum
 
+    # if we have the file's name and sum
+    def normal(self):
+        if readinst.analyze_file(self.file, self.sumType):
+            readata(self.file, self.sumType)
+            check(self.hashSum, self.sumType, self.file)
 
-# if we have the file's name and sum
-def normal(s_type, f_name, f_sum):
-    if readinst.analyze_file(f_name, f_sum):
-        readata(f_name, s_type)
-        check(f_sum, s_type, f_name)
-
-
-# if the file's name and sum is in a sum.txt file
-def text(txt):
-    found, unfounded = readinst.analyze_text(txt)
-    if found:
-        f_name, f_sum, s_type = found[0]
-
-        readata(f_name, s_type)
-        check(f_sum, s_type, f_name)
-    else:
-        print("None of these file(s) was/were found:")
-        for f in unfounded:
-            print(" ", f)
-
-
-# get all sums
-def allsums(f_name):
-    if readinst.exists(f_name):
-        all_sums(f_name)
-        output = ""
-        for typo in hashlist:
-            output += f" {typo}sum: {hashlist[typo].hexdigest()}\n"
-        print(f"\nAll '{f_name}' sums below: ")
-        print(output)
-    else:
-        print(f"checksum: error: '{f_name}' was not found!")
-
-
-# if we want only show the sum and no to compare it
-def only_sum(s_type, f_name):
-    if readinst.exists(f_name):
-        readata(f_name, s_type)
-        print(f"'{f_name}' {s_type}sum is: {hashlist[s_type].hexdigest()}")
-    else:
-        print(f"checksum: error: '{f_name}' was not found!")
-
-
-def multi_files(text_file):
-    found, unfounded = readinst.analyze_text(text_file)
-    if found:
-        for i in range(len(found)):
-            f_name, f_sum, s_type = found[i]
+    # if the file's name and sum is in a sum.txt file
+    def text(self):
+        found, unfounded = readinst.analyze_text(self.file)
+        if found:
+            f_name, f_sum, s_type = found[0]
 
             readata(f_name, s_type)
             check(f_sum, s_type, f_name)
-        if unfounded:
-            print(f"The file(s) below was/were not found:")
+        else:
+            print("None of these file(s) was/were found:")
             for f in unfounded:
                 print(" ", f)
-    else:
-        print("None of the file(s) below was/were found:")
-        for f in unfounded:
-            print(colored(f" {f}", "red"))
+
+    # get all sums
+    def allsums(self):
+        if readinst.exists(self.file):
+            all_sums(self.file)
+            output = ""
+            for typo in hashlist:
+                output += f" {typo}sum: {hashlist[typo].hexdigest()}\n"
+            print(f"\nAll '{self.file}' sums below: ")
+            print(output)
+        else:
+            print(f"checksum: error: '{self.file}' was not found!")
+
+
+    # if we want only show the sum and no to compare it
+    def only_sum(self):
+        if readinst.exists(self.file):
+            readata(self.file, self.sumType)
+            print(f"'{self.file}' {self.sumType}sum is: {hashlist[self.sumType].hexdigest()}")
+        else:
+            print(f"checksum: error: '{self.file}' was not found!")
+
+
+    def multi_files(self):
+        found, unfounded = readinst.analyze_text(self.file)
+        if found:
+            for i in range(len(found)):
+                f_name, f_sum, s_type = found[i]
+
+                readata(f_name, s_type)
+                check(f_sum, s_type, f_name)
+            if unfounded:
+                print(f"The file(s) below was/were not found:")
+                for f in unfounded:
+                    print(" ", f)
+        else:
+            print("None of the file(s) below was/were found:")
+            for f in unfounded:
+                print(colored(f" {f}", "red"))
+
+    def verbose(self):
+        h = hashlist[self.sumType].hexdigest()
+        print(f"\n-> '{self.file}' {self.sumType}sum: {h}")
+        print(f"\n-> The given sum: {self.hashSum}")

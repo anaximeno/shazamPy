@@ -2,6 +2,7 @@
 #
 # Calculates the file sum and compares it with an given sum
 # September 2020
+# TODO: add a class method here!!
 
 from .hashes import hashes as hashlist
 import os

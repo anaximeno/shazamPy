@@ -5,7 +5,7 @@
 
 
 import argparse
-from processing import process
+from processing.process import Process
 from processing.hashes import hashes as hashlist
 
 
@@ -46,36 +46,42 @@ def main():
         option.add_argument(f"-{s}", f"--{s}sum", metavar='')  # *metavar = empty
 
     args = parser.parse_args()
+    
 
     def make_process(ac, st, fn):
+        # ac == file sum, fn == file name, st == sum type
         if ac:
-            process.normal(st, fn, ac)  # ac == file sum, fn == file name, st == sum type
+            prc = Process(file=fn, sumType=st, hashSum=ac)
+            prc.normal()  
             if args.verbose:
-                process.verbose(st, fn, ac)
+                prc.verbose()
         else:
             only_sum = input("Do you only want check the sum, without compare it? [Y/n]: ")
             if not only_sum or only_sum.isspace() or only_sum.lower() == ("yes" or "y"):
-                process.only_sum(st, fn)
+                prc = Process(file=fn, sumType=st)
+                prc.only_sum()
             else:
                 print("Aborted!")
                 print("usage: checksum [SUMTYPE] file_NAME file_SUM")
                 print("or: checksum -h, for more information.")
 
+    prc = Process(file=args.content)
+
     if args.version:
         print("checksum 0.2.4")  # must get of one txt file!!
     elif args.file:
         if args.content:
-            process.text(args.content)
+            prc.text()
         else:
             parser.error("expected one argument")
     elif args.Files:
         if args.content:
-            process.multi_files(args.content)
+            prc.multi_files()
         else:
             parser.error("expected one argument")
     elif args.all:
         if args.content:
-            process.allsums(args.content)
+            prc.allsums()
         else:
             parser.error("expected one argument")
     elif args.md5sum:
@@ -94,7 +100,7 @@ def main():
         want_all = input("Do you want to check all '{}' sums? [Y/n]: ".format(args.content))
         if not want_all or want_all.isspace() or want_all.lower() == ("yes" or "y"):
             print("")  # jump one line
-            process.allsums(args.content)
+            prc.allsums()
         else:
             print("Aborted!")
             print("usage: checksum [OPTION] content...")
