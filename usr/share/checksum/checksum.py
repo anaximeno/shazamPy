@@ -3,7 +3,7 @@
 # Calculates the file sum and compares it with an given sum
 # September 2020
 
-
+#%%
 import argparse
 from processing.process import Process
 from processing.hashes import hashes as hashlist
@@ -14,7 +14,7 @@ tp = ""
 for item in hashlist:
     tp += " " + item
 
-
+#%%
 # principal function
 def main():
     parser = argparse.ArgumentParser(
@@ -43,7 +43,7 @@ def main():
     parser.add_argument("--verbose", help="Verbose response", action="store_true")
 
     for s in hashlist:
-        option.add_argument(f"-{s}", f"--{s}sum", metavar='')  # *metavar = empty
+        option.add_argument(f"-{s}", f"--{s}sum", metavar='')  # metavar is empty
 
     args = parser.parse_args()
     
@@ -57,7 +57,7 @@ def main():
                 prc.verbose()
         else:
             only_sum = input("Do you only want check the sum, without compare it? [Y/n]: ")
-            if not only_sum or only_sum.isspace() or only_sum.lower() == ("yes" or "y"):
+            if not only_sum or only_sum.isspace() or only_sum.lower() == "yes" or only_sum.lower == "y":
                 prc = Process(file=fn, sumType=st)
                 prc.only_sum()
             else:
@@ -68,7 +68,8 @@ def main():
     prc = Process(file=args.content)
 
     if args.version:
-        print("checksum 0.2.4")  # must get of one txt file!!
+        # must get of one txt file!!
+        print("checksum 0.2.4")
     elif args.file:
         if args.content:
             prc.text()
@@ -99,7 +100,7 @@ def main():
     elif args.content:  # must be the penultimate
         want_all = input("Do you want to check all '{}' sums? [Y/n]: ".format(args.content))
         if not want_all or want_all.isspace() or want_all.lower() == ("yes" or "y"):
-            print("")  # jump one line
+            print("")  # skip one line
             prc.allsums()
         else:
             print("Aborted!")

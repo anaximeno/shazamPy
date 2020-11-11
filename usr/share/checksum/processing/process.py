@@ -3,8 +3,8 @@
 # Calculates the file sum and compares it with an given sum
 # 2020
 
-from . import readinst
 import os
+from . import readinst
 from .hashes import hashes
 from time import sleep
 from alive_progress import alive_bar
