@@ -1,24 +1,23 @@
 # Author: Anaximeno Brito
-#
 # Calculates the file sum and compares it with an given sum
-# September 2020
+# 2020
 
 #%%
 import argparse
 from processing.process import Process
-from processing.hashes import hashes as hashlist
+from processing.hashes import hashes
 
 
 # get all types of sums
 tp = ""
-for item in hashlist:
+for item in hashes:
     tp += " " + item
 
 #%%
 # principal function
 def main():
     parser = argparse.ArgumentParser(
-        description="Check and Compare the sums.", 
+        description="Check and Compare the sums.",
         usage="checksum [OPTION] content...",
         epilog="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
     )
@@ -42,17 +41,17 @@ def main():
 
     parser.add_argument("--verbose", help="Verbose response", action="store_true")
 
-    for s in hashlist:
+    for s in hashes:
         option.add_argument(f"-{s}", f"--{s}sum", metavar='')  # metavar is empty
 
     args = parser.parse_args()
-    
+
 
     def make_process(ac, st, fn):
-        # ac == file sum, fn == file name, st == sum type
+        # ac is file sum, fn is file name, st is sum type
         if ac:
             prc = Process(file=fn, sumType=st, hashSum=ac)
-            prc.normal()  
+            prc.normal()
             if args.verbose:
                 prc.verbose()
         else:
@@ -99,7 +98,7 @@ def main():
         make_process(args.content, "sha512", args.sha512sum)
     elif args.content:  # must be the penultimate
         want_all = input("Do you want to check all '{}' sums? [Y/n]: ".format(args.content))
-        if not want_all or want_all.isspace() or want_all.lower() == ("yes" or "y"):
+        if not want_all or want_all.isspace() or want_all.lower() == "yes" or want_all.lower() == "y":
             print("")  # skip one line
             prc.allsums()
         else:

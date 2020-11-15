@@ -1,8 +1,6 @@
 # Author: Anaximeno Brito
-#
 # Calculates the file sum and compares it with an given sum
 # September 2020
-# TODO: add a class method here!!
 
 from .hashes import hashes as hashlist
 import os
@@ -51,23 +49,11 @@ def _hex(hexa):
     except ValueError:
         return False
 
-
-# analyze the existence and the sum conditions
-def analyze_file(f_name, f_sum):
-    if exists(f_name) and _hex(f_sum):
-        return True
-    elif not exists(f_name):
-        print(f"checksum: error: '{f_name}' was not found here in this directory!")
-    elif not _hex(f_sum):
-        print(f"checksum: error: '{f_sum}' is not an hexadecimal number!")
-
-
 def type_of_sum(text):
     if is_readable(text):
         text_path = text.split('/')
         otxt = text_path[len(text_path) -1]
-        sum_name, file_ext = os.path.splitext(otxt)
-        del file_ext  # unnecessary already
+        sum_name = os.path.splitext(otxt)[0]
         if sum_name in sumslist:
             return sumslist[sum_name]
         else:
@@ -76,43 +62,58 @@ def type_of_sum(text):
                   f" so the file name actually supported are: {tp}")
             return False
 
+class CheckVars():
 
-# analyze the content of the sum.txt given
-def analyze_text(text): 
-    if not type_of_sum(text):
-        return False, False
-    try:
-        file_base = {}
-        with open(text, "rt") as t:
-            try:
-                line = 0
-                for l in t:
-                    line += 1
-                    file_sum, file_name = l.split()
-                    if _hex(file_sum):
-                        file_base[file_name] = file_sum
+    def __init__(self, file=False, sumType=False, hashSum=False):
+        self.file = file
+        self.sumType = sumType
+        self.hashSum = hashSum
+
+    # analyze the existence and the sum conditions
+    def analyze_file(self):
+        if exists(self.file) and _hex(self.hashSum):
+            return True
+        elif not exists(self.file):
+            print(f"checksum: error: '{self.file}' was not found here in this directory!")
+        elif not _hex(self.hashSum):
+            print(f"checksum: error: '{self.hashSum}' is not an hexadecimal number!")
+
+    # analyze the content of the sum.txt given
+    def analyze_text(self):
+        if not type_of_sum(self.file):
+            return False, False
+        try:
+            file_base = {}
+            with open(self.file, "rt") as t:
+                try:
+                    line = 0
+                    for l in t:
+                        line += 1
+                        file_sum, file_name = l.split()
+                        if _hex(file_sum):
+                            file_base[file_name] = file_sum
+                        else:
+                            print(f"checksum: error: irregularity in the line {line} of '{self.file}', " +
+                                  f"sum must be an hexadecimal value!")
+                            return False, False
+                except ValueError:
+                    print(f"checksum: error: '{self.file}' must have the " +
+                          f"file sum and the file name in each line!\nIrregularity in line {line}")
+                    return False, False
+
+                unfounded = []
+                found = []
+
+                def find_files(file):
+                    if exists(file):
+                        found.append((file, file_base[file], type_of_sum(self.file)))
                     else:
-                        print(f"checksum: error: irregularity in the line {line} of '{text}', " +
-                              f"sum must be an hexadecimal value!")
-                        return False, False
-            except ValueError:
-                print(f"checksum: error: '{text}' must have the " +
-                      f"file sum and the file name in each line!\nIrregularity in line {line}")
-                return False, False
+                        unfounded.append(file)
 
-            unfounded = []
-            found = []
+                for f in file_base:
+                    find_files(f)
 
-            def find_files(file):
-                if exists(file):
-                    found.append((file, file_base[file], type_of_sum(text)))
-                else:
-                    unfounded.append(file)
-
-            for f in file_base:
-                find_files(f)
-
-            return found, unfounded
-    except FileNotFoundError:
-        print(f"checksum: error: '{text}' was not found!")
-        return False, False
+                return found, unfounded
+        except FileNotFoundError:
+            print(f"checksum: error: '{self.file}' was not found!")
+            return False, False
