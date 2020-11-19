@@ -1,3 +1,4 @@
+# It is here to avoid circular imports
 import hashlib
 
 # List with all hashlist usable

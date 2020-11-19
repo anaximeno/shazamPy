@@ -1,7 +1,6 @@
 # Author: Anaximeno Brito
 # Calculates the file sum and compares it with an given sum
-# 2020
-# TODO: must use decorators, and lambda
+# September 2020 - currently
 
 import os
 from .readinst import CheckVars, exists
@@ -11,7 +10,7 @@ from time import sleep
 from alive_progress import alive_bar
 from termcolor import colored
 
-# don't change this number
+# don't never change this number
 BUF_SIZE = 32768
 
 op = OutPut()
@@ -79,8 +78,8 @@ def check(file_sum, sum_type, file_name):
         suc = False
 
     op.results(
-        fname=file_name, 
-        stype=sum_type, 
+        fname=file_name,
+        stype=sum_type,
         hsum=file_sum,
         sucess=suc
     )
@@ -90,9 +89,16 @@ def check(file_sum, sum_type, file_name):
 
 class Process():
 
-    def __init__(self, file=False, sumType=False, hashSum=False):
-        self.file = file
+    def __init__(self):
+        pass
+
+    def set_name(self, fileName):
+        self.file = fileName
+
+    def set_sum_type(self, sumType):
         self.sumType = sumType
+
+    def set_hash_sum(self, hashSum):
         self.hashSum = hashSum
 
     # if we have the file's name and sum
@@ -111,7 +117,7 @@ class Process():
         cv.set_file(self.file)
 
         found, unfounded = cv.analyze_text()
-        
+
         if found:
             f_name, f_sum, s_type = found[0]
 
@@ -166,8 +172,8 @@ class Process():
     def verbose(self):
 
         op.results(
-            fname=self.file, 
-            stype=self.sumType, 
+            fname=self.file,
+            stype=self.sumType,
             hsum=self.hashSum,
             sucess=None
         )

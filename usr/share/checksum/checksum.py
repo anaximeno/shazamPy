@@ -1,7 +1,8 @@
 # Author: Anaximeno Brito
 # Calculates the file sum and compares it with an given sum
 # 2020
-
+# TODO: Anaxime if you think well ya can put one decorator below (or more)
+# TODO: must a module to check if the import of all modules are working well, if not, mssss
 
 import argparse
 from processing.process import Process
@@ -9,7 +10,6 @@ from processing.hashes import hashes
 from processing.output import OutPut
 
 
-# principal function
 def main():
     parser = argparse.ArgumentParser(
         description="Check and Compare the sums.",
@@ -41,36 +41,35 @@ def main():
 
     args = parser.parse_args()
 
+    prc = Process()
 
-    def make_process(ac, st, fn):
-        # ac is file sum, fn is file name, st is sum type
-        if ac:
-            prc = Process(
-                file=fn, 
-                sumType=st, 
-                hashSum=ac
-            )
+    def make_process(hash_sum, sum_type, file_name):
+        if hash_sum:
+            prc.set_file(file_name)
+            prc.set_sum_type(sum_type)
+            prc.set_hash_sum(hash_sum)
 
             prc.normal()
-
             if args.verbose:
                 prc.verbose()
         else:
             only_sum = input("Do you only want check the sum, without compare it? [Y/n]: ")
             if not only_sum or only_sum.isspace() or only_sum.lower() == "yes" or only_sum.lower == "y":
-                prc = Process(file=fn, sumType=st)
+                prc.set_file(file_name)
+                prc.set_sum_type(sum_type)
+
                 prc.only_sum()
             else:
                 print("Aborted!")
                 print("usage: checksum [SUMTYPE] file_NAME file_SUM")
                 print("or: checksum -h, for more information.")
 
-    prc = Process(file=args.content)
+    # this will be used below for the conditions
+    prc.set_file(args.content)
 
     if args.version:
-        # must get of one txt file!!
-        ####
-        print("checksum 0.2.5.0")
+        with open("VERSION", "rt") as f:
+            print(str(f.read()))
     elif args.file:
         if args.content:
             prc.text()
@@ -99,7 +98,7 @@ def main():
     elif args.sha512sum:
         make_process(args.content, "sha512", args.sha512sum)
     elif args.content:  # must be the penultimate
-        want_all = input("Do you want to check all '{}' sums? [Y/n]: ".format(args.content))
+        want_all = input(f"Do you want to check all '{args.content}' sums? [Y/n]: ")
         if not want_all or want_all.isspace() or want_all.lower() == "yes" or want_all.lower() == "y":
             print("")  # skip one line
             prc.allsums()
