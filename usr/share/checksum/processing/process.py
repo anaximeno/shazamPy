@@ -1,23 +1,22 @@
 # Author: Anaximeno Brito
 # Calculates the file sum and compares it with an given sum
 # 2020
-# TODO: must use decorators
+# TODO: must use decorators, and lambda
 
 import os
 from .readinst import CheckVars, exists
-from .hashes import hashes
+from .hashes import hashes as hashlist
+from .output import OutPut
 from time import sleep
 from alive_progress import alive_bar
 from termcolor import colored
 
-
-hashlist = hashes
-
 # don't change this number
 BUF_SIZE = 32768
 
+op = OutPut()
+cv = CheckVars()
 
-# TODO: make it lambda
 def gen(dt):
     if dt:
         yield dt
@@ -69,15 +68,24 @@ def readata(f_name, s_type):
                     break
 
 
-# check if the file's sum is equal to the given sum
-def check(f_sum, s_type, f_name):
-    x = int(f_sum, 16)
-    h = hashlist[s_type].hexdigest()
+# it checks if the file's sum is equal to the given sum
+def check(file_sum, sum_type, file_name):
+    x = int(file_sum, 16)
+    h = hashlist[sum_type].hexdigest()
 
     if int(h, 16) == x:
-        print(colored(f"#SUCCESS, '{f_name}' {s_type}sum matched!", "green"))
+        suc = True
     else:
-        print(colored(f"%FAIL, '{f_name}' {s_type}sum did not match!", "red"))
+        suc = False
+
+    op.results(
+        fname=file_name, 
+        stype=sum_type, 
+        hsum=file_sum,
+        sucess=suc
+    )
+
+    op.out_message()
 
 
 class Process():
@@ -87,27 +95,30 @@ class Process():
         self.sumType = sumType
         self.hashSum = hashSum
 
-    def make_verbose(self, verbose):
-        self.verbose = verbose
-
     # if we have the file's name and sum
     def normal(self):
-        cv = CheckVars(file=self.file, hashSum=self.hashSum)
+
+        cv.set_file(self.file)
+        cv.set_hash_sum(self.hashSum)
+
         if cv.analyze_file():
             readata(self.file, self.sumType)
             check(self.hashSum, self.sumType, self.file)
 
     # if the file's name and sum is in a sum.txt file
     def text(self):
-        cv = CheckVars(file=self.file)
+
+        cv.set_file(self.file)
+
         found, unfounded = cv.analyze_text()
+        
         if found:
             f_name, f_sum, s_type = found[0]
 
             readata(f_name, s_type)
             check(f_sum, s_type, f_name)
         else:
-            print("None of these file(s) was/were found:")
+            op.out_error("None of these file(s) was/were found:")
             for f in unfounded:
                 print(" ", f)
 
@@ -122,7 +133,7 @@ class Process():
             print(f"\nAll '{self.file}' sums below: ")
             print(output)
         else:
-            print(f"checksum: error: '{self.file}' was not found!")
+            op.out_error(f"'{self.file}' was not found!")
 
     # if we want only show the sum and no to compare it
     def only_sum(self):
@@ -130,11 +141,13 @@ class Process():
             readata(self.file, self.sumType)
             print(f"'{self.file}' {self.sumType}sum is: {hashlist[self.sumType].hexdigest()}")
         else:
-            print(f"checksum: error: '{self.file}' was not found!")
+            op.out_error(f"'{self.file}' was not found!")
 
     def multi_files(self):
-        cv = CheckVars(file=self.file)
+        cv.set_file(self.file)
+
         found, unfounded = cv.analyze_text()
+
         if found:
             for i in range(len(found)):
                 f_name, f_sum, s_type = found[i]
@@ -149,3 +162,14 @@ class Process():
             print("None of the file(s) below was/were found:")
             for f in unfounded:
                 print(colored(f" {f}", "red"))
+
+    def verbose(self):
+
+        op.results(
+            fname=self.file, 
+            stype=self.sumType, 
+            hsum=self.hashSum,
+            sucess=None
+        )
+
+        op.verbose()

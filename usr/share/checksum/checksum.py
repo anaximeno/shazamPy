@@ -2,18 +2,13 @@
 # Calculates the file sum and compares it with an given sum
 # 2020
 
-#%%
+
 import argparse
 from processing.process import Process
 from processing.hashes import hashes
+from processing.output import OutPut
 
 
-# get all types of sums
-tp = ""
-for item in hashes:
-    tp += " " + item
-
-#%%
 # principal function
 def main():
     parser = argparse.ArgumentParser(
@@ -50,8 +45,14 @@ def main():
     def make_process(ac, st, fn):
         # ac is file sum, fn is file name, st is sum type
         if ac:
-            prc = Process(file=fn, sumType=st, hashSum=ac)
+            prc = Process(
+                file=fn, 
+                sumType=st, 
+                hashSum=ac
+            )
+
             prc.normal()
+
             if args.verbose:
                 prc.verbose()
         else:
@@ -68,7 +69,8 @@ def main():
 
     if args.version:
         # must get of one txt file!!
-        print("checksum 0.2.4")
+        ####
+        print("checksum 0.2.5.0")
     elif args.file:
         if args.content:
             prc.text()

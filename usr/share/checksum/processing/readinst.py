@@ -4,9 +4,12 @@
 
 from .hashes import hashes as hashlist
 import os
+from .output import OutPut
 
 
 sumslist = {}
+
+op = OutPut()
 
 for item in hashlist:
     sumslist[item + "sum"] = item
@@ -25,10 +28,10 @@ def is_readable(file):
                 f.read(1)
                 return True
         except UnicodeDecodeError:
-            print(f"checksum: error: {file} is unreadable, must be a file with the sums and filename inside!")
+            op.out_error(f"{file} is unreadable, must be a file with the sums and filename inside!")
             return False
     else:
-        print(f"checksum: error: {file} do not exits in this dir!")
+        op.out_error(f"{file} do not exits in this dir!")
 
 
 # check the existence of the file
@@ -57,26 +60,34 @@ def type_of_sum(text):
         if sum_name in sumslist:
             return sumslist[sum_name]
         else:
-            print(f"checksum: error: '{sum_name}' is unsupported already!")
+            op.out_error(f"'{sum_name}' is unsupported already!")
             print("'-f' and '-F' method uses the file name to specify the type of sum that should be used," +
                   f" so the file name actually supported are: {tp}")
             return False
 
 class CheckVars():
 
-    def __init__(self, file=False, sumType=False, hashSum=False):
-        self.file = file
+    def __init__(self):
+        pass
+    
+    def set_file(self, fname):
+        self.file = fname
+    
+    def set_sum_type(self, sumType):
         self.sumType = sumType
+
+    def set_hash_sum(self, hashSum):
         self.hashSum = hashSum
+
 
     # analyze the existence and the sum conditions
     def analyze_file(self):
         if exists(self.file) and _hex(self.hashSum):
             return True
         elif not exists(self.file):
-            print(f"checksum: error: '{self.file}' was not found here in this directory!")
+            op.out_error(f"'{self.file}' was not found here in this directory!")
         elif not _hex(self.hashSum):
-            print(f"checksum: error: '{self.hashSum}' is not an hexadecimal number!")
+            op.out_error(f"'{self.hashSum}' is not an hexadecimal number!")
 
     # analyze the content of the sum.txt given
     def analyze_text(self):
@@ -93,12 +104,12 @@ class CheckVars():
                         if _hex(file_sum):
                             file_base[file_name] = file_sum
                         else:
-                            print(f"checksum: error: irregularity in the line {line} of '{self.file}', " +
+                            op.out_error(f"irregularity in the line {line} of '{self.file}', " +
                                   f"sum must be an hexadecimal value!")
                             return False, False
                 except ValueError:
-                    print(f"checksum: error: '{self.file}' must have the " +
-                          f"file sum and the file name in each line!\nIrregularity in line {line}")
+                    op.out_error(f"'{self.file}' must have the file sum and the file name in each line!")
+                    print(f"Irregularity in line {line}")
                     return False, False
 
                 unfounded = []
@@ -115,5 +126,5 @@ class CheckVars():
 
                 return found, unfounded
         except FileNotFoundError:
-            print(f"checksum: error: '{self.file}' was not found!")
+            op.out_error(f"'{self.file}' was not found!")
             return False, False
