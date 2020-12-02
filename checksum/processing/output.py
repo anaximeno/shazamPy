@@ -27,6 +27,6 @@ class OutPut():
 
     def verbose(self):
         print(
-            f" -> Given sum: {self.hsum}",
-            f" -> '\n{self.fname}' {self.stype}sum: {hashlist[self.stype].hexdigest()}"
+            f" -> Given sum: {self.hsum}\n",
+            f"-> '{self.fname}' {self.stype}sum: {hashlist[self.stype].hexdigest()}"
         )

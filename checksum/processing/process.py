@@ -27,11 +27,15 @@ def all_sums(f_name):
     with alive_bar(len(hashlist), bar='blocks', spinner='dots') as bar:
         for s_type in hashlist:
             with open(f_name, 'rb') as f:
-                for file_data in gen(f.read(BUF_SIZE)):
-                    hashlist[s_type].update(file_data)
-                    # when lower is this value, faster will be the reading,
-                    sleep(0.00001)
-                    # but it will use more CPU
+                while True:
+                    try:
+                        file_data = gen(f.read(BUF_SIZE))
+                        hashlist[s_type].update(next(file_data))
+                        # when lower is this value, faster will be the reading,
+                        sleep(0.00001)
+                        # but it will use more CPU
+                    except StopIteration:
+                        break
             bar()
 
 
@@ -46,12 +50,17 @@ def readata(f_name, s_type):
 
     with alive_bar(times, bar='filling', spinner='dots') as bar:
         with open(f_name, 'rb') as f:
-            for file_data in gen(f.read(BUF_SIZE)):
-                hashlist[s_type].update(file_data)
-                # when lower is this value, faster will be the reading,
-                sleep(0.00001)
-                # but it will use more CPU
-                bar()
+            while True:
+                try:
+                    file_data = gen(f.read(BUF_SIZE))
+                    hashlist[s_type].update(next(file_data))
+                    # when lower is this value, faster will be the reading,
+                    sleep(0.00001)
+                    # but it will use more CPU
+                    bar()
+                except StopIteration:
+                    break
+                
 
 
 # it checks if the file's sum is equal to the given sum
