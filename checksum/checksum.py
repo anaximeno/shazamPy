@@ -41,34 +41,32 @@ def main():
 
     args = parser.parse_args()
 
-    prc = Process()
-
     def make_process(hash_sum, sum_type, file_name):
-        if hash_sum:
-            prc.set_file(file_name)
-            prc.set_sum_type(sum_type)
-            prc.set_hash_sum(hash_sum)
+        prc = Process(
+            fileName=file_name, 
+            sumType=sum_type, 
+            hashSum=hash_sum
+        )
 
+        if hash_sum:
             prc.normal()
+
             if args.verbose:
                 prc.verbose()
+
         else:
             only_sum = input("Do you only want check the sum, without compare it? [Y/n]: ")
             if not only_sum or only_sum.isspace() or only_sum.lower() == "yes" or only_sum.lower == "y":
-                prc.set_file(file_name)
-                prc.set_sum_type(sum_type)
-
                 prc.only_sum()
+
             else:
                 print("Aborted!")
                 print("usage: checksum [SUMTYPE] file_NAME file_SUM")
                 print("or: checksum -h, for more information.")
 
-    # this will be used below for the conditions
-    prc.set_file(args.content)
+    prc = Process(fileName=args.content)
 
     if args.version:
-        ### put version in another dir
         with open("/usr/share/checksum/VERSION", "rt") as f:
             print("Checksum: ", str(f.read()))
     elif args.file:

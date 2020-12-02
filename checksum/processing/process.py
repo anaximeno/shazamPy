@@ -15,6 +15,7 @@ BUF_SIZE = 32768
 
 op = OutPut()
 
+
 # this is used in the function below to gen data
 def gen(dt):
     if dt:
@@ -71,16 +72,9 @@ def check(file_sum, sum_type, file_name):
 
 class Process:
 
-    def __init__(self):
-        pass
-
-    def set_file(self, fileName):
+    def __init__(self, fileName, sumType=None, hashSum=None):
         self.file = fileName
-
-    def set_sum_type(self, sumType):
         self.sumType = sumType
-
-    def set_hash_sum(self, hashSum):
         self.hashSum = hashSum
 
     # if we have the file's name and sum
