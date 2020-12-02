@@ -5,7 +5,7 @@ Version: 0.2.5.1
 Architecture: all
 Section: misc
 Maintainer: Anaxímeno Brito, <anaximenobrito@gmail.com>
-Installed-Size: 79.1
+Installed-Size: 40
 Depends: python3.8
 Description: Checksum is an CLI aplication thats calculate and compare the sums of one file. For knowing the methods try: checksum -h or checksum --help.
 

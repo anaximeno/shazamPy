@@ -69,7 +69,7 @@ def main():
 
     if args.version:
         with open("VERSION", "rt") as f:
-            print(str(f.read()))
+            print("Checksum: ",str(f.read()))
     elif args.file:
         if args.content:
             prc.text()

@@ -1,3 +1,5 @@
+# TODO: verbose should not be shown if an error occurs
+
 from termcolor import colored as clr
 from .hashes import hashes as hashlist
 

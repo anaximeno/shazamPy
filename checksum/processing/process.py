@@ -3,19 +3,19 @@
 # September 2020 - currently
 
 import os
+from time import sleep
 from .readinst import CheckVars, exists
 from .hashes import hashes as hashlist
 from .output import OutPut
-from time import sleep
 from alive_progress import alive_bar
 from termcolor import colored
 
-# don't never change this number
+# don't ever change this number
 BUF_SIZE = 32768
 
 op = OutPut()
-cv = CheckVars()
 
+# this is used in the function below to gen data
 def gen(dt):
     if dt:
         yield dt
@@ -26,73 +26,55 @@ def all_sums(f_name):
     with alive_bar(len(hashlist), bar='blocks', spinner='dots') as bar:
         for s_type in hashlist:
             with open(f_name, 'rb') as f:
-                while True:
-                    try:
-                        data = gen(f.read(BUF_SIZE))
-                        hashlist[s_type].update(next(data))
-                        # when lower is this value, faster will be the reading,
-                        sleep(0.00001)
-                        # but it will use more CPU
-                    except StopIteration:
-                        break
+                for file_data in gen(f.read(BUF_SIZE)):
+                    hashlist[s_type].update(file_data)
+                    # when lower is this value, faster will be the reading,
+                    sleep(0.00001)
+                    # but it will use more CPU
             bar()
 
 
 # read and set the file's sum
 def readata(f_name, s_type):
-
-    def rep(s):
-        t = 0
-        while s > 0:
-            s -= BUF_SIZE
-            t += 1
-            yield t
-
     size = os.path.getsize(f_name)
     times = 0
-    for x in rep(size):
-        times = x
+
+    while size > 0:
+        size -= BUF_SIZE
+        times += 1
 
     with alive_bar(times, bar='filling', spinner='dots') as bar:
         with open(f_name, 'rb') as f:
-            while True:
-                try:
-                    data = gen(f.read(BUF_SIZE))
-                    hashlist[s_type].update(next(data))
-                    # when lower is this value, faster will be the reading,
-                    sleep(0.00001)
-                    # but it will use more CPU
-                    bar()
-                except StopIteration:
-                    break
+            for file_data in gen(f.read(BUF_SIZE)):
+                hashlist[s_type].update(file_data)
+                # when lower is this value, faster will be the reading,
+                sleep(0.00001)
+                # but it will use more CPU
+                bar()
 
 
 # it checks if the file's sum is equal to the given sum
 def check(file_sum, sum_type, file_name):
-    x = int(file_sum, 16)
     h = hashlist[sum_type].hexdigest()
 
-    if int(h, 16) == x:
-        suc = True
-    else:
-        suc = False
-
-    op.results(
+    op = OutPut(
         fname=file_name,
         stype=sum_type,
-        hsum=file_sum,
-        sucess=suc
+        hsum=file_sum
     )
 
-    op.out_message()
+    if int(h, 16) == int(file_sum, 16):
+        op.out_results(sucess=True)
+    else:
+        op.out_results(sucess=False)
 
 
-class Process():
+class Process:
 
     def __init__(self):
         pass
 
-    def set_name(self, fileName):
+    def set_file(self, fileName):
         self.file = fileName
 
     def set_sum_type(self, sumType):
@@ -103,9 +85,7 @@ class Process():
 
     # if we have the file's name and sum
     def normal(self):
-
-        cv.set_file(self.file)
-        cv.set_hash_sum(self.hashSum)
+        cv = CheckVars(fname=self.file, hash=self.hashSum)
 
         if cv.analyze_file():
             readata(self.file, self.sumType)
@@ -114,7 +94,7 @@ class Process():
     # if the file's name and sum is in a sum.txt file
     def text(self):
 
-        cv.set_file(self.file)
+        cv = CheckVars(fname=self.file, hash=None)
 
         found, unfounded = cv.analyze_text()
 
@@ -125,8 +105,8 @@ class Process():
             check(f_sum, s_type, f_name)
         else:
             op.out_error("None of these file(s) was/were found:")
-            for f in unfounded:
-                print(" ", f)
+            for unf in unfounded:
+                print("*", unf)
 
     # get all sums
     def allsums(self):
@@ -150,7 +130,7 @@ class Process():
             op.out_error(f"'{self.file}' was not found!")
 
     def multi_files(self):
-        cv.set_file(self.file)
+        cv = CheckVars(fname=self.file, hash=None)
 
         found, unfounded = cv.analyze_text()
 
@@ -162,20 +142,17 @@ class Process():
                 check(f_sum, s_type, f_name)
             if unfounded:
                 print(f"The file(s) below was/were not found:")
-                for f in unfounded:
-                    print(" ", f)
+                for unf in unfounded:
+                    print("*", unf)
         else:
             print("None of the file(s) below was/were found:")
-            for f in unfounded:
-                print(colored(f" {f}", "red"))
+            for unf in unfounded:
+                print("*", unf)
 
     def verbose(self):
-
-        op.results(
+        op = OutPut(
             fname=self.file,
             stype=self.sumType,
-            hsum=self.hashSum,
-            sucess=None
+            hsum=self.hashSum
         )
-
         op.verbose()

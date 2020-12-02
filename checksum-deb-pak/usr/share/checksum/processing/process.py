@@ -92,7 +92,7 @@ class Process():
     def __init__(self):
         pass
 
-    def set_name(self, fileName):
+    def set_file(self, fileName):
         self.file = fileName
 
     def set_sum_type(self, sumType):

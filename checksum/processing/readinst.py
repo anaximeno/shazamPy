@@ -16,11 +16,6 @@ for item in hashlist:
     sumslist[item + "sums"] = item
 
 
-tp = ''  # for posterior use
-for item in sumslist:
-    tp += '\n ' + item
-
-
 def is_readable(file):
     if exists(file):
         try:
@@ -60,25 +55,20 @@ def type_of_sum(text):
         if sum_name in sumslist:
             return sumslist[sum_name]
         else:
+            tp = ''
+            for item in sumslist:
+                tp += '\n ' + item
+
             op.out_error(f"'{sum_name}' is unsupported already!")
             print("'-f' and '-F' method uses the file name to specify the type of sum that should be used," +
                   f" so the file name actually supported are: {tp}")
             return False
 
-class CheckVars():
+class CheckVars:
 
-    def __init__(self):
-        pass
-    
-    def set_file(self, fname):
+    def __init__(self, fname, hash):
         self.file = fname
-    
-    def set_sum_type(self, sumType):
-        self.sumType = sumType
-
-    def set_hash_sum(self, hashSum):
-        self.hashSum = hashSum
-
+        self.hashSum = hash
 
     # analyze the existence and the sum conditions
     def analyze_file(self):

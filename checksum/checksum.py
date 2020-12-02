@@ -1,8 +1,8 @@
 # Author: Anaximeno Brito
 # Calculates the file sum and compares it with an given sum
 # 2020
-# TODO: Anaxime if you think well ya can put one decorator below (or more)
-# TODO: must a module to check if the import of all modules are working well, if not, mssss
+# TODO: put one decorator below (or more)
+# TODO: must check if the imports of all modules are working well, if not, mssss
 
 import argparse
 from processing.process import Process
@@ -68,8 +68,9 @@ def main():
     prc.set_file(args.content)
 
     if args.version:
-        with open("VERSION", "rt") as f:
-            print(str(f.read()))
+        ### put version in another dir
+        with open("/usr/share/checksum/VERSION", "rt") as f:
+            print("Checksum: ", str(f.read()))
     elif args.file:
         if args.content:
             prc.text()
