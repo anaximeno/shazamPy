@@ -68,7 +68,7 @@ def main():
 
     if args.version:
         with open("/usr/share/checksum/VERSION", "rt") as f:
-            print("Checksum: ", str(f.read()))
+            print("Checksum:", str(f.read()))
     elif args.file:
         if args.content:
             prc.text()

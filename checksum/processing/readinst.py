@@ -6,7 +6,6 @@ from .hashes import hashes as hashlist
 import os
 from .output import OutPut
 
-
 sumslist = {}
 
 op = OutPut()
@@ -15,6 +14,15 @@ for item in hashlist:
     sumslist[item + "sum"] = item
     sumslist[item + "sums"] = item
 
+# check the existence of the file
+def exists(file):
+    try:
+        with open(file, 'rb') as target:
+            if target:
+                return True
+    except IOError:
+        return False
+	
 
 def is_readable(file):
     if exists(file):
@@ -27,16 +35,6 @@ def is_readable(file):
             return False
     else:
         op.out_error(f"{file} do not exits in this dir!")
-
-
-# check the existence of the file
-def exists(file):
-    try:
-        with open(file, 'rb') as target:
-            if target:
-                return True
-    except IOError:
-        return False
 
 
 # check if the value is an hexadecimal value
@@ -55,13 +53,11 @@ def type_of_sum(text):
         if sum_name in sumslist:
             return sumslist[sum_name]
         else:
-            tp = ''
-            for item in sumslist:
-                tp += '\n ' + item
+            tp = '\n'.join(sumslist.keys())
 
             op.out_error(f"'{sum_name}' is unsupported already!")
-            print("'-f' and '-F' method uses the file name to specify the type of sum that should be used," +
-                  f" so the file name actually supported are: {tp}")
+            print("'-f' and '-F' method uses the file name to specify the type of sum that should be used",
+                  f"so the file name actually supported are:\n{tp}")
             return False
 
 class CheckVars:

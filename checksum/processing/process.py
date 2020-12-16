@@ -60,7 +60,7 @@ def readata(f_name, s_type):
                     bar()
                 except StopIteration:
                     break
-                
+
 
 
 # it checks if the file's sum is equal to the given sum
@@ -131,7 +131,8 @@ class Process:
             print(f"'{self.file}' {self.sumType}sum is: {hashlist[self.sumType].hexdigest()}")
         else:
             op.out_error(f"'{self.file}' was not found!")
-
+    
+    # TODO: use multi_files funct with class recusion on normal funct
     def multi_files(self):
         cv = CheckVars(fname=self.file, hash=None)
 
@@ -146,11 +147,11 @@ class Process:
             if unfounded:
                 print(f"The file(s) below was/were not found:")
                 for unf in unfounded:
-                    print("*", unf)
+                    print("->", unf)
         else:
             print("None of the file(s) below was/were found:")
             for unf in unfounded:
-                print("*", unf)
+                print("->", unf)
 
     def verbose(self):
         op = OutPut(
