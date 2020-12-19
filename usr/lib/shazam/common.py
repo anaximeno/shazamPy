@@ -90,7 +90,7 @@ class Validate:
     def sumtype(self):
         if is_readable(self.fname):
             text_path = self.fname.split('/')
-            otxt = text_path[len(text_path) -1]
+            otxt = text_path[-1]
             name = os.path.splitext(otxt)[0]
             if name in hlist["type"]:
                 return name
