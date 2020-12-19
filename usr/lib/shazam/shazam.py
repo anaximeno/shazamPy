@@ -1,6 +1,5 @@
-'''
+''' shazam 2020.1
 Calculates the file sum and compares it with an given sum
-
 Author: Anaxímeno Brito
 '''
 
@@ -16,7 +15,7 @@ from common import Process, hlist, out_error, CheckVars
 def main():
     parser = argparse.ArgumentParser(
         description="Check and Compare the sums.",
-        usage="checksum [OPTION] content...",
+        usage="shazam [OPTION] content...",
         epilog="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
     )
 
@@ -53,8 +52,8 @@ def main():
             procs.only_sum()
 
     if args.version:
-        with open("/usr/share/checksum/VERSION", "rt") as f:
-            print("Checksum:", str(f.read()))
+        with open("/usr/share/shazam/VERSION", "rt") as f:
+            print("ShaZam: %s" % str(f.read()))
     elif args.file:
         if args.content:
             checks = CheckVars(filename=args.content, givensum=None)
@@ -114,9 +113,9 @@ def main():
             procs = Process(args.content)
             procs.allsums()
         else:
-            out_error("Aborted!\nusage: checksum [OPTION] content...")
+            out_error("Aborted!\nusage: shazam [OPTION] content...")
     else:
-        out_error("No options was chosen, \ntry: checksum -h, for more information.")
+        out_error("No options was chosen, \ntry: shazam -h, for more informations.")
 
-
-main()
+if __name__ == '__main__':
+    main()

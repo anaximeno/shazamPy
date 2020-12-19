@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python3 ../lib/checksum/checksum.py $1 $2 $3 $4

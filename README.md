@@ -1,6 +1,6 @@
-# CHECKSUM
+# ShaZam
 
-Checksum is a **CLI** application made principally in python. <br>
+ShaZam is a **CLI** application made basically in python. <br>
 It checks the integrity of one file by comparing it with a given hash.
 
 ## General Information
@@ -12,7 +12,7 @@ It converts the file to the chosen hash type and compares it with a given hash.
 ### Usage & More
 You can use it as below:
 
-  > checksum *-sha1* "*file_name*" "*given_sum*"
+  > shazam *-sha1* "*file_name*" "*given_sum*"
 
 **OBS:** If you have a file with the hashes inside you can check it by using a short command.
 For more option after install it try: checksum -h/--help

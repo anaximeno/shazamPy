@@ -7,11 +7,11 @@ with open("README.md", "rt") as ld:
     long_desc = ld.read()
 
 setup(
-    name='checksum',
+    name='shazam',
     version=__version__,
     packages=find_packages(),
     package_dir={'': 'usr/share/'},
-    py_modules=["checksum"],
+    py_modules=["shazam"],
     url='https://github.com/anaximeno/checksum',
     license='GPL-3.0 License',
     author='Anaximeno Brito',
@@ -26,7 +26,7 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        checksum=checksum:cli
+        shazam=shazam:cli
     ''',
     classfiers=[
         'Programming Language :: Python :: 3',

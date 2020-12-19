@@ -18,7 +18,7 @@ hlist = {
 
 
 def out_error(err, exit=True):
-    print("checksum: error:", err)
+    print("shazam: error:", err)
     if exit:
         sys.exit(1)
 
@@ -104,7 +104,7 @@ class Validate:
                 out_error("'%s' was not recognized as a supported sum type!" % name)
                 return False
 
-        
+
 class CheckVars:
 
     def __init__(self, filename, givensum):
@@ -145,7 +145,7 @@ class CheckVars:
 
                     def find(filename):
                         if exists(filename):
-                            found.append(tuple(filename, file_base[filename], self.validate.sumtype()))
+                            found.append((filename, file_base[filename], self.validate.sumtype()))
                         else:
                             unfounded.append(filename)
 
@@ -247,7 +247,7 @@ class Process:
             for item in hlist['type']:
                 index = hlist['type'].index(item)
                 filesum = hlist['hash'][index].hexdigest()
-                print(" -> {}sum: {}".format(item, filesum))
+                print(" -> %ssum: %s" % item % filesum)
         else:
             out_error(f"'{self.fname}' was not found!")
 
