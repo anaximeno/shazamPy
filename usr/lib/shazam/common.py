@@ -22,9 +22,7 @@ def out_error(err, exit=True):
     print("shazam: error:", err)
     if exit:
         sys.exit(1)
-
-
-class OutPut:
+  class OutPut:
 
     def __init__(self, filename=None, givensum=None, sumtype=None):
         self.fname = filename

@@ -1,11 +1,14 @@
 Source: shazam
 Package: shazam
 Priority: optional
-Version: 0.2.5.1
+Version: 2020.1
 Architecture: all
 Section: misc
 Maintainer: Anaxímeno Brito, <anaximenobrito@gmail.com>
 Installed-Size: 40
-Depends: python3.8
-Description: ShaZam is an CLI aplication thats calculate and compare the sums of one file. For knowing the methods try: checksum -h or checksum --help.
-
+Depends: python3,
+	 python3-argparse,
+	 python3-termcolor,
+	 python3-alive_progress,
+	 python3-hashlib
+Description: ShaZam is an CLI aplication thats calculate and compare the sums of one file. For knowing the methods try: shazam -h or shazam --help.
