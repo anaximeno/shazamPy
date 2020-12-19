@@ -50,9 +50,6 @@ class OutPut:
         )
 
 
-op = OutPut()
-   
-
 # check the existence of the file
 def exists(file):
     try:
