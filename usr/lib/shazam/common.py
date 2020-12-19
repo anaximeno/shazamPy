@@ -33,11 +33,11 @@ class OutPut:
     def results(self, sucess):
         if sucess:
             print(
-                clr(f" #SUCCESS, '{self.fname}' {self.stype}sum matched!", "green")
+                clr(" #SUCCESS, '%s' %ssum matched!" % self.fname % self.stype, "green")
             )
         else:
             print(
-                clr(f" %FAIL, '{self.fname}' {self.stype}sum did not match!", "red")
+                clr(" %%FAIL, '%s' %sum did not match!" % self.fname % self.stype, "red")
             )
 
     def verbose(self):
@@ -45,8 +45,8 @@ class OutPut:
         filesum = hlist['hash'][index].hexdigest()
 
         print(
-            f" -> Given sum: {self.gsum}\n",
-            f"-> '{self.fname}' {self.stype}sum: {filesum}"
+            " -> Given sum: %s\n" % self.gsum,
+            "-> '%s' %ssum: %s" % self.fname % self.stype % filesum,
         )
 
 
@@ -76,10 +76,10 @@ def is_readable(fname):
                     f.read(1)
                     return True
             except UnicodeDecodeError:
-                out_error(f"{fname} is unreadable, must be a file with the sums and filename inside!")
+                out_error("%s is unreadable, must be a file with the sums and filename inside!" % fname)
                 return False
         else:
-            out_error(f"{fname} do not exits in this dir!")
+            out_error("%s do not exits in this dir!" % fname)
 
 
 class Validate:
@@ -117,9 +117,9 @@ class CheckVars:
         if exists(self.fname) and _hex(self.gsum):
             return True
         elif not exists(self.fname):
-            out_error(f"'{self.fname}' was not found here in this directory!")
+            out_error("'%s' was not found here in this directory!" % self.fname)
         elif not _hex(self.gsum):
-            out_error(f"'{self.gsum}' is not an hexadecimal number!")
+            out_error("'%s' is not an hexadecimal number!" % self.gsum)
 
     # analyze the content of the sum.txt given
     def analyze_text(self):
@@ -135,10 +135,11 @@ class CheckVars:
                             if _hex(givensum):
                                 file_base[filename] = givensum
                             else:
-                                out_error(f"irregularity in the line {l} of '{self.fname}', " +
-                                             f"sum must be an hexadecimal value!")
+                                out_error("irregularity in the line %s of '%s', " %l %self.fname  +
+                                "sum must be an hexadecimal value!")
                     except ValueError:
-                        out_error(f"'{self.fname}' must have the file sum and the file name in each line!\nIrregularity in line {line}.")
+                        out_error("'%s' must have the file sum and the file name in each" % self.fname +
+                        "line!\nIrregularity in line %s." %l)
 
                     unfounded = []
                     found = []
@@ -154,7 +155,7 @@ class CheckVars:
 
                     return found, unfounded
             except FileNotFoundError:
-                out_error(f"'{self.fname}' was not found!")
+                out_error("'%s' was not found!" % self.fname)
 
 
 # this is used in the function below to gen data
@@ -243,13 +244,13 @@ class Process:
     def allsums(self):
         if exists(self.fname):
             self.make.all_sums()
-            print(f"\nAll '{self.fname}' sums below: ")
+            print("\nAll '%s' sums below: " % self.fname)
             for item in hlist['type']:
                 index = hlist['type'].index(item)
                 filesum = hlist['hash'][index].hexdigest()
                 print(" -> %ssum: %s" % item % filesum)
         else:
-            out_error(f"'{self.fname}' was not found!")
+            out_error("'%s' was not found!" % self.fname)
 
     # if we want only show the sum and no to compare it
     def only_sum(self):
@@ -257,15 +258,11 @@ class Process:
             self.make.read()
             index = hlist['type'].index(self.stype)
             filesum = hlist['hash'][index].hexdigest()
-            print(f"'{self.fname}' {self.stype}sum is: {filesum}")
+            print("'%s' %ssum is: %s" % self.fname % self.stype % filesum)
         else:
-            out_error(f"'{self.fname}' was not found!")
+            out_error("'%s' was not found!" % self.fname)
 
     def verbose(self):
-        op = OutPut(
-            filename=self.fname,
-            sumtype=self.stype,
-            givensum=self.gsum
-        )
+        op = OutPut(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
         op.verbose()
 

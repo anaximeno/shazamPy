@@ -34,7 +34,7 @@ def main():
     parser.add_argument("--verbose", help="Verbose response", action="store_true")
 
     for item in hlist['type']:
-        option.add_argument(f"-{item}", f"--{item}sum", metavar='')  # metavar is empty
+        option.add_argument("-%s" % item, "--%ssum" % item, metavar='')  # metavar is empty
 
     args = parser.parse_args()
 
@@ -79,7 +79,7 @@ def main():
                     procs = Process(filename=fname, givensum=gsum, sumtype=stype)
                     procs.normal()
                 if unfounded:
-                    print(f"The file(s) below was/were not found:")
+                    print("The file(s) below was/were not found:")
                     for unf in unfounded:
                         print("* ", unf)
             else:
