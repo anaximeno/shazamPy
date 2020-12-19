@@ -30,7 +30,7 @@ class OutPut:
         self.gsum = givensum
         self.stype = sumtype
 
-    def out_results(self, sucess):
+    def results(self, sucess):
         if sucess:
             print(
                 clr(f" #SUCCESS, '{self.fname}' {self.stype}sum matched!", "green")
@@ -51,26 +51,13 @@ class OutPut:
 
 
 # check the existence of the file
-def exists(file):
+def exists(fname):
     try:
-        with open(file, 'rb') as target:
+        with open(fname, 'rb') as target:
             if target:
                 return True
     except IOError:
         return False
-	
-
-def is_readable(file):
-    if exists(file):
-        try:
-            with open(file, "rt") as f:
-                f.read(1)
-                return True
-        except UnicodeDecodeError:
-            out_error(f"{file} is unreadable, must be a file with the sums and filename inside!")
-            return False
-    else:
-        out_error(f"{file} do not exits in this dir!")
 
 
 # check if the value is an hexadecimal value
@@ -81,23 +68,41 @@ def _hex(hexa):
     except ValueError:
         return False
 
-    
-def type_of_sum(text):
-    if is_readable(text):
-        text_path = text.split('/')
-        otxt = text_path[len(text_path) -1]
-        name = os.path.splitext(otxt)[0]
-        if name in hlist["type"]:
-            return name
-        elif name in hlist["pluralnames"]:
-            index = hlist["pluralnames"].index(name)
-            return hlist["type"][index]
-        elif name in hlist["othernames"]:
-            index = hlist["othernames"].index(name)
-            return hlist["type"][index]
+
+def is_readable(fname):
+        if exists(fname):
+            try:
+                with open(fname, "rt") as f:
+                    f.read(1)
+                    return True
+            except UnicodeDecodeError:
+                out_error(f"{fname} is unreadable, must be a file with the sums and filename inside!")
+                return False
         else:
-            out_error("'{}' was unrecognized as a supported sum type!".format(name))
-            return False
+            out_error(f"{fname} do not exits in this dir!")
+
+
+class Validate:
+
+    def __init__(self, filename):
+        self.fname = filename
+
+    def sumtype(self):
+        if is_readable(self.fname):
+            text_path = self.fname.split('/')
+            otxt = text_path[len(text_path) -1]
+            name = os.path.splitext(otxt)[0]
+            if name in hlist["type"]:
+                return name
+            elif name in hlist["pluralnames"]:
+                index = hlist["pluralnames"].index(name)
+                return hlist["type"][index]
+            elif name in hlist["othernames"]:
+                index = hlist["othernames"].index(name)
+                return hlist["type"][index]
+            else:
+                out_error("'%s' was not recognized as a supported sum type!" % name)
+                return False
 
         
 class CheckVars:
@@ -105,6 +110,7 @@ class CheckVars:
     def __init__(self, filename, givensum):
         self.fname = filename
         self.gsum = givensum
+        self.validate = Validate(self.fname)
 
     # analyze the existence and the sum conditions
     def analyze_file(self):
@@ -117,43 +123,38 @@ class CheckVars:
 
     # analyze the content of the sum.txt given
     def analyze_text(self):
-        if not type_of_sum(self.fname):
-            return False, False
-        try:
-            file_base = {}
-            with open(self.fname, "rt") as t:
-                try:
-                    line = 0
-                    for l in t:
-                        line += 1
-                        givensum, filename = l.split()
-                        if _hex(givensum):
-                            file_base[filename] = givensum
+        if self.validate.sumtype():
+            try:
+                file_base = {}
+                with open(self.fname, "rt") as t:
+                    try:
+                        l = 0
+                        for line in t:
+                            l += 1
+                            givensum, filename = line.split()
+                            if _hex(givensum):
+                                file_base[filename] = givensum
+                            else:
+                                out_error(f"irregularity in the line {l} of '{self.fname}', " +
+                                             f"sum must be an hexadecimal value!")
+                    except ValueError:
+                        out_error(f"'{self.fname}' must have the file sum and the file name in each line!\nIrregularity in line {line}.")
+
+                    unfounded = []
+                    found = []
+
+                    def find(filename):
+                        if exists(filename):
+                            found.append(tuple(filename, file_base[filename], self.validate.sumtype()))
                         else:
-                            out_error(f"irregularity in the line {line} of '{self.fname}', " +
-                                         f"sum must be an hexadecimal value!")
-                            return False, False
-                except ValueError:
-                    out_error(f"'{self.fname}' must have the file sum and the file name in each line!")
-                    print(f"Irregularity in line {line}")
-                    return False, False
+                            unfounded.append(filename)
 
-                unfounded = []
-                found = []
+                    for item in file_base:
+                        find(item)
 
-                def find(filename):
-                    if exists(filename):
-                        found.append((filename, file_base[filename], type_of_sum(self.fname)))
-                    else:
-                        unfounded.append(filename)
-
-                for item in file_base:
-                    find(item)
-
-                return found, unfounded
-        except FileNotFoundError:
-            out_error(f"'{self.fname}' was not found!")
-            return False, False
+                    return found, unfounded
+            except FileNotFoundError:
+                out_error(f"'{self.fname}' was not found!")
 
 
 # this is used in the function below to gen data
@@ -162,96 +163,86 @@ def gen(dt):
         yield dt
 
 
-# read all sums
-def all_sums(f_name):
-    with alive_bar(len(hlist['type']), bar='blocks', spinner='dots') as bar:
-        for item in hlist['type']:
-            with open(f_name, 'rb') as f:
+class Make:
+
+    def __init__(self, filename, givensum=None, sumtype=None):
+        self.fname = filename
+        self.gsum = givensum
+        self.stype = sumtype
+        self.out = OutPut(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
+
+    # read all sums
+    def all_sums(self):
+        with alive_bar(len(hlist['type']), bar='blocks', spinner='dots') as bar:
+            for item in hlist['type']:
+                with open(self.fname, 'rb') as f:
+                    while True:
+                        try:
+                            file_data = gen(f.read(BUF_SIZE))
+                            index = hlist['type'].index(item)
+                            filesum = hlist['hash'][index]
+                            filesum.update(next(file_data))
+                            # when lower is this value, faster will be the reading,
+                            # but it will increase CPU usage
+                            sleep(0.00001)
+                        except StopIteration:
+                            break
+                bar()
+
+    # read and set the file's sum
+    def read(self):
+        size = os.path.getsize(self.fname)
+        times = 0
+
+        while size > 0:
+            size -= BUF_SIZE
+            times += 1
+
+        with alive_bar(times, bar='filling', spinner='dots') as bar:
+            with open(self.fname, 'rb') as f:
                 while True:
                     try:
                         file_data = gen(f.read(BUF_SIZE))
-                        index = hlist['type'].index(item)
+                        index = hlist['type'].index(self.stype)
                         filesum = hlist['hash'][index]
                         filesum.update(next(file_data))
                         # when lower is this value, faster will be the reading,
                         # but it will increase CPU usage
                         sleep(0.00001)
+                        bar()
                     except StopIteration:
                         break
-            bar()
 
+    # it checks if the file's sum is equal to the given sum
+    def check(self):
+        index = hlist['type'].index(self.stype)
+        filesum = hlist['hash'][index].hexdigest()
 
-# read and set the file's sum
-def readata(filename, sumtype):
-    size = os.path.getsize(filename)
-    times = 0
-
-    while size > 0:
-        size -= BUF_SIZE
-        times += 1
-
-    with alive_bar(times, bar='filling', spinner='dots') as bar:
-        with open(filename, 'rb') as f:
-            while True:
-                try:
-                    file_data = gen(f.read(BUF_SIZE))
-                    index = hlist['type'].index(sumtype)
-                    filesum = hlist['hash'][index]
-                    filesum.update(next(file_data))
-                    # when lower is this value, faster will be the reading,
-                    # but it will increase CPU usage
-                    sleep(0.00001)
-                    bar()
-                except StopIteration:
-                    break
-
-
-# it checks if the file's sum is equal to the given sum
-def check(givensum, sumtype, filename):
-    index = hlist['type'].index(sumtype)
-    filesum = hlist['hash'][index].hexdigest()
-    op = OutPut(
-        filename=filename,
-        sumtype=sumtype,
-        givensum=givensum
-    )
-    if int(filesum, 16) == int(givensum, 16):
-        op.out_results(sucess=True)
-    else:
-        op.out_results(sucess=False)
+        if int(filesum, 16) == int(self.gsum, 16):
+            self.out.results(True)
+        else:
+            self.out.results(False)
 
 
 class Process:
 
     def __init__(self, filename, sumtype=None, givensum=None):
-        self.fname = filename
         self.stype = sumtype
         self.gsum = givensum
+        self.fname = filename
         self.checks = CheckVars(filename=self.fname, givensum=self.gsum)
+        self.make = Make(filename=self.fname, givensum=self.gsum, sumtype=self.stype)
 
     # if we have the file's name and sum
     def normal(self):
         if self.checks.analyze_file():
-            readata(self.fname, self.stype)
-            check(self.gsum, self.stype, self.fname)
-
-    # if the file's name and sum is in a sum.txt file
-    def text(self):
-        found, unfounded = self.checks.analyze_text()
-        if found:
-            fname, gsum, stype = found[0]
-            readata(fname, stype)
-            check(gsum, stype, fname)
-        else:
-            out_error("None of these file(s) was/were found:", exit=False)
-            for unf in unfounded:
-                print("*", unf)
-            sys.exit(1)
+            self.make.read()
+            self.make.check()
 
     # get all sums
     def allsums(self):
         if exists(self.fname):
-            all_sums(self.fname)
+            self.make.all_sums()
             print(f"\nAll '{self.fname}' sums below: ")
             for item in hlist['type']:
                 index = hlist['type'].index(item)
@@ -263,32 +254,12 @@ class Process:
     # if we want only show the sum and no to compare it
     def only_sum(self):
         if exists(self.fname):
-            readata(self.fname, self.stype)
+            self.make.read()
             index = hlist['type'].index(self.stype)
             filesum = hlist['hash'][index].hexdigest()
             print(f"'{self.fname}' {self.stype}sum is: {filesum}")
         else:
             out_error(f"'{self.fname}' was not found!")
-    
-    # TODO: use multi_files funct with recusion on normal funct
-    def multi_files(self):
-        cv = CheckVars(filename=self.fname, givensum=None)
-
-        found, unfounded = cv.analyze_text()
-
-        if found:
-            for i in range(len(found)):
-                f_name, f_sum, s_type = found[i]
-                readata(f_name, s_type)
-                check(f_sum, s_type, f_name)
-            if unfounded:
-                print(f"The file(s) below was/were not found:")
-                for unf in unfounded:
-                    print("->", unf)
-        else:
-            print("None of the file(s) below was/were found:")
-            for unf in unfounded:
-                print("->", unf)
 
     def verbose(self):
         op = OutPut(
@@ -297,3 +268,4 @@ class Process:
             givensum=self.gsum
         )
         op.verbose()
+

@@ -7,9 +7,10 @@ Author: Anaxímeno Brito
 # TODO: put one decorator below (or more)
 # TODO: must check if the imports of all modules are working well, if not, mssss
 
+import sys
 import argparse
 
-from common import Process, hlist, out_error
+from common import Process, hlist, out_error, CheckVars
 
 
 def main():
@@ -39,42 +40,61 @@ def main():
     args = parser.parse_args()
 
     def make_process(givensum, sumtype, filename):
-        prc = Process(
-            filename=filename,
-            sumtype=sumtype,
-            givensum=givensum
-        )
+        procs = Process(filename=filename, sumtype=sumtype, givensum=givensum)
 
         if givensum:
-            prc.normal()
+            procs.normal()
 
             if args.verbose:
-                prc.verbose()
+                procs.verbose()
 
         else:
             print("It will only show the file's %s!" % sumtype)
-            prc.only_sum()
-
-    prc = Process(filename=args.content)
+            procs.only_sum()
 
     if args.version:
         with open("/usr/share/checksum/VERSION", "rt") as f:
             print("Checksum:", str(f.read()))
     elif args.file:
         if args.content:
-            prc.text()
+            checks = CheckVars(filename=args.content, givensum=None)
+            found, unfounded = checks.analyze_text()
+            if found:
+                fname, gsum, stype = found[0]
+                procs = Process(filename=fname, sumtype=stype, givensum=gsum)
+                procs.normal()
+            else:
+                out_error("None of these file(s) was/were found:", exit=False)
+                for unf in unfounded:
+                    print("*", unf)
+                sys.exit(1)
         else:
             parser.error("expected one argument")
     elif args.Files:
         if args.content:
-            prc.multi_files()
+            checks = CheckVars(filename=args.content, givensum=None)
+            found, unfounded = checks.analyze_text()
+            if found:
+                for i in range(len(found)):
+                    fname, gsum, stype = found[i]
+                    procs = Process(filename=fname, givensum=gsum, sumtype=stype)
+                    procs.normal()
+                if unfounded:
+                    print(f"The file(s) below was/were not found:")
+                    for unf in unfounded:
+                        print("* ", unf)
+            else:
+                print("None of the file(s) below was/were found:")
+                for unf in unfounded:
+                    print("* ", unf)
         else:
             parser.error("expected one argument")
     elif args.all:
         if args.content:
-            prc.allsums()
+            procs = Process(args.content)
+            procs.allsums()
         else:
-            parser.error("expected one argument")
+            out_error("expected one argument")
     elif args.md5sum:
         make_process(args.content, "md5", args.md5sum)
     elif args.sha1sum:
@@ -91,13 +111,12 @@ def main():
         want_all = input(f"Do you want to check all '{args.content}' sums? [Y/n]: ")
         if not want_all or want_all.isspace() or want_all.lower() == "yes" or want_all.lower() == "y":
             print("")  # skip one line
-            prc.allsums()
+            procs = Process(args.content)
+            procs.allsums()
         else:
-            print("Aborted!")
-            print("usage: checksum [OPTION] content...")
-            print("or: checksum -h, for more information.")
+            out_error("Aborted!\nusage: checksum [OPTION] content...")
     else:
-        out_error("No options was chosen, try: checksum -h, for more information.")
+        out_error("No options was chosen, \ntry: checksum -h, for more information.")
 
 
 main()
