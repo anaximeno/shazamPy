@@ -1,3 +1,2 @@
 #!/bin/bash
-
-python3 ../lib/shazam/shazam.py $1 $2 $3 $4
+/usr/lib/shazam/shazam.py $1 $2 $3 $4

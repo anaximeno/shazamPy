@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import sys
 import hashlib as hlib
@@ -33,11 +34,11 @@ class OutPut:
     def results(self, sucess):
         if sucess:
             print(
-                clr(" #SUCCESS, '%s' %ssum matched!" % self.fname % self.stype, "green")
+                clr(" #SUCCESS, '%s' %ssum matched!" % (self.fname, self.stype), "green")
             )
         else:
             print(
-                clr(" %%FAIL, '%s' %sum did not match!" % self.fname % self.stype, "red")
+                clr(" %%FAIL, '%s' %sum did not match!" % (self.fname, self.stype), "red")
             )
 
     def verbose(self):
@@ -46,7 +47,7 @@ class OutPut:
 
         print(
             " -> Given sum: %s\n" % self.gsum,
-            "-> '%s' %ssum: %s" % self.fname % self.stype % filesum,
+            "-> '%s' %ssum: %s" % (self.fname, self.stype, filesum),
         )
 
 
@@ -248,7 +249,7 @@ class Process:
             for item in hlist['type']:
                 index = hlist['type'].index(item)
                 filesum = hlist['hash'][index].hexdigest()
-                print(" -> %ssum: %s" % item % filesum)
+                print(" -> %ssum: %s" % (item, filesum))
         else:
             out_error("'%s' was not found!" % self.fname)
 
@@ -258,7 +259,7 @@ class Process:
             self.make.read()
             index = hlist['type'].index(self.stype)
             filesum = hlist['hash'][index].hexdigest()
-            print("'%s' %ssum is: %s" % self.fname % self.stype % filesum)
+            print("'%s' %ssum is: %s" % (self.fname, self.stype, filesum))
         else:
             out_error("'%s' was not found!" % self.fname)
 

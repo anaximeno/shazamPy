@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 ''' shazam 2020.1
 Calculates the file sum and compares it with an given sum
 Author: Anaxímeno Brito
