@@ -15,7 +15,7 @@ You can use it as below:
   > shazam *-sha1* "*file_name*" "*given_sum*"
 
 **OBS:** If you have a file with the hashes inside you can check it by using a short command.
-For more option after install it try: checksum -h/--help
+For more option after install it try: shazam -h/--help
   
 Types of hash that you can currently use:
 
