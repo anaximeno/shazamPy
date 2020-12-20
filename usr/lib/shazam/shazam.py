@@ -1,38 +1,121 @@
 #!/usr/bin/python3
-# TODO: put one decorator below (or more)
 # TODO: must check if the imports of all modules are working well, if not, mssss
 
 import sys
 import argparse
 
-from common import Process, hlist, out_error, CheckVars
+from common import Process, CheckVars, out_error, hlist
 
 
+parser = argparse.ArgumentParser(
+	description="Check and Compare the sums.",
+	usage="shazam [OPTION] content...",
+	epilog="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
+)
+
+option = parser.add_mutually_exclusive_group()
+
+option.add_argument("-f", "--file",
+					help="Check the sum of only one file which have the name and sum wrote in the file.")
+
+option.add_argument("-F", "--Files",
+					help="Check the sum of all files which have the name and sum wrote in the file.")
+
+option.add_argument("-A", "--all", help="Print all the file's sums.")
+
+option.add_argument(
+    "-v", "--version", help="Print the current version of this app.", action="store_true")
+
+option.add_argument(
+    "content", help="file name or sum depending of the choice", nargs='?', default=None)
+
+parser.add_argument("--verbose", help="Verbose response", action="store_true")
+
+for item in hlist['type']:
+	option.add_argument("-%s" % item, help="to compare the file's hash",
+	                    metavar='', nargs=2)  # metavar is empty
+	option.add_argument("--%ssum" % item,
+						metavar='', help="to get the file's hash")
+
+
+# TODO: Ainda falta fazer o processamento na classe para versão e verbose e none opt
+
+class MainFlow:
+
+	def __init__(self, args):
+		self.args = args
+
+		self.stype = None
+		self.fname = None
+		self.gsum = None
+
+		simple_options = {
+			"options": [args.md5, args.sha1, args.sha256, args.sha384, args.sha512],
+			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
+
+		}
+
+		only_options = {
+			"options": [args.md5sum, args.sha1sum, args.sha256sum, args.sha384sum, args.sha512sum],
+			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
+
+		}
+
+		for opt in simple_options["options"]:
+			if opt and len(opt) == 2:
+				self.fname, self.gsum = opt
+				index = simple_options["options"].index(opt)
+				self.stype = simple_options["sumtype"][index]
+			# TODO: put an else error here
+
+
+		if not self.fname:
+			for opt in only_options["options"]:
+				if opt:
+					self.fname = opt
+					index = only_options["options"].index(opt)
+					self.stype = only_options["sumtype"][index]
+					self.gsum = None
+
+			if args.file:
+				checkv = CheckVars(filename=args.file, givensum=None)
+				found, unfounded = checkv.analyze_text()
+				if found:
+					self.fname, self.gsum, self.stype = found[0]
+				else:
+					out_error("None of these file(s) was/were found:", exit=False)
+					for unf in unfounded:
+						print("*", unf)
+					sys.exit(1)
+
+			elif args.Files:
+				self.fname = args.Files
+
+			elif args.all:
+				self.fname = args.all
+
+			elif args.content:
+				self.fname = args.content
+
+		self.process = Process(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
+		
+	def make_process(self):
+		if (self.fname and self.stype and self.gsum) or self.args.file:
+			self.process.normal()
+		elif self.fname and self.stype:
+			self.process.only_sum()
+		elif self.args.Files:
+			self.process.multifiles()
+		elif self.args.all or self.args.content:
+			self.process.allsums()
+
+
+if __name__ == '__main__':
+	mf = MainFlow(parser.parse_args())
+	mf.make_process()
+
+'''	*Superposition*
 def main():
-    parser = argparse.ArgumentParser(
-        description="Check and Compare the sums.",
-        usage="shazam [OPTION] content...",
-        epilog="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
-    )
-
-    option = parser.add_mutually_exclusive_group()
-    option.add_argument("-f", "--file",
-                        help="Check the sum of only one file which have the name and sum wrote in the file.",
-                        action="store_true")
-    option.add_argument("-F", "--Files",
-                        help="Check the sum of all files which have the name and sum wrote in the file.",
-                        action="store_true")
-    option.add_argument("-A", "--all", help="Print all the file's sums.",
-                        action="store_true")
-    option.add_argument("-v", "--version", help="Print the current version of this app.", action="store_true")
-
-    parser.add_argument("content", help="file name or sum depending of the choice", nargs='?', default=None)
-    parser.add_argument("--verbose", help="Verbose response", action="store_true")
-
-    for item in hlist['type']:
-        option.add_argument("-%s" % item, "--%ssum" % item, metavar='')  # metavar is empty
-
-    args = parser.parse_args()
 
     def make_process(givensum, sumtype, filename):
         procs = Process(filename=filename, sumtype=sumtype, givensum=givensum)
@@ -115,3 +198,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''
