@@ -22,7 +22,9 @@ def out_error(err, exit=True):
     print("shazam: error:", err)
     if exit:
         sys.exit(1)
-  class OutPut:
+
+
+class OutPut:
 
     def __init__(self, filename=None, givensum=None, sumtype=None):
         self.fname = filename
@@ -32,11 +34,13 @@ def out_error(err, exit=True):
     def results(self, sucess):
         if sucess:
             print(
-                clr(" #SUCCESS, '%s' %ssum matched!" % (self.fname, self.stype), "green")
+                clr(" #SUCCESS, '%s' %ssum matched!" %
+                    (self.fname, self.stype), "green")
             )
         else:
             print(
-                clr(" %%FAIL, '%s' %sum did not match!" % (self.fname, self.stype), "red")
+                clr(" %%FAIL, '%s' %ssum did not match!" %
+                    (self.fname, self.stype), "red")
             )
 
     def verbose(self):
@@ -69,16 +73,17 @@ def _hex(hexa):
 
 
 def is_readable(fname):
-        if exists(fname):
-            try:
-                with open(fname, "rt") as f:
-                    f.read(1)
-                    return True
-            except UnicodeDecodeError:
-                out_error("%s is unreadable, must be a file with the sums and filename inside!" % fname)
-                return False
-        else:
-            out_error("%s do not exits in this dir!" % fname)
+    if exists(fname):
+        try:
+            with open(fname, "rt") as f:
+                f.read(1)
+                return True
+        except UnicodeDecodeError:
+            out_error(
+                "%s is unreadable, must be a file with the sums and filename inside!" % fname)
+            return False
+    else:
+        out_error("%s do not exits in this dir!" % fname)
 
 
 class Validate:
@@ -100,7 +105,8 @@ class Validate:
                 index = hlist["othernames"].index(name)
                 return hlist["type"][index]
             else:
-                out_error("'%s' was not recognized as a supported sum type!" % name)
+                out_error(
+                    "'%s' was not recognized as a supported sum type!" % name)
                 return False
 
 
@@ -116,7 +122,8 @@ class CheckVars:
         if exists(self.fname) and _hex(self.gsum):
             return True
         elif not exists(self.fname):
-            out_error("'%s' was not found here in this directory!" % self.fname)
+            out_error("'%s' was not found here in this directory!" %
+                      self.fname)
         elif not _hex(self.gsum):
             out_error("'%s' is not an hexadecimal number!" % self.gsum)
 
@@ -134,18 +141,19 @@ class CheckVars:
                             if _hex(givensum):
                                 file_base[filename] = givensum
                             else:
-                                out_error("irregularity in the line %s of '%s', " %l %self.fname  +
-                                "sum must be an hexadecimal value!")
+                                out_error("irregularity in the line %s of '%s', " % l % self.fname +
+                                          "sum must be an hexadecimal value!")
                     except ValueError:
                         out_error("'%s' must have the file sum and the file name in each" % self.fname +
-                        "line!\nIrregularity in line %s." %l)
+                                  "line!\nIrregularity in line %s." % l)
 
                     unfounded = []
                     found = []
 
                     def find(filename):
                         if exists(filename):
-                            found.append((filename, file_base[filename], self.validate.sumtype()))
+                            found.append(
+                                (filename, file_base[filename], self.validate.sumtype()))
                         else:
                             unfounded.append(filename)
 
@@ -169,7 +177,8 @@ class Make:
         self.fname = filename
         self.gsum = givensum
         self.stype = sumtype
-        self.out = OutPut(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
+        self.out = OutPut(filename=self.fname,
+                          sumtype=self.stype, givensum=self.gsum)
 
     # read all sums
     def all_sums(self):
@@ -182,8 +191,8 @@ class Make:
                             index = hlist['type'].index(item)
                             filesum = hlist['hash'][index]
                             filesum.update(next(file_data))
-                            # when lower is this value, faster will be the reading,
-                            # but it will increase CPU usage
+                            # when lower is the sleep value, faster will be the reading,
+                            # but it will increase the CPU usage
                             sleep(0.00001)
                         except StopIteration:
                             break
@@ -206,8 +215,8 @@ class Make:
                         index = hlist['type'].index(self.stype)
                         filesum = hlist['hash'][index]
                         filesum.update(next(file_data))
-                        # when lower is this value, faster will be the reading,
-                        # but it will increase CPU usage
+                        # when lower is the sleep value, faster will be the reading,
+                        # but it will increase the CPU usage
                         sleep(0.00001)
                         bar()
                     except StopIteration:
@@ -231,13 +240,34 @@ class Process:
         self.gsum = givensum
         self.fname = filename
         self.checks = CheckVars(filename=self.fname, givensum=self.gsum)
-        self.make = Make(filename=self.fname, givensum=self.gsum, sumtype=self.stype)
+        self.make = Make(filename=self.fname,
+                         givensum=self.gsum, sumtype=self.stype)
 
     # if we have the file's name and sum
     def normal(self):
         if self.checks.analyze_file():
             self.make.read()
             self.make.check()
+
+    # TODO: handle when check multifiles's sum, need to eliminate the shadows of the privious check
+    def multifiles(self):
+        checks = CheckVars(filename=self.fname, givensum=None)
+        found, unfounded = checks.analyze_text()
+        if found:
+            for ifound in found:
+                fname, gsum, stype = ifound
+                procs = Process(filename=fname, givensum=gsum, sumtype=stype)
+
+                procs.normal()
+
+                if unfounded:
+                    print("The file(s) below was/were not found:")
+                    for unf in unfounded:
+                        print("* ", unf)
+        else:
+            print("None of the file(s) below was/were found:")
+            for unf in unfounded:
+                print("* ", unf)
 
     # get all sums
     def allsums(self):
@@ -262,6 +292,6 @@ class Process:
             out_error("'%s' was not found!" % self.fname)
 
     def verbose(self):
-        op = OutPut(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
+        op = OutPut(filename=self.fname,
+                    sumtype=self.stype, givensum=self.gsum)
         op.verbose()
-
