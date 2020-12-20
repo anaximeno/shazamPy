@@ -57,32 +57,30 @@ class MainFlow:
 		self.fname = None
 		self.gsum = None
 
-		simple_options = {
+		simple = {
 			"options": [args.md5, args.sha1, args.sha256, args.sha384, args.sha512],
 			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
 
 		}
 
-		only_options = {
+		only_one = {
 			"options": [args.md5sum, args.sha1sum, args.sha256sum, args.sha384sum, args.sha512sum],
 			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
 
 		}
 
-		for opt in simple_options["options"]:
-			if opt and len(opt) == 2:
+		for opt in simple["options"]:
+			if opt:
 				self.fname, self.gsum = opt
-				index = simple_options["options"].index(opt)
-				self.stype = simple_options["sumtype"][index]
-			# TODO: put an else error here
-
+				index = simple["options"].index(opt)
+				self.stype = simple["sumtype"][index]
 
 		if not self.fname:
-			for opt in only_options["options"]:
+			for opt in only_one["options"]:
 				if opt:
 					self.fname = opt
-					index = only_options["options"].index(opt)
-					self.stype = only_options["sumtype"][index]
+					index = only_one["options"].index(opt)
+					self.stype = only_one["sumtype"][index]
 					self.gsum = None
 
 			if args.file:
@@ -118,7 +116,7 @@ class MainFlow:
 			self.process.allsums()
 		elif self.args.version:
 			with open("/usr/share/shazam/VERSION", "rt") as ver:
-				print("ShaZam", str(ver.read()))
+				print( "ShaZam", str(ver.read()) )
 
 if __name__ == '__main__':
 	if len(sys.argv) > 1:
