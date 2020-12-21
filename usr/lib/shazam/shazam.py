@@ -17,7 +17,7 @@ hlist = {
 parser = argparse.ArgumentParser(
 	description="Check and Compare the sums.",
 	usage="shazam [OPTION] content...",
-	epilog="Author: Anaximeno Brito, <anaximenobrito@gmail.com>"
+	epilog="Author: Anaxímeno Brito, <anaximenobrito@gmail.com>"
 )
 
 option = parser.add_mutually_exclusive_group()
@@ -47,7 +47,7 @@ for item in hlist['type']:
 
 # TODO: Ainda falta fazer o processamento na classe para verbose
 # TODO: Quando for do tipo ler arquivo de txt e fazer para um só arquivo, 
-# precisa tentar todo os nomes dentro e procurar o que funciona
+# precisa tentar todo os nomes dentro e procurar o que funciona, ou fazer isso o processo normal
 class MainFlow:
 
 	def __init__(self, args):
@@ -58,13 +58,13 @@ class MainFlow:
 		self.gsum = None
 
 		simple = {
-			"options": [args.md5, args.sha1, args.sha256, args.sha384, args.sha512],
+			"options": [args.md5, args.sha1, args.224, args.sha256, args.sha384, args.sha512],
 			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
 
 		}
 
 		only_one = {
-			"options": [args.md5sum, args.sha1sum, args.sha256sum, args.sha384sum, args.sha512sum],
+			"options": [args.md5sum, args.sha1sum, args.224, args.sha256sum, args.sha384sum, args.sha512sum],
 			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
 
 		}
@@ -124,5 +124,5 @@ if __name__ == '__main__':
 		mf.make_process()
 	else:
 		print("Usage: shazam [Option] ARGUMENTS..")
-		print("       shazam --help			display the help section and exit")
-		print("       shazam --version		display the Version information and exit")
+		print("       shazam --help	        display the help section and exit")
+		print("       shazam --version      display the Version information and exit")
