@@ -58,13 +58,13 @@ class MainFlow:
 		self.gsum = None
 
 		simple = {
-			"options": [args.md5, args.sha1, args.224, args.sha256, args.sha384, args.sha512],
+			"options": [args.md5, args.sha1, args.sha224, args.sha256, args.sha384, args.sha512],
 			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
 
 		}
 
 		only_one = {
-			"options": [args.md5sum, args.sha1sum, args.224, args.sha256sum, args.sha384sum, args.sha512sum],
+			"options": [args.md5sum, args.sha1sum, args.sha224sum, args.sha256sum, args.sha384sum, args.sha512sum],
 			"sumtype": ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"],
 
 		}
