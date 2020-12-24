@@ -115,7 +115,7 @@ class CheckVars:
 		if exists(self.fname) and _hex(self.gsum):
 			return True
 		elif not exists(self.fname):
-			out_error("'%s' was not found here in this directory!" %
+			out_error("'%s' was not found!" %
 					self.fname)
 		elif not _hex(self.gsum):
 			out_error("'%s' is not an hexadecimal number!" % self.gsum)

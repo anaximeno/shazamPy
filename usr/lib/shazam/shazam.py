@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-# TODO: must check if the imports of all modules are working well, if not, mssss
 
+# TODO: must check if the imports of all modules are working well, if not, mssss
 import sys
 import hashlib as hlib
 import argparse
@@ -82,26 +82,27 @@ class MainFlow:
 					index = only_one["options"].index(opt)
 					self.stype = only_one["sumtype"][index]
 					self.gsum = None
+					
+			if not self.fname:
+				if args.file:
+					checkv = CheckVars(filename=args.file, givensum=None, hashlist=hlist)
+					found, unfounded = checkv.analyze_text()
+					if found:
+						self.fname, self.gsum, self.stype = found[0]
+					else:
+						out_error("None of these file(s) was/were found:", exit=False)
+						for unf in unfounded:
+							print("*", unf)
+						sys.exit(1)
 
-			if args.file:
-				checkv = CheckVars(filename=args.file, givensum=None, hashlist=hlist)
-				found, unfounded = checkv.analyze_text()
-				if found:
-					self.fname, self.gsum, self.stype = found[0]
-				else:
-					out_error("None of these file(s) was/were found:", exit=False)
-					for unf in unfounded:
-						print("*", unf)
-					sys.exit(1)
+				elif args.Files:
+					self.fname = args.Files
 
-			elif args.Files:
-				self.fname = args.Files
+				elif args.all:
+					self.fname = args.all
 
-			elif args.all:
-				self.fname = args.all
-
-			elif args.content:
-				self.fname = args.content
+				elif args.content:
+					self.fname = args.content
 
 		self.process = Process(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
 		
