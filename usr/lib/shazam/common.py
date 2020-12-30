@@ -202,8 +202,11 @@ class Process:
 		}
 
 		self.checkv = CheckVars(filename=self.filename, givensum=self.givensum)
-		self.make = Make(filename=self.filename, hashlist=self.hlist,
-						givensum=self.givensum, sumtype=self.sumtype)
+		if exists(filename):
+			self.make = Make(filename=self.filename, hashlist=self.hlist,
+							givensum=self.givensum, sumtype=self.sumtype)
+		else:
+			out_error(f"'{self.filename}' was not found!")
 
 	# if we have the file's name and sum
 	def normal(self):
@@ -228,14 +231,11 @@ class Process:
 
 	# get all sums
 	def allsums(self):
-		if exists(self.filename):
-			for sumtype in self.hlist.keys():
-				self.make.read(sumtype)
+		for sumtype in self.hlist.keys():
+			self.make.read(sumtype)
 
-			for sumtype, fsum in self.hlist.items():
-				print(f"{sumtype}sum: {fsum.hexdigest()} {self.filename}")
-		else:
-			out_error(f"'{self.filename}' was not found!")
+		for sumtype, fsum in self.hlist.items():
+			print(f"{sumtype}sum: {fsum.hexdigest()} {self.filename}")
 
 	# if we want only show the sum and no to compare it
 	def only_sum(self):
