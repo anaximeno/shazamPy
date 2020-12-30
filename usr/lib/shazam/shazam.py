@@ -77,7 +77,7 @@ class MainFlow:
 				print("This/these file(s) wasn't/weren't found:")
 				for f in unfound:
 					print("* ", f)
-				sys.exit(1)
+				sys.exit(0)
 
 		elif args.Files:
 			self.fname = args.Files
@@ -87,6 +87,7 @@ class MainFlow:
 
 		elif args.content:
 			self.fname = args.content
+
 		else:
 			for stype, opt in options.items():
 				if opt[0]:
@@ -102,8 +103,9 @@ class MainFlow:
 					self.stype = stype
 					self.gsum = None
 					break
-
-		self.process = Process(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
+		
+		if self.fname:
+			self.process = Process(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
 		
 	def make_process(self):
 		if self.fname and self.stype and self.gsum or self.args.file:
