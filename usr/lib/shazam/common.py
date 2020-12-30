@@ -27,11 +27,11 @@ class OutPut:
 	def results(self, sucess):
 		if sucess:
 			print(
-				clr(f"# '{self.filename}' {self.sumtype}sum is ok!", "green")
+				clr(f"# {self.filename}: {self.sumtype}sum is ok!\n", "green")
 			)
 		else:
 			print(
-				clr(f"# '{self.filename}' {self.sumtype}sum is not the same as the given!", "red")
+				clr(f"# {self.filename}: {self.sumtype}sum is not the same as the given!\n", "red")
 			)
 
 	def verbose(self, hashlist):
@@ -156,7 +156,7 @@ def gen_data(f):
 				yield file_data
 				# when lower is the sleep value, faster will be the reading,
 				# but it will increase the CPU usage
-				sleep(0.000001)
+				sleep(0.00001)
 				i += 1
 				bar()
 
@@ -168,13 +168,12 @@ class Make:
 		self.givensum = givensum
 		self.sumtype = sumtype
 		self.hlist = hashlist
-		self.generated_data = list(gen_data(filename))
 		self.out = OutPut(filename=filename, sumtype=sumtype, 
 						givensum=givensum)
 
 	# read and set the file's sum
-	def read(self, sumtype):
-		for file_data in self.generated_data:
+	def read(self, sumtype, generated_data):
+		for file_data in generated_data:
 			self.hlist[sumtype].update(file_data)
 
 	# it checkv if the file's sum is equal to the given sum
@@ -211,7 +210,8 @@ class Process:
 	# if we have the file's name and sum
 	def normal(self):
 		if self.checkv.analyze_content():
-			self.make.read(self.sumtype)
+			
+			self.make.read(self.sumtype, gen_data(self.filename))
 			self.make.check()
 
 	# TODO: handle when check multifiles's sum, need to eliminate the shadows of the privious check
@@ -227,12 +227,17 @@ class Process:
 		print("\nThis/these file(s) wasn't/weren't found:")
 		for f in unfound:
 			print("* ", f)
-		print('\n** If nothing appears, it means all files were found!')
+		print('\n** If nothing appears, it means all files were found! **')
 
 	# get all sums
 	def allsums(self):
-		for sumtype in self.hlist.keys():
-			self.make.read(sumtype)
+		print("Calculating sum...")
+		generated_data = list(gen_data(self.filename))
+		with alive_bar(len(self.hlist.keys()), spinner='waves') as bar:
+			print("Getting hashes...")
+			for sumtype in self.hlist.keys():
+				self.make.read(sumtype, generated_data)
+				bar()
 
 		for sumtype, fsum in self.hlist.items():
 			print(f"{sumtype}sum: {fsum.hexdigest()} {self.filename}")
@@ -240,7 +245,7 @@ class Process:
 	# if we want only show the sum and no to compare it
 	def only_sum(self):
 		if exists(self.filename):
-			self.make.read(self.sumtype)
+			self.make.read(self.sumtype, gen_data(self.filename))
 
 			print(f"\n{self.hlist[self.sumtype].hexdigest()} {self.filename}")
 		else:

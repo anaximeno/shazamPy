@@ -17,22 +17,22 @@ hlist = {
 }
 
 parser = argparse.ArgumentParser(
-	description="Check and Compare the sums.",
+	description="Checks and Compare the sums.",
 	usage="shazam [OPTION] content..."
 )
 
 option = parser.add_mutually_exclusive_group()
 
 option.add_argument("-f", "--file", metavar='',
-					help="Check the sum of only one file which have the name and sum wrote in the file.")
+					help="Checks the sum of only one file written in the text file.")
 
 option.add_argument("-F", "--Files", metavar='',
-					help="Check the sum of all files which have the name and sum wrote in the file.")
+					help="Checks the sum of all files written  in the text file.")
 
 option.add_argument("-a", "--all", help="Print all the file's sums.", metavar='')
 
 option.add_argument(
-	"-v", "--version", help="Print the current version of this app.", action="store_true")
+	"-v", "--version", help="Print the current version of this program.", action="store_true")
 
 option.add_argument(
 	"content", help="file name or sum depending of the choice", nargs='?', default=None)
@@ -40,10 +40,10 @@ option.add_argument(
 parser.add_argument("--verbose", help="Verbose response", action="store_true")
 
 for item in hlist.keys():
-	option.add_argument("-%s" % item, help="to compare the file's hash",
+	option.add_argument("-%s" % item, help="for comparing the file's hash",
 						metavar='', nargs=2)  # metavar is empty
 	option.add_argument("--%ssum" % item,
-						metavar='', help="to get the file's hash")
+						metavar='', help="for just getting the file's hash")
 
 
 # TODO: Ainda falta fazer o processo para verbose
@@ -74,9 +74,9 @@ class MainFlow:
 			if found:
 				self.fname, self.gsum, self.stype = found[0]
 			else:
-				out_error("This/these file(s) wasn't/weren't found:", exit=False)
+				print("This/these file(s) wasn't/weren't found:")
 				for f in unfound:
-					print("*", f)
+					print("* ", f)
 				sys.exit(1)
 
 		elif args.Files:
