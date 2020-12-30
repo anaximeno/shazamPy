@@ -37,7 +37,7 @@ class OutPut(object):
 	def verbose(self, hashlist):
 		print(
 			f" -> Given sum: {self.givensum}\n",
-			f"-> '{self.filename}' {self.sumtype}sum: {hashlist[self.sumtype].hexdigest()}"
+			f" -> '{self.filename}': {self.sumtype}sum: {hashlist[self.sumtype].hexdigest()}"
 		)
 
 
@@ -76,9 +76,10 @@ def readable(filename):
 	else:
 		out_error(f"{filename} do not exits in this dir!")
 
+
 def get_sumtype(filename, hlist):
 	if readable(filename):
-		# The reverse here is proposal
+		# The reverse below is proposal
 		for sumtype in list(hlist.keys())[::-1]:
 			if sumtype in filename:
 				return sumtype

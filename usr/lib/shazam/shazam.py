@@ -92,10 +92,12 @@ class MainFlow:
 			for stype, opt in options.items():
 				if opt[0]:
 					# TODO: pass the expression below to a function, to be used when reading txt files
-					if not _hex(opt[0][0]):	
+					if _hex(opt[0][1]):
 						self.fname, self.gsum = opt[0]
-					else:
+					elif _hex(opt[0][0]):
 						self.gsum, self.fname = opt[0]			
+					else:
+						out_error("file sum was not recognized")
 					self.stype = stype
 					break
 				elif opt[1]:
@@ -107,7 +109,7 @@ class MainFlow:
 		if self.fname:
 			self.process = Process(filename=self.fname, sumtype=self.stype, givensum=self.gsum)
 		
-	def make_process(self):
+	def make_process(self): # TODO: args.file: must find search for all the files until find one Sucess case
 		if self.fname and self.stype and self.gsum or self.args.file:
 			self.process.normal()
 		elif self.fname and self.stype:
