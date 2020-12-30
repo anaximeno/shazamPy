@@ -17,8 +17,8 @@ def out_error(err, exit=True):
 		sys.exit(1)
 
 
-class OutPut:
-
+class OutPut(object):
+	__slots__ = ['filename', 'givensum', 'sumtype']
 	def __init__(self, filename, givensum, sumtype):
 		self.filename = filename
 		self.givensum = givensum
@@ -87,8 +87,8 @@ def get_sumtype(filename, hlist):
 		return False
 
 
-class CheckVars():
-
+class CheckVars(object):
+	__slots__ = ['filename', 'givensum']
 	def __init__(self, filename, givensum):
 		self.filename = filename
 		self.givensum = givensum
@@ -137,9 +137,8 @@ class CheckVars():
 				out_error(f"'{self.filename}' was not found!")
 
 
-def gen_data(f):
+def generate_data(f):
 	size = os.path.getsize(f)
-	i = 0
 
 	if size < BUF_SIZE:
 		times = 1
@@ -151,17 +150,16 @@ def gen_data(f):
 
 	with alive_bar(times, bar='blocks', spinner='dots') as bar:
 		with open(f, 'rb') as f:
-			while i < times:
+			for _ in range(times):
 				file_data = f.read(BUF_SIZE)	
 				yield file_data
 				# when lower is the sleep value, faster will be the reading,
 				# but it will increase the CPU usage
 				sleep(0.00001)
-				i += 1
 				bar()
 
 
-class Make:
+class Make(object):
 
 	def __init__(self, filename, hashlist, givensum=None, sumtype=None):
 		self.filename = filename
@@ -184,12 +182,13 @@ class Make:
 			self.out.results(False)
 
 
-class Process:
+class Process(object):
 
 	def __init__(self, filename, sumtype=None, givensum=None):
 		self.sumtype = sumtype
 		self.givensum = givensum
 		self.filename = filename
+		self.gen_data = generate_data
 
 		self.hlist = {
 			"md5": hlib.md5(),
@@ -211,7 +210,7 @@ class Process:
 	def normal(self):
 		if self.checkv.analyze_content():
 			
-			self.make.read(self.sumtype, gen_data(self.filename))
+			self.make.read(self.sumtype, self.gen_data(self.filename))
 			self.make.check()
 
 	# TODO: handle when check multifiles's sum, need to eliminate the shadows of the privious check
@@ -232,7 +231,7 @@ class Process:
 	# get all sums
 	def allsums(self):
 		print("Calculating sum...")
-		generated_data = list(gen_data(self.filename))
+		generated_data = list(self.gen_data(self.filename))
 		with alive_bar(len(self.hlist.keys()), spinner='waves') as bar:
 			print("Getting hashes...")
 			for sumtype in self.hlist.keys():
@@ -245,7 +244,7 @@ class Process:
 	# if we want only show the sum and no to compare it
 	def only_sum(self):
 		if exists(self.filename):
-			self.make.read(self.sumtype, gen_data(self.filename))
+			self.make.read(self.sumtype, self.gen_data(self.filename))
 
 			print(f"\n{self.hlist[self.sumtype].hexdigest()} {self.filename}")
 		else:
