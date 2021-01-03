@@ -6,149 +6,114 @@ import hashlib as hlib
 from time import sleep
 from alive_progress import alive_bar
 
-
-def out_error(err, exit=True):
-	if exit:
-		sys.exit("ShaZam: ERROR: %s" % err)
-	else:
-		print("ShaZam: ERROR: %s" % err)
-
-
 try:
 	from termcolor import colored as clr
 except ImportError:
-	out_error("Important Module is not installed yet: alive_progress, termcolor\n\
-		Install it with: pip/pip3 termcolor")
-
-# don't ever change this number
-BUF_SIZE = 32768
+	sys.exit("Important Module is not installed yet: termcolor\n\
+		Install it with: pip/pip3 install termcolor")
 
 
-def results(filename, sumtype, sucess):
-	if sucess:
-		print(clr(f"# {filename}: {sumtype}sum is ok!\n", "green"))
-	else:
-		print(clr(f"# {filename}: {sumtype}sum is not the same as the given!\n", "red"))
+class Out:
+	def __init__(self, filename, sumtype):
+		self.fname, self.stype = filename, sumtype
+		
+	@staticmethod
+	def error(err, exit=True):
+		if exit:
+			sys.exit("ShaZam: ERROR: %s" % err)
+		else:
+			print("ShaZam: ERROR: %s" % err)
+
+	def results(self, sucess):
+		if sucess:
+			print(clr(f"# {self.fname}: {self.stype}sum is ok!\n", "green"))
+		else:
+			print(clr(f"# {self.fname}: {self.stype}sum is not the same as the given!\n", "red"))
 
 
-# check the existence of the file
-def exists(filename):
-	folder = os.listdir()
-	if filename in folder:
-		return True
-	else:
+class Analyze:
+	sumtypes_list = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
+
+	@staticmethod
+	def is_hex(hexa):
 		try:
-			with open(filename, 'rb') as target:
-				if target:
-					return True
-		except IOError:
-			return False
-
-
-# check if the value is an hexadecimal value
-def _hex(hexa):
-	try:
-		int(hexa, 16)
-		return True
-	except ValueError:
-		return False
-
-
-def readable(filename):
-	if exists(filename):
-		try:
-			with open(filename, "rt") as f:
-				f.read(1)
-				return True
-		except UnicodeDecodeError:
-			out_error(f"File is unreadable: {filename!r}")
-			return False
-	else:
-		out_error(f"File not found: {filename!r}")
-
-
-def get_sumtype(filename, hlist):
-	if readable(filename):
-		# The reverse below is proposal
-		for sumtype in list(hlist.keys())[::-1]:
-			if sumtype in filename:
-				return sumtype
-
-		out_error("Sumtype was not recognized: {filename}")
-		return False
-
-
-class CheckVars(object):
-	__slots__ = ['filename', 'givensum']
-
-	def __init__(self, filename, givensum):
-		self.filename = filename
-		self.givensum = givensum
-
-	# analyze the existence and the sum conditions
-	def analyze_content(self):
-		if exists(self.filename) and _hex(self.givensum):
+			int(hexa, 16)
 			return True
-		elif not exists(self.filename):
-			out_error(f"File not found: {self.filename!r}")
-		elif not _hex(self.givensum):
-			out_error(f"File sum not hexadecimal value: {self.givensum}")
+		except ValueError:
+			return False
 
-	# analyze the content of the sum.txt given
-	def analyze_text(self, hashlist):
-		sumtype = get_sumtype(self.filename, hashlist)
-		if sumtype:
+	@staticmethod
+	def existence(filename):
+		folder = os.listdir()
+		if filename in folder:
+			return True
+		else:
 			try:
-				file_base = {}
-				with open(self.filename, "rt") as t:
-					try:
-						l = 0
-						for line in t:
-							l += 1
-							givensum, filename = line.split()
+				with open(filename, 'rb') as target:
+					if target:
+						return True
+			except IOError:
+				return False
 
-							if '*' == filename[0] and not exists(filename[0]):
-								filename = filename[1:]
-							else:
-								pass
-							# TODO: must check if the first part is hex and the second part exists or vice
-							if _hex(givensum):
-								file_base[filename] = givensum
-							else:
-								out_error(f"File sum not hexadecimal value: irregularity in the line {l}")
-					except ValueError:
-						out_error(f"Read error: must have the sum of the file and the file name respectively on each line\n\
-						Irregularity in line {l}.")
+	@classmethod
+	def is_readable(cls, filename):
+		if cls.existence(filename):
+			try:
+				with open(filename, "rt") as f:
+					f.read(1)
+					return True
+			except UnicodeDecodeError:
+				Out.error(f"File is unreadable: {filename!r}")
+				return False
+		else:
+			Out.error(f"File not found: {filename!r}")
 
-					found = ((item, file_base[item], sumtype) for item in file_base if exists(item))
-					unfound = (item for item in file_base if not exists(item))
+	@classmethod
+	def sumtype(cls, filename):
+		if cls.is_readable(filename):
+			for stype in cls.sumtypes_list[::-1]:
+				if stype in filename:
+					return stype
+			Out.error(f"Sumtype not recognized in: {filename}")
 
-					return found, unfound
-			except FileNotFoundError:
-				out_error(f"File not found: {self.filename!r}")
+	@classmethod
+	def text_content(cls, filename):
+		if cls.existence(filename) is True:
+			content = {}
+			with open(filename, "rt") as t:
+				try:
+					for line in t:
+						gsum, fname = line.split()
+						if fname[0] == '*' and not cls.existence(fname[0]):
+							fname = fname[1:]
+						content[fname] = gsum
+				except ValueError:
+					Out.error(f"Read error: must have the sum of the file and the file name respectively on each line.")
+				return content
+		else:
+			Out.error(f"File not found: {filename!r}")
 
 
-class Make(object):
+class Make:
+	BUF_SIZE = 32768
 
-	def __init__(self, filename, hashlist, givensum=None, sumtype=None):
+	def __init__(self, filename, hashlist):
 		self.filename = filename
-		self.givensum = givensum
-		self.sumtype = sumtype
 		self.hlist = hashlist
 
 	def gen_data(self, bars=True):
 		size = os.path.getsize(self.filename)
 
-		if size < BUF_SIZE:
+		if size < self.BUF_SIZE:
 			times = 1
-		elif size % BUF_SIZE == 0:
-			times = size / BUF_SIZE
+		elif size % self.BUF_SIZE == 0:
+			times = size / self.BUF_SIZE
 		else:
-			size -= size % BUF_SIZE
-			times = int(size / BUF_SIZE) + 1
+			size -= size % self.BUF_SIZE
+			times = int(size / self.BUF_SIZE) + 1
 
 		def generate_data(f):
-			file_data = f.read(BUF_SIZE)
+			file_data = f.read(self.BUF_SIZE)
 			yield file_data
 			# when lower is the sleep value, faster will be the reading,
 			# but it will increase the CPU usage
@@ -169,65 +134,139 @@ class Make(object):
 	def read(self, sumtype, generated_data):
 		for file_data in generated_data:
 			self.hlist[sumtype].update(file_data)
+		else:
+			return True
 
 	# it checkv if the file's sum is equal to the given sum
-	def check(self):
-		if int(self.hlist[self.sumtype].hexdigest(), 16) == int(self.givensum, 16):
-			results(self.filename, self.sumtype, True)
+	def check(self, sumtype, givensum):
+		out = Out(self.filename, sumtype)
+		if int(self.hlist[sumtype].hexdigest(), 16) == int(givensum, 16):
+			out.results(True)
+			return True
 		else:
-			results(self.filename, self.sumtype, False)
+			out.results(False)
+			return False
 
 
-class Process(object):
-	def __init__(self, filename, sumtype=None, givensum=None):
+class FileId:
+
+	def __init__(self, name, givensum=None):
+		self.name = name
+		self.existence = Analyze.existence(name)
+		if self.existence is True:
+			self.hlist = {
+				"md5": hlib.md5(),
+				"sha1": hlib.sha1(),
+				"sha224": hlib.sha224(),
+				"sha256": hlib.sha256(),
+				"sha384": hlib.sha384(),
+				"sha512": hlib.sha512()
+			}
+		if givensum:
+			self.gsum = givensum
+			self.valid_gsum = Analyze.is_hex(givensum)
+
+	def get_hash_sum(self, sumtype):
+		if self.existence is True:
+			return self.hlist[sumtype].hexdigest()
+		Out.error(f"File not found: {self.name!r}\nCan't Give hash sum")
+
+
+class Process:
+	def __init__(self, files=None, sumtype=None):
+		try:
+			self.files = list(files)
+		except:
+			self.files = []
+
 		self.sumtype = sumtype
-		self.givensum = givensum
-		self.filename = filename
 
-		self.hlist = {
-			"md5": hlib.md5(),
-			"sha1": hlib.sha1(),
-			"sha224": hlib.sha224(),
-			"sha256": hlib.sha256(),
-			"sha384": hlib.sha384(),
-			"sha512": hlib.sha512()
-		}
+	def addFile(self, filename):
+		self.files.append(filename)
 
-		self.checkv = CheckVars(filename=self.filename, givensum=self.givensum)
+	def define_sumtype(self, sumtype):
+		self.sumtype = sumtype
 
-		if self.filename:
-			self.make = Make(filename=self.filename, hashlist=self.hlist, givensum=self.givensum, sumtype=self.sumtype)
+	def normal_process(self):
+		fileid = self.files[0]
+		
+		if fileid.existence is False:
+			Out.error(f"File not found: {fileid.name!r}")
+		elif fileid.valid_gsum is False:
+			Out.error(f"Given sum is not Hexadecimal: {fileid.gsum!r}")
+		elif not self.sumtype:
+			Out.error("Sumtype is Undefined")
+		else:
+			make = Make(filename=fileid.name, hashlist=fileid.hlist)
+			make.read(self.sumtype, make.gen_data())
+			make.check(self.sumtype, fileid.gsum)
+			
+	def only_show_sum(self):
+		if not self.sumtype:
+			Out.error("Sumtype is Undefined")
+		elif len(self.files) > 1:
+			found = [f for f in self.files if f.existence is True]
+			unfound = [f.name for f in self.files if f not in found]
 
-	# if we have the file's name and sum
-	def make_and_check(self):
-		if self.checkv.analyze_content():
-			self.make.read(self.sumtype, self.make.gen_data())
-			self.make.check()
+			with alive_bar(len(found), bar='blocks', spinner='dots') as bar:
+				for fileid in found:
+					make = Make(filename=fileid.name, hashlist=fileid.hlist)
+					make.read(self.sumtype, make.gen_data(bars=False))
+					print(f"{fileid.get_hash_sum(self.sumtype)} {fileid.name}")
+					bar()
 
-	# get all sums
+			print("\nThis/these file(s) wasn't/weren't found:")
+			for filename in unfound:
+				print("* ", filename)
+			print('\n ** If nothing appears above, it means that all files have been found **')
+		elif len(self.files) == 1:
+			fileid = self.files[0]
+			if fileid.existence is True:
+				make = Make(filename=fileid.name, hashlist=fileid.hlist)
+				make.read(self.sumtype, make.gen_data())
+				print(f"\n{fileid.get_hash_sum(self.sumtype)} {fileid.name}\n")
+			else:
+				Out.error(f"File not found: {fileid.name!r}")
+		else:
+			Out.error("File was not given!")
+			
+	def check_multifiles(self):
+		found = [f for f in self.files if f.existence is True]
+		unfound = [f.name for f in self.files if f not in found]
+
+		with alive_bar(len(found), bar='blocks', spinner='dots') as bar:
+			for fileid in found:
+				if fileid.valid_gsum is False:
+					Out.error(f"Given sum is not Hexadecimal: {fileid.gsum!r}")
+				elif not self.sumtype:
+					Out.error("Sumtype is Undefined")
+				else:
+					make = Make(filename=fileid.name, hashlist=fileid.hlist)
+					make.read(self.sumtype, make.gen_data(bars=False))
+					make.check(self.sumtype, fileid.gsum)
+					bar()
+		
+		print("\nThis/these file(s) wasn't/weren't found:")
+		for filename in unfound:
+			print("* ", filename)
+		print('\n ** If nothing appears above, it means that all files have been found **')
+
 	def show_allsums(self):
-		if exists(self.filename):
+		fileid = self.files[0]
+		if fileid.existence is True:
+			make = Make(filename=fileid.name, hashlist=fileid.hlist)
 			print("Calculating sum...")
-			generated_data = list(self.make.gen_data())
-			with alive_bar(len(self.hlist.keys()), spinner='waves') as bar:
+			generated_data = list(make.gen_data())
+			with alive_bar(len(fileid.hlist.keys()), spinner='waves') as bar:
 				print("Getting hashes...")
-				for sumtype in self.hlist.keys():
-					self.make.read(sumtype, generated_data)
+				for sumtype in fileid.hlist.keys():
+					make.read(sumtype, generated_data)
 					# when lower is the sleep value, faster will be the reading,
 					# but it will increase the CPU usage
 					sleep(0.00001)
 					bar()
 
-			for sumtype, fsum in self.hlist.items():
-				print(f"{sumtype}sum: {fsum.hexdigest()} {self.filename}")
+			for sumtype in fileid.hlist.keys():
+				print(f"{sumtype}sum: {fileid.get_hash_sum(sumtype)} {fileid.name}")
 		else:
-			out_error(f"File not found: {self.filename!r}")
-
-	# if we want only show the sum and no to compare it
-	def only_show_sum(self):
-		if exists(self.filename):
-			self.make.read(self.sumtype, self.make.gen_data())
-
-			print(f"\n{self.hlist[self.sumtype].hexdigest()} {self.filename}")
-		else:
-			out_error(f"File not found: {self.filename!r}")
+			Out.error(f"File not found: {fileid.name!r}")
