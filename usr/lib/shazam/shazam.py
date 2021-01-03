@@ -39,7 +39,7 @@ class MainFlow:
 			sys.exit()
 		elif self.args.file:
 			stype = Analyze.sumtype(self.args.file)
-			content = Analyze.analyze_text(self.args.file)
+			content = Analyze.text_content(self.args.file)
 
 			for fname, gsum in content.items():
 				f = FileId(fname, gsum)
