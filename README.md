@@ -7,7 +7,9 @@ It checks the integrity of one file by comparing it with a given hash.
 
 ### How does it work
 
-It converts the file to the chosen hash type and compares it with a given hash.
+It calculates the file's hash sum and compares it with a given hash, <br>
+if they were equal it will show a sucess message, <br>
+else it will say that the calculated hash and the given one are different.
 
 ### Usage & More
 You can use it as below:
@@ -17,7 +19,7 @@ You can use it as below:
 **OBS:** If you have a file with the hashes inside you can check it by using a short command.
 For more option after install it try: shazam -h/--help
   
-Types of hash that you can currently use:
+Types of hash that you can currently calculate and/or check:
 
 * md5
 * sha1
@@ -26,4 +28,4 @@ Types of hash that you can currently use:
 * sha384
 * sha512
 
-** If you have suggestions send it to me! **
+**If you have suggestions send it to me!**
