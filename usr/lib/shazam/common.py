@@ -165,6 +165,9 @@ class FileId(object):
 		if givensum:
 			self.gsum = givensum
 			self.valid_gsum = Analyze.is_hex(givensum)
+			
+	def __str__(self):
+		return str(self.name)
 
 	def get_hash_sum(self, sumtype):
 		if self.existence is True:
