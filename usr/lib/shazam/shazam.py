@@ -1,20 +1,14 @@
 #!/usr/bin/python3
 import sys
-from time import sleep
-
 from common import Process, Analyze, FileId, Out
 
 try:
 	import argparse
-	from alive_progress import alive_bar
 except ImportError:
-	Out.error("Important Modules are not installed yet: argparse, alive_progress",
-			  "\nInstall them with: pip/pip3 install argparse alive_progress")
+	Out.error("Important Module is not installed yet: argparse",
+			  "\nInstall it with: pip/pip3 install argparse")
 
-if len(sys.argv) == 2:
-	cont = True
-else:
-	cont = False
+argv_len = len(sys.argv)
 
 # TODO: coloca only_sum pa calcula mas de um arquivos (elimina args.contente, e usa sys.argv pa get file o que ca escodjedo opts)
 class MainFlow:
@@ -39,12 +33,12 @@ class MainFlow:
 			sys.exit()
 		elif self.args.file:
 			stype = Analyze.sumtype(self.args.file)
-			content = Analyze.text_content(self.args.file)
+			content = Analyze.contents(self.args.file)
 
 			for fname, gsum in content.items():
 				f = FileId(fname, gsum)
 				if f.existence is True:
-					self.process.addFile(f)
+					self.process.add_file(f)
 					break
 			else:
 				print("\nThis/these file(s) wasn't/weren't found:")
@@ -53,51 +47,56 @@ class MainFlow:
 				sys.exit()
 			
 			self.process.define_sumtype(stype)
-			self.process.normal_process()
+			self.process.check_process()
 		elif self.args.Files:
 			stype = Analyze.sumtype(self.args.Files)
-			content = Analyze.text_content(self.args.Files)
+			content = Analyze.contents(self.args.Files)
 			
 			for fname, gsum in content.items():
 				f = FileId(fname, gsum)
-				self.process.addFile(f)
+				self.process.add_file(f)
 
 			self.process.define_sumtype(stype)
 			self.process.check_multifiles()
-		elif self.args.all or cont:
+		elif self.args.all or argv_len == 2:
 			if self.args.all:
 				fname = self.args.all
 			else:
 				fname = self.args.content
 			f = FileId(fname)
-			self.process.addFile(f)
+			self.process.add_file(f)
 			self.process.show_allsums()
 		else:
 			for stype, option in self.options.items():
 				norm, only = option
 				if norm:
 					if Analyze.is_hex(norm[0]):
-						gsum, fname = norm[0], norm[1]
+						gsum, fname = norm
 					elif Analyze.is_hex(norm[1]):
-						fname, gsum = norm[0], norm[1]
+						fname, gsum = norm
 					else:
-						Out.error(f"Given sum not recognized: {norm[0], norm[1]}")
+						if Analyze.exists(norm[0]):
+							Out.error(f"Given sum not recognized: {norm[1]!r}")
+						elif Analyze.exists(norm[1]):
+							Out.error(f"Given sum not recognized: {norm[0]!r}")
+						else:
+							Out.error(f"Given sum not recognized: {norm[0], norm[1]}")
 					f = FileId(fname, gsum)
-					self.process.addFile(f)
+					self.process.add_file(f)
 					self.process.define_sumtype(stype)
-					self.process.normal_process()
+					self.process.check_process()
 					break
 				elif only:
 					if type(only) is list:
 						for item in only:
 							f = FileId(item)
-							self.process.addFile(f)
+							self.process.add_file(f)
 							self.process.define_sumtype(stype)
 							self.process.only_show_sum()
 							break
 					else:
 						f = FileId(only)
-						self.process.addFile(f)
+						self.process.add_file(f)
 						self.process.define_sumtype(stype)
 						self.process.only_show_sum()
 						break
@@ -120,14 +119,14 @@ if __name__ == '__main__':
 
 	option.add_argument("-v", "--version", help="Print the current version of this program.", action="store_true")
 	
-	if cont:
+	if argv_len == 2:
 		option.add_argument("content", help="file name or sum depending of option the choiced", nargs='?')
 
 	for item in Analyze.sumtypes_list:
 		option.add_argument("-%s" % item, help="for comparing the file's hash", metavar='', nargs=2)
 		option.add_argument("--%ssum" % item, metavar='', help="for just getting the file's hash", nargs='?')
 
-	if len(sys.argv) > 1:
+	if argv_len > 1:
 		mf = MainFlow(parser.parse_args())
 		mf.make_process()
 	else:

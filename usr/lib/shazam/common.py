@@ -4,13 +4,13 @@ import sys
 import hashlib as hlib
 
 from time import sleep
-from alive_progress import alive_bar
 
 try:
 	from termcolor import colored as clr
+	from alive_progress import alive_bar
 except ImportError:
-	sys.exit("Important Module is not installed yet: termcolor\n\
-		Install it with: pip/pip3 install termcolor")
+	sys.exit("Important Modules are not installed yet: termcolor, alive_bar\n\
+		Install them with: pip/pip3 install termcolor alive_bar")
 
 
 class Out:
@@ -18,11 +18,11 @@ class Out:
 		self.fname, self.stype = filename, sumtype
 		
 	@staticmethod
-	def error(err, exit=True):
+	def error(*err, exit=True):
+		error_message = ' '.join(err)
+		print("ShaZam: ERROR: %s" % error_message)
 		if exit:
-			sys.exit("ShaZam: ERROR: %s" % err)
-		else:
-			print("ShaZam: ERROR: %s" % err)
+			sys.exit(1)
 
 	def results(self, sucess):
 		if sucess:
@@ -43,7 +43,7 @@ class Analyze:
 			return False
 
 	@staticmethod
-	def existence(filename):
+	def exists(filename):
 		folder = os.listdir()
 		if filename in folder:
 			return True
@@ -56,8 +56,8 @@ class Analyze:
 				return False
 
 	@classmethod
-	def is_readable(cls, filename):
-		if cls.existence(filename):
+	def readable(cls, filename):
+		if cls.exists(filename):
 			try:
 				with open(filename, "rt") as f:
 					f.read(1)
@@ -70,21 +70,21 @@ class Analyze:
 
 	@classmethod
 	def sumtype(cls, filename):
-		if cls.is_readable(filename):
+		if cls.readable(filename):
 			for stype in cls.sumtypes_list[::-1]:
 				if stype in filename:
 					return stype
 			Out.error(f"Sumtype not recognized in: {filename}")
 
 	@classmethod
-	def text_content(cls, filename):
-		if cls.existence(filename) is True:
+	def contents(cls, filename):
+		if cls.exists(filename) is True:
 			content = {}
 			with open(filename, "rt") as t:
 				try:
 					for line in t:
 						gsum, fname = line.split()
-						if fname[0] == '*' and not cls.existence(fname[0]):
+						if fname[0] == '*' and not cls.exists(fname[0]):
 							fname = fname[1:]
 						content[fname] = gsum
 				except ValueError:
@@ -148,11 +148,11 @@ class Make:
 			return False
 
 
-class FileId:
+class FileId(object):
 
 	def __init__(self, name, givensum=None):
 		self.name = name
-		self.existence = Analyze.existence(name)
+		self.existence = Analyze.exists(name)
 		if self.existence is True:
 			self.hlist = {
 				"md5": hlib.md5(),
@@ -176,20 +176,19 @@ class Process:
 	def __init__(self, files=None, sumtype=None):
 		try:
 			self.files = list(files)
-		except:
+		except TypeError:
 			self.files = []
 
 		self.sumtype = sumtype
 
-	def addFile(self, filename):
+	def add_file(self, filename):
 		self.files.append(filename)
 
 	def define_sumtype(self, sumtype):
 		self.sumtype = sumtype
 
-	def normal_process(self):
+	def check_process(self):
 		fileid = self.files[0]
-		
 		if fileid.existence is False:
 			Out.error(f"File not found: {fileid.name!r}")
 		elif fileid.valid_gsum is False:
@@ -200,7 +199,7 @@ class Process:
 			make = Make(filename=fileid.name, hashlist=fileid.hlist)
 			make.read(self.sumtype, make.gen_data())
 			make.check(self.sumtype, fileid.gsum)
-			
+
 	def only_show_sum(self):
 		if not self.sumtype:
 			Out.error("Sumtype is Undefined")
