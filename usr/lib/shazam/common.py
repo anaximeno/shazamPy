@@ -106,7 +106,7 @@ class Make:
 		if size < self.BUF_SIZE:
 			times = 1
 		elif size % self.BUF_SIZE == 0:
-			times = size / self.BUF_SIZE
+			times = int(size / self.BUF_SIZE)
 		else:
 			size -= size % self.BUF_SIZE
 			times = int(size / self.BUF_SIZE) + 1
