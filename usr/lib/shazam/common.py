@@ -9,8 +9,7 @@ try:
 	from termcolor import colored as clr
 	from alive_progress import alive_bar
 except ImportError:
-	sys.exit("Important Modules are not installed yet: termcolor, alive_bar\n\
-		Install them with: pip/pip3 install termcolor alive_bar")
+	sys.exit("Important Modules are not installed yet: termcolor, alive_progress\nInstall them with: pip/pip3 install termcolor alive_progress")
 
 
 class Out:
