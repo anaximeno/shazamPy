@@ -13,7 +13,8 @@ except ImportError:
 			  "\nInstall it with: pip/pip3 install argparse")
 
 
-# TODO: coloca only_sum pa calcula mas de um arquivos (elimina args.contente, e usa sys.argv pa get file o que ca escodjedo opts)
+# TODO: coloca only_sum pa calcula mas de um arquivos 
+# (elimina args.content, e usa sys.argv pa get file oh que ca scodjedo opts)
 class MainFlow:
 
 	def __init__(self, args):
@@ -41,7 +42,7 @@ class MainFlow:
 				Out.error("VERSION file was not found")
 
 		elif self.args.file:
-			stype = Analyze.sumtype(self.args.file)
+			self.process.define_sumtype(Analyze.sumtype(self.args.file))
 			content = Analyze.contents(self.args.file)
 
 			for fname, gsum in content.items():
@@ -59,7 +60,6 @@ class MainFlow:
 				
 				sys.exit()
 			
-			self.process.define_sumtype(stype)
 			self.process.check_process()
 
 		elif self.args.Files:
@@ -101,8 +101,8 @@ class MainFlow:
 							Out.error(f"Given sum not recognized: {norm[0]!r}")
 		
 						else:
-							Out.error(f"Given sum not recognized: {norm[0], norm[1]}")
-		
+							Out.error(f"File given hashsum was not recognized as hexadecimal: {norm[0], norm[1]}")
+
 					f = FileId(fname, gsum)
 					self.process.add_file(f)
 					self.process.define_sumtype(stype)
@@ -117,14 +117,14 @@ class MainFlow:
 							self.process.define_sumtype(stype)
 							self.process.only_show_sum()
 							break
-		
+
 					else:
 						f = FileId(only)
 						self.process.add_file(f)
 						self.process.define_sumtype(stype)
 						self.process.only_show_sum()
 						break
-		
+
 			else:
 				Out.error('No option was chosen!')
 
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 	option.add_argument("-a", "--all", help="Print all the file's sums.", metavar='')
 
 	option.add_argument("-v", "--version", help="Print the current version of this program.", action="store_true")
-	
+
 	if argv_len == 2:
 		option.add_argument("content", help="file name or sum depending of option the choiced", nargs='?')
 
