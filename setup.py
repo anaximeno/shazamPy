@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 with open("VERSION", "rt") as v:
-    __version__ = v.read()
+    __version__ = v.read().strip()
 
 with open("README.md", "rt") as ld:
     long_desc = ld.read()
