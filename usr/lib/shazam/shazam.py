@@ -13,6 +13,12 @@ Prerequesites:
 
 """
 
+__author__ = "Anaxímeno Brito"
+__current_version__ = "2021.1"
+__license__ = "GNU General Public License v3.0"
+__copyright__ = "Copyright (c) 2021 by Anaxímeno Brito"
+
+
 import sys
 from common import Process, Analyze, FileId, Out
 

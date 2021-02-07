@@ -13,6 +13,11 @@ except ImportError:
 	"alive_progress.\nInstall them with: pip (or pip3) install termcolor " +
 	"alive_progress")
 
+__author__ = "Anaxímeno Brito"
+__current_version__ = "2021.1"
+__license__ = "GNU General Public License v3.0"
+__copyright__ = "Copyright (c) 2021 by Anaxímeno Brito"
+
 
 class Out:
 	def __init__(self, filename, sumtype):
@@ -42,23 +47,23 @@ class Analyze:
 		try:
 			int(hexa, 16)
 			return True
-		
+
 		except ValueError:
 			return False
 
 	@staticmethod
 	def exists(filename):
-		folder = os.listdir()
-		
-		if filename in folder:
+		current_folder = os.listdir()
+
+		if filename in current_folder:
 			return True
-		
+
 		else:
 			try:
 				with open(filename, 'rb') as target:
 					if target:
 						return True
-		
+
 			except IOError:
 				return False
 
@@ -69,11 +74,11 @@ class Analyze:
 				with open(filename, "rt") as f:
 					f.read(1)
 					return True
-		
+
 			except UnicodeDecodeError:
 				Out.error(f"File is unreadable: {filename!r}")
 				return False
-		
+
 		else:
 			Out.error(f"File not found: {filename!r}")
 
@@ -102,7 +107,7 @@ class Analyze:
 						content[fname] = gsum
 		
 				except ValueError:
-					Out.error(f"Read error: must have the sum of the file and the file name respectively on each line.")
+					Out.error(f"Reading error: must have the sum of the file and the file name respectively on each line.")
 		
 				return content
 		
@@ -150,7 +155,7 @@ class Make:
 					yield from generate_data(f)
 
 	# read and set the file's sum
-	def read(self, sumtype, generated_data):
+	def update(self, sumtype, generated_data):
 		for file_data in generated_data:
 			self.hlist[sumtype].update(file_data)
 		
@@ -231,7 +236,7 @@ class Process:
 		
 		else:
 			make = Make(filename=fileid.name, hashlist=fileid.hlist)
-			make.read(self.sumtype, make.gen_data())
+			make.update(self.sumtype, make.gen_data())
 			make.check(self.sumtype, fileid.gsum)
 
 	def only_show_sum(self):
@@ -245,7 +250,7 @@ class Process:
 			with alive_bar(len(found), bar='blocks', spinner='dots') as bar:
 				for fileid in found:
 					make = Make(filename=fileid.name, hashlist=fileid.hlist)
-					make.read(self.sumtype, make.gen_data(bars=False))
+					make.update(self.sumtype, make.gen_data(bars=False))
 					print(f"{fileid.get_hash_sum(self.sumtype)} {fileid.name}")
 					bar()
 
@@ -259,7 +264,7 @@ class Process:
 			
 			if fileid.existence is True:
 				make = Make(filename=fileid.name, hashlist=fileid.hlist)
-				make.read(self.sumtype, make.gen_data())
+				make.update(self.sumtype, make.gen_data())
 				print(f"\n{fileid.get_hash_sum(self.sumtype)} {fileid.name}\n")
 			
 			else:
@@ -282,7 +287,7 @@ class Process:
 		
 				else:
 					make = Make(filename=fileid.name, hashlist=fileid.hlist)
-					make.read(self.sumtype, make.gen_data(bars=False))
+					make.update(self.sumtype, make.gen_data(bars=False))
 					make.check(self.sumtype, fileid.gsum)
 					bar()
 		
@@ -302,7 +307,7 @@ class Process:
 			with alive_bar(len(fileid.hlist.keys()), spinner='waves') as bar:
 				print("Getting hashes...")
 				for sumtype in fileid.hlist.keys():
-					make.read(sumtype, generated_data)
+					make.update(sumtype, generated_data)
 					# when lower is the sleep value, faster will be the reading,
 					# but it will increase the CPU usage
 					sleep(0.00001)
