@@ -20,7 +20,7 @@ It calculates the file's hash sum and compares it with a given hash, if they wer
 
 ### Usage & More
 
-How to check sum:
+-> How to check sum:
 	
 	$ shazam [HASHTYPE] FILENAME HASHSUM
 	
@@ -28,7 +28,7 @@ Ex:
 
   	$ shazam sha1 linux.iso 4fe31ea2ce34ef45234fbedfca
 	
-How to check on a file:
+-> How to check on a file:
 
 	$ shazam --read FILENAME
 	
