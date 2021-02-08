@@ -23,9 +23,17 @@ Usage:
 	
 	$ shazam [HASHTYPE] FILENAME HASHSUM
 	
-Exemple:
+Or:
 
-  	$ shazam -sha1 linux.iso 4fe31ea2ce34ef45234fbedfca
+	$ shazam --read FILENAME
+	
+Exemple1:
+
+  	$ shazam sha1 linux.iso 4fe31ea2ce34ef45234fbedfca
+	
+Exemple2:
+
+	$ shazam --read sha1sum.txt
 
 **OBS:** For more options, try, after install it:
 
