@@ -19,19 +19,20 @@ Prerequesites:
 It calculates the file's hash sum and compares it with a given hash, if they were equal, it will show a sucess message, else, it will show an unsucess message.
 
 ### Usage & More
-Usage:
+
+How to check sum:
 	
 	$ shazam [HASHTYPE] FILENAME HASHSUM
 	
-Or:
-
-	$ shazam --read FILENAME
-	
-Exemple1:
+Ex:
 
   	$ shazam sha1 linux.iso 4fe31ea2ce34ef45234fbedfca
 	
-Exemple2:
+How to check on a file:
+
+	$ shazam --read FILENAME
+	
+Ex:
 
 	$ shazam --read sha1sum.txt
 
