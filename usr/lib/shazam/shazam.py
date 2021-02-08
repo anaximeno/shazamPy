@@ -31,7 +31,6 @@ __copyright__ = "Copyright (c) 2021 by Anaxímeno Brito"
 import sys
 from common import Process, Analyze, FileId, Out
 
-
 try :
 	import argparse
 
@@ -41,13 +40,13 @@ except ImportError :
 
 
 class MainFlow :
-
+	"""Organizes the program's processing flow."""
 	def __init__(self, args) :
 		self.args = args
 		self.process = Process()
 
 	def make_process(self) :
-		"""Analysis command args and make specified process"""
+		"""Performs specific processing depending on the arguments"""
 		if self.args.type :
 			self.process.define_sumtype(self.args.type)
 			

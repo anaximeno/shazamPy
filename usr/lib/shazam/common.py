@@ -1,8 +1,17 @@
 #!/usr/bin/python3
-import os
-import sys
-import hashlib as hlib
-from time import sleep
+""" ShaZam  can calculate a file sum and compare with a given one.
+
+ShaZam as also other options like:
+	calculate all supported hashsums of one file
+	calculate and compare file sum which is inside a text file
+	Calculate only the file sum without compare it 
+
+Prerequesites:
+	Python version 3.2.x or higher
+	termcolor version 1.1.x or higher (install it with pip or conda)
+	alive_progress version 1.6.x or higher (install it with pip or conda)
+
+"""
 
 
 try :
@@ -19,6 +28,12 @@ __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2021 by Anaxímeno Brito"
 
 
+
+import os
+import sys
+import hashlib as hlib
+from time import sleep
+
 try :
 	from termcolor import colored as clr
 	from alive_progress import alive_bar
@@ -27,6 +42,7 @@ except ImportError :
 	sys.exit("Important Modules are not installed yet: termcolor, " +
 	"alive_progress.\nInstall them with: pip (or pip3) install termcolor " +
 	"alive_progress")
+
 
 
 class Out :
@@ -194,7 +210,7 @@ class Make :
 
 
 class FileId(object) :
-
+	"""Holds all file's informations"""
 	def __init__(self, name, givensum=None) :
 		self.name = name
 		self.existence = Analyze.exists(name)
@@ -217,6 +233,7 @@ class FileId(object) :
 		return str(self.name)
 
 	def get_hash_sum(self, sumtype) :
+		"""Return the file's hash sum"""
 		if self.existence is True :
 			return self.hlist[sumtype].hexdigest()
 		
@@ -242,6 +259,7 @@ class Process :
 		self.sumtype = sumtype
 
 	def check_process(self) :
+		"""Check and Compare the hash sums of one file."""
 		fileid = self.files[0]
 		
 		if fileid.existence is False :
@@ -259,6 +277,7 @@ class Process :
 			make.check(self.sumtype, fileid.gsum)
 
 	def only_show_sum(self) :
+		"""Only calculates and print the file's hash sum."""
 		if not self.sumtype :
 			Out.error("Sumtype is Undefined")
 		
@@ -293,6 +312,7 @@ class Process :
 			Out.error("File was not given!")
 			
 	def check_multifiles(self) :
+		"""Checks and compare the hash sums of more than one files."""
 		found = [f for f in self.files if f.existence is True]
 		unfound = [f.name for f in self.files if f not in found]
 
@@ -316,6 +336,7 @@ class Process :
 		print('\n ** If nothing appears above, it means that all files have been found **')
 
 	def show_allsums(self) :
+		"""Print all supported hash sums of one file."""
 		fileid = self.files[0]
 		
 		if fileid.existence is True :
