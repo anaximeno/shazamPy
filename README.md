@@ -6,7 +6,7 @@
 ShaZam as also other options like:
 * calculate all supported hashsums of one file
 * calculate and compare file sum wich is inside a text file
-* Calculate only the file sum without compare it 
+* calculate only the file sum without compare it 
 
 Prerequesites:
 * Python version 3.2.x or higher
