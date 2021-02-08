@@ -1,3 +1,69 @@
 #!/bin/bash
 
-/usr/lib/shazam/shazam.py $@
+SHAZAM=/usr/lib/shazam/shazam.py
+
+sum_types=('md5' 'sha1' 'sha224' 'sha256' 'sha384' 'sha512')
+unique_opts=('--version' '--help' '-h')
+others_opts=('-A' '--all' '-r' '--read')
+
+enc=0
+# TODO: Must handle bad commands and input better
+if [ $# = 1 ]
+then
+
+    for opt in "${unique_opts[@]}"
+    do
+        if [ "$opt" = "$1" ]
+            then
+            enc = 1
+            $SHAZAM $opt
+        fi
+    done
+
+    if [ $enc -eq 0 ]
+    then
+        echo ShaZam: Bad Usage!
+        $SHAZAM
+    fi
+
+elif [ $# -gt 1 ] 
+then
+    for opt in "${others_opts[@]}"
+    do
+        if [ "$opt" = "$1" ]
+        then
+            if [ $# = 2 ]
+            then
+                $SHAZAM $opt $2
+            else
+                echo ShaZam: Error: expected: shazam $opt filename
+            fi
+
+        fi
+
+    done
+
+    for opt in "${sum_types[@]}"
+    do 
+        if [ "$opt" = "$1" ] 
+        then
+
+            if [ "$2" = "-f" ]
+            then
+                $SHAZAM --type $opt --files $@
+
+            elif [ $# = 3 ]
+            then
+                $SHAZAM --type $opt --content $2 $3
+
+            else
+                echo ShaZam: Error: wrong command, type: shazam --help
+            fi
+
+        fi
+
+    done
+
+else
+    $SHAZAM
+fi
