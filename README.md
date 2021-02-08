@@ -15,7 +15,7 @@ Prerequesites:
 
 
 ### How does it work ?
-<br>
+
 It calculates the file's hash sum and compares it with a given hash, if they were equal, it will show a sucess message, else, it will show an unsucess message.
 
 ### Usage & More
