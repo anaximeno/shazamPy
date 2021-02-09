@@ -22,7 +22,7 @@ then
 
     if [ $enc -eq 0 ]
     then
-        echo ShaZam: Bad Usage!
+        echo 'ShaZam: Wrong Commands!'
         $SHAZAM
     fi
 
@@ -36,7 +36,7 @@ then
             then
                 $SHAZAM $opt $2
             else
-                echo ShaZam: Error: expected: shazam $opt filename
+                echo 'ShaZam: Error: expected: shazam' $opt 'filename'
             fi
 
         fi
@@ -50,14 +50,14 @@ then
 
             if [ "$2" = "-f" ]
             then
-                $SHAZAM --type $opt --files $@
+                $SHAZAM '--type' $opt '--files' $@
 
             elif [ $# = 3 ]
             then
-                $SHAZAM --type $opt --content $2 $3
+                $SHAZAM '--type' $opt '--content' $2 $3
 
             else
-                echo ShaZam: Error: wrong command, type: shazam --help
+                echo 'ShaZam: Error: wrong command, type: shazam --help'
             fi
 
         fi
