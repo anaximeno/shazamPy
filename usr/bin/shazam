@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# The idea of this file is to control the commands for doing some action, 
+# The idea of this file is to control the commands to perform some action
 # depending on the commands, like a pipeline
 
 
