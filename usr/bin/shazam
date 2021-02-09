@@ -1,69 +1,80 @@
 #!/bin/bash
 
+# The idea of this file is to control the commands for doing some action, 
+# depending on the commands, like a pipeline
+
+
+# App's path
 SHAZAM=/usr/lib/shazam/shazam.py
 
+
+# Some possible command
 sum_types=('md5' 'sha1' 'sha224' 'sha256' 'sha384' 'sha512')
 unique_opts=('--version' '--help' '-h')
 others_opts=('-A' '--all' '-r' '--read')
 
-enc=0
-# TODO: Must handle bad commands and input better
-if [ $# = 1 ]
+
+if [ $# = 0 ]
 then
+	$SHAZAM
+	exit
+elif [ $# = 1 ]
+then 
+	
+	for opt in "${unique_opts[@]}"
+	do
 
-    for opt in "${unique_opts[@]}"
-    do
-        if [ "$opt" = "$1" ]
-            then
-            enc = 1
-            $SHAZAM $opt
-        fi
-    done
+		if [ "$opt" = "$1" ]
+        	then
+            		$SHAZAM $opt
+            		exit
+		fi
 
-    if [ $enc -eq 0 ]
-    then
-        echo 'ShaZam: Wrong Commands!'
-        $SHAZAM
-    fi
+    	done
 
 elif [ $# -gt 1 ] 
 then
-    for opt in "${others_opts[@]}"
-    do
-        if [ "$opt" = "$1" ]
-        then
-            if [ $# = 2 ]
-            then
-                $SHAZAM $opt $2
-            else
-                echo 'ShaZam: Error: expected: shazam' $opt 'filename'
-            fi
+    
+	for opt in "${others_opts[@]}"
+    	do
+        	if [ "$opt" = "$1" ]
+		then
+            		if [ $# = 2 ]
+            		then
+                		$SHAZAM $@
+			else
+				n=$(( $#-1 ))
+				echo 'ShaZam: Error:' $opt 'expected 1 argument, but' $n 'was given!'
+			fi
 
-        fi
+			exit
+        	fi
+    	done
 
-    done
+    	for opt in "${sum_types[@]}"
+    	do 
+        	if [ "$opt" = "$1" ] 
+        	then
 
-    for opt in "${sum_types[@]}"
-    do 
-        if [ "$opt" = "$1" ] 
-        then
+            		if [ "$2" = "-f" ]
+            		then
+                		$SHAZAM '--type' $opt '--files' $@
 
-            if [ "$2" = "-f" ]
-            then
-                $SHAZAM '--type' $opt '--files' $@
+            		elif [ $# = 3 ]
+            		then
+                		$SHAZAM '--type' $opt '--content' $2 $3
 
-            elif [ $# = 3 ]
-            then
-                $SHAZAM '--type' $opt '--content' $2 $3
+            		else
+                		echo 'ShaZam: Error: wrong command, type: shazam --help'
+            		fi
 
-            else
-                echo 'ShaZam: Error: wrong command, type: shazam --help'
-            fi
-
-        fi
-
-    done
-
+			exit
+        	fi
+    	done
 else
-    $SHAZAM
+	$SHAZAM
 fi
+
+# If no option was recognized display help
+$SHAZAM
+
