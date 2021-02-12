@@ -10,87 +10,73 @@ Prerequesites:
 	Python version 3.2.x or higher
 	termcolor version 1.1.x or higher (install it with pip or conda)
 	alive_progress version 1.6.x or higher (install it with pip or conda)
-
 """
 
+### Libraries
+# Standart Libraries
+import sys
+import argparse
 
-try :
-	with open("/usr/share/shazam/VERSION", "rt") as ver :
-		vers = str(ver.read()).strip()
-
-except FileNotFoundError :
-	vers = 'Undefined'
+# Support Module
+from common import *
 
 
 __author__ = "Anaxímeno Brito"
-__version__ = vers
+__version__ = version
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2021 by Anaxímeno Brito"
 
 
-import sys
-from common import Process, Analyze, FileId, Out
-
-try :
-	import argparse
-
-except ImportError :
-	Out.error("Important Module is not installed yet: argparse",
-			  "\nInstall it with: pip/pip3 install argparse")
-
-
-class MainFlow :
+# TODO: Make an option to save the output in one file
+class MainFlow(object):
 	"""Organizes the program's processing flow."""
-	def __init__(self, args) :
+
+	def __init__(self, args):
 		self.args = args
 		self.process = Process()
 
-	def make_process(self) :
-		"""Performs specific processing depending on the arguments"""
-		if self.args.type :
+	def make_process(self):
+		"""Performs specific processing depending on the arguments."""
+		if self.args.type:
 			self.process.define_sumtype(self.args.type)
-			
-			if self.args.content :
-				filename, givensum = self.args.content
 
+			if self.args.content:
+				filename, givensum = self.args.content
 				self.process.add_file(FileId(filename, givensum))
 				self.process.check_process()
-
-			elif self.args.files :
-				for filename in self.args.files :
+			elif self.args.files:
+				for filename in self.args.files:
 					self.process.add_file(FileId(filename))
 				self.process.only_show_sum()
+			else:
+				print_error("Spected more arguments")
 
-			else :
-				Out.error("Spected more arguments")
-
-		elif self.args.read :
+		elif self.args.read:
 			txt_file = self.args.read[0]
-			self.process.define_sumtype(Analyze.sumtype(txt_file))
-
-			for filename, givensum in Analyze.contents(txt_file).items() :
+			self.process.define_sumtype(sumtype(txt_file))
+			for filename, givensum in contents(txt_file):
 				self.process.add_file(FileId(filename, givensum))
-
 			self.process.check_multifiles()
 
-		elif self.args.all :
+		elif self.args.all:
 			self.process.add_file(FileId(self.args.all[0]))
 			self.process.show_allsums()
 
-		else :
-			Out.error('No option was chosen!')
-			
+		else:
+			print_error('No option was chosen!')
 
-if __name__ == '__main__' :
+
+if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
-		prog="ShaZam",
+		prog="shazam",
 		description="Checks and Compare the sums.",
 		usage="shazam [OPTION] content..."
 	)
-	parser.add_argument("--version", help="Print the current version of this program.", action='version', version='%(prog)s {}'.format(__version__))
+	parser.add_argument("--version", help="Print the current version of this program.",
+						action='version', version='%(prog)s {}'.format(__version__))
 
 	# TODO: Check the help output
-	parser.add_argument("--type", choices=Analyze.sumtypes_list)
+	parser.add_argument("--type", choices=sumtypes_list)
 	parser.add_argument("--content", nargs=2)
 	parser.add_argument("-A", "--all", nargs=1)
 	parser.add_argument("-f", "--files", nargs='+')
@@ -98,12 +84,11 @@ if __name__ == '__main__' :
 
 	args = parser.parse_args()
 
-
-	if len(sys.argv) > 1 :
+	if len(sys.argv) > 1:
 		mf = MainFlow(args)
 		mf.make_process()
 
-	else :
+	else:
 		print("Usage: shazam [Option] ARGUMENTS..")
 		print("       shazam --help         display the help section and exit")
 		print("       shazam --version      display the Version information and exit")
