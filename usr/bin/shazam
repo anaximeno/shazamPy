@@ -56,9 +56,9 @@ then
         	if [ "$opt" = "$1" ] 
         	then
 
-            		if [ "$2" = "-f" ]
+            		if [ "$2" = "-f" ] || [ "$2" = "-wf" ]
             		then
-                		$SHAZAM '--type' $opt '--files' $@
+                		$SHAZAM '--type' $opt $2 $@
 
             		elif [ $# = 3 ]
             		then

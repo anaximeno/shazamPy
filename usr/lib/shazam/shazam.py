@@ -48,6 +48,7 @@ class MainFlow(object):
 				for filename in self.args.files:
 					self.process.add_file(FileId(filename))
 				self.process.only_show_sum()
+				if self.args.write: self.process.write()
 			else:
 				print_error("Spected more arguments")
 
@@ -76,11 +77,13 @@ if __name__ == '__main__':
 						action='version', version='%(prog)s {}'.format(__version__))
 
 	# TODO: Check the help output
+	# TODO: Make only write option
 	parser.add_argument("--type", choices=sumtypes_list)
 	parser.add_argument("--content", nargs=2)
 	parser.add_argument("-A", "--all", nargs=1)
 	parser.add_argument("-f", "--files", nargs='+')
 	parser.add_argument("-r", "--read", nargs=1)
+	parser.add_argument("-w", "--write", action='store_true')
 
 	args = parser.parse_args()
 
