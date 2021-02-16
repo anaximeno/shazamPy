@@ -1,80 +1,15 @@
 #!/bin/bash
 
-# The idea of this file is to control the commands to perform some action
-# depending on the commands, like a pipeline
-
+# This file calls the principal file in $SHAZAM,
+# which makes all the processings. But if it don't
+# find the file, echo a error message
 
 # App's path
 SHAZAM=/usr/lib/shazam/shazam.py
 
-
-# Some possible command
-sum_types=('md5' 'sha1' 'sha224' 'sha256' 'sha384' 'sha512')
-unique_opts=('--version' '--help' '-h')
-others_opts=('-A' '--all' '-r' '--read')
-
-
-if [ $# = 0 ]
+if [ -e $SHAZAM ]
 then
-	$SHAZAM
-	exit
-elif [ $# = 1 ]
-then 
-	
-	for opt in "${unique_opts[@]}"
-	do
-
-		if [ "$opt" = "$1" ]
-        	then
-            		$SHAZAM $opt
-            		exit
-		fi
-
-    	done
-
-elif [ $# -gt 1 ] 
-then
-    
-	for opt in "${others_opts[@]}"
-    	do
-        	if [ "$opt" = "$1" ]
-		then
-            		if [ $# = 2 ]
-            		then
-                		$SHAZAM $@
-			else
-				n=$(( $#-1 ))
-				echo 'ShaZam: Error:' $opt 'expected 1 argument, but' $n 'was given!'
-			fi
-
-			exit
-        	fi
-    	done
-
-    	for opt in "${sum_types[@]}"
-    	do 
-        	if [ "$opt" = "$1" ] 
-        	then
-
-            		if [ "$2" = "-f" ] || [ "$2" = "-wf" ]
-            		then
-                		$SHAZAM '--type' $opt $2 $@
-
-            		elif [ $# = 3 ]
-            		then
-                		$SHAZAM '--type' $opt '--content' $2 $3
-
-            		else
-                		echo 'ShaZam: Error: wrong command, type: shazam --help'
-            		fi
-
-			exit
-        	fi
-    	done
+	$SHAZAM $@
 else
-	$SHAZAM
+	echo 'shazam: error:' $SHAZAM 'was not found!!'
 fi
-
-# If no option was recognized display help
-$SHAZAM
-

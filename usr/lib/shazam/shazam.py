@@ -33,35 +33,35 @@ class MainFlow(object):
 
 	def __init__(self, args):
 		self.args = args
-		self.process = Process()
+		self.subarg = args.subparser
 
 	def make_process(self):
 		"""Performs specific processing depending on the arguments."""
-		if self.args.type:
-			self.process.define_sumtype(self.args.type)
-
-			if self.args.content:
-				filename, givensum = self.args.content
-				self.process.add_file(FileId(filename, givensum))
-				self.process.check_process()
-			elif self.args.files:
-				for filename in self.args.files:
-					self.process.add_file(FileId(filename))
-				self.process.only_show_sum()
-				if self.args.write: self.process.write()
-			else:
-				print_error("Spected more arguments")
-
-		elif self.args.read:
-			txt_file = self.args.read[0]
-			self.process.define_sumtype(sumtype(txt_file))
-			for filename, givensum in contents(txt_file):
-				self.process.add_file(FileId(filename, givensum))
-			self.process.check_multifiles()
-
-		elif self.args.all:
-			self.process.add_file(FileId(self.args.all[0]))
-			self.process.show_allsums()
+		if self.subarg:
+			if self.subarg == 'check':
+				process = Process(
+					[FileId(self.args.filename, self.args.filesum)], 
+					sumtype=self.args.sumtype
+				)
+				process.checkfile()
+			elif self.subarg == 'calc':
+				process = Process(
+					[FileId(fname) for fname in self.args.files],
+					sumtype=self.args.sumtype
+				)
+				process.show_sum()
+				if self.args.write: process.write()
+			elif self.subarg == 'read':
+				process = Process(
+					[FileId(fname, fsum) for fsum, fname in contents(self.args.filename)],
+					sumtype=get_sumtype(self.args.filename)
+				)
+				process.checksum_plus()
+			elif self.subarg == 'all':
+				process = Process(
+					[FileId(self.args.filename)]
+				)
+				process.totalcheck()
 
 		else:
 			print_error('No option was chosen!')
@@ -70,21 +70,35 @@ class MainFlow(object):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
 		prog="shazam",
-		description="Checks and Compare the sums.",
-		usage="shazam [OPTION] content..."
+		description="Checks and Compare the file hashsums.",
 	)
 	parser.add_argument("--version", help="Print the current version of this program.",
 						action='version', version='%(prog)s {}'.format(__version__))
+	subparser = parser.add_subparsers(dest='subparser')
 
-	# TODO: Check the help output
-	# TODO: Make only write option
-	parser.add_argument("--type", choices=sumtypes_list)
-	parser.add_argument("--content", nargs=2)
-	parser.add_argument("-A", "--all", nargs=1)
-	parser.add_argument("-f", "--files", nargs='+')
-	parser.add_argument("-r", "--read", nargs=1)
-	parser.add_argument("-w", "--write", action='store_true')
+	# Positional arguments for check and compare hashsums
+	check = subparser.add_parser('check')
+	check.add_argument("sumtype", choices=sumtypes_list)
+	check.add_argument("filesum")
+	check.add_argument("filename")
 
+	# Positional arguments for only calculate hashsums
+	calc = subparser.add_parser('calc')
+	calc.add_argument('sumtype', choices=sumtypes_list)
+	calc.add_argument("-w", "--write", action='store_true')
+	calc.add_argument('files', nargs='+')
+
+	# Positional arguments for read a file which
+	# has the file sum and names wrote in.
+	read = subparser.add_parser('read')
+	read.add_argument('filename')
+
+	# Postional arguments for calculating all
+	# sums of the file
+	all_sums = subparser.add_parser('all')
+	all_sums.add_argument('filename')
+
+	# Get all arguments
 	args = parser.parse_args()
 
 	if len(sys.argv) > 1:
@@ -92,6 +106,7 @@ if __name__ == '__main__':
 		mf.make_process()
 
 	else:
-		print("Usage: shazam [Option] ARGUMENTS..")
+		print("usage: shazam [-h] [--version] {check,calc,read,all} ...")
 		print("       shazam --help         display the help section and exit")
 		print("       shazam --version      display the Version information and exit")
+ 

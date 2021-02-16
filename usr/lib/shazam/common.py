@@ -62,64 +62,69 @@ def print_error(*err: object, exit=True):
 
 
 def hexa_to_int(hexa):
-		"""Receive hexadecimal string and return integer."""
-		try:	
-			return int(hexa, 16)
-		except ValueError:
-			print_error(f"{hexa!r} is not an hexadecimal value!")
+	"""Receive hexadecimal string and return integer."""
+	try:	
+		return int(hexa, 16)
+	except ValueError:
+		print_error(f"{hexa!r} is not an hexadecimal value!")
 
 
 def readable(fname):
-		"""Analyses de readability and return bool."""
-		if exists(fname) and os.path.isfile(fname):
-			try:
-				with open(fname, "rb") as f: f.read(1)
-				return True
-			except UnicodeDecodeError:
-				return False
-		else:
-			return False
+	"""Analyses de readability and return bool."""
+	if not exists(fname) or not os.path.isfile(fname):
+		return False
+	try:
+		# Try to read at least one byte of the file to
+		# check if it is readable.
+		with open(fname, "rb") as f: 
+			f.read(1)
+		return True
+	except UnicodeDecodeError:
+		return False
 
 
-def sumtype(fname):
-		"""Analyses the filename and return the sumtype."""
-		if readable(fname):
-			for stype in sumtypes_list[::-1]:
-				if stype in fname:
-					return stype
-			print_error(f"Sumtype not recognized in: {fname!r}")
+def get_sumtype(fname):
+	"""Analyses the filename and return the sumtype."""
+	if not readable(fname):
+		print_error(f"{fname!r} is unreadable!")
+	for stype in sumtypes_list[::-1]:
+		if stype in fname: return stype
+	print_error(f"Sumtype not recognized in: {fname!r}")
 
 
-def contents(name):
-		"""Return a list with tuples with the content of the file, 
-		the tuple will be like (filename, sum)."""
-		if exists(name):
-			content = []
-
-			with open(name, "rt") as txt:
-				try:
-					for line in txt:
-						givensum, filename = line.split()
-						if name[0] == '*' and not exists(name):
-							filename = filename[1:]
-						content.append((filename, givensum))
-				except ValueError:
-					print_error(f"Error reading {name!r}")
-		
-			return content		
-		else:
-			print_error(f"{name!r} was not found!")
+def contents(txtfile):
+	"""Return a `list with tuples` with the content of the file, 
+	each tuple has the following structure: `(filesum, filename)`."""
+	if not exists(txtfile):
+		print_error(f"{txtfile!r} was not found!")
+	try:
+		with open(txtfile, "rt") as txt:
+			content = [(line.split()[0], line.split()[1]) for line in txt]
+		return content
+	except ValueError:
+		print_error(f"Error reading {txtfile!r}")
 
 
 class FileId(object):
-
+	"""This class holds all necessary file informations and operations."""
 	def __init__(self, name, givensum=None):
+		# Eliminates asteriscs if it is in the beginning of the file name
+		if name[0] == '*' and not exists(name): name = name[1:] 
+	
 		self.name = name
 		self.existence = exists(name)
 		self.readability = readable(name)
+
+		# ´givensum´ is the original file sum which is given
+		# at the download place.
 		self.gsum = givensum
+
+		# ´self.integer_sum´ is the integer value 
+		# of the hash sum, it will be used in comparisons
+		# for checking if the values are equal.
 		self.integer_sum = hexa_to_int(givensum) if givensum else None
-		if exists(name):
+
+		if readable(name):
 			self.size = os.path.getsize(name)
 			self.hlist = {
 				"md5": hlib.md5(),
@@ -136,33 +141,32 @@ class FileId(object):
 			return self.hlist[sumtype].hexdigest()
 		print_error(f"{self.name!r} is unreadable!")
 
-	def gen_data(self, bars=True):
+	def gen_data(self, *, bars=True):
 		"""Generates binary data. Keyword arg: bars -- bool (default: True)."""
 		if not self.readability:
 			print_error(f"{self.name!r} is unreadable!")
+		elif self.size < BUF_SIZE: 
+			times = 1
+		elif self.size % BUF_SIZE == 0: 
+			times = int(self.size / BUF_SIZE)
 		else:
-			if self.size < BUF_SIZE: 
-				times = 1
-			elif self.size % BUF_SIZE == 0: 
-				times = int(self.size / BUF_SIZE)
-			else:
-				self.size -= self.size % BUF_SIZE
-				times = int(self.size / BUF_SIZE) + 1
+			self.size -= self.size % BUF_SIZE
+			times = int(self.size / BUF_SIZE + 1)
 
-			def generate_data(f):
-				file_data = f.read(BUF_SIZE)
-				# when lower is the sleep value, faster will be the reading,
-				sleep(0.00001) # but it will increase the CPU usage
-				yield file_data
+		def generate_data(f):
+			file_data = f.read(BUF_SIZE)
+			# when lower is the sleep value, faster will be the reading,
+			sleep(0.00001) # but it will increase the CPU usage
+			yield file_data
 
-			with open(self.name, 'rb') as f:
-				for _ in range(times):
-					if bars:
-						with alive_bar(times, bar='blocks', spinner='dots') as bar:
-							yield from generate_data(f)
-							bar()
-					else:
+		with open(self.name, 'rb') as f:
+			for _ in range(times):
+				if bars:
+					with alive_bar(times, bar='blocks', spinner='dots') as bar:
 						yield from generate_data(f)
+						bar()
+				else:
+					yield from generate_data(f)
 
 	def update_data(self, sumtype, generated_data):
 		"""Updates binary data to the sumtype's class."""
@@ -171,7 +175,7 @@ class FileId(object):
 
 	def checksum(self, sumtype) :
 		"""Compares file's sum with givensum."""
-		if hexa_to_int(self.hlist[sumtype].hexdigest()) == self.integer_sum:
+		if hexa_to_int(self.get_hashsum(sumtype)) == self.integer_sum:
 			print(clr(f"{self.name} O", "green"))
 		else:
 			print(clr(f"{self.name} X", "red"))
@@ -179,24 +183,24 @@ class FileId(object):
 
 class Process(object):
 
-	def __init__(self, *files, sumtype=None):
-		if files:
-			self.files = files
-		else:
-			self.files = []
+	def __init__(self, files: list, sumtype=None):
 		self.sumtype = sumtype
 
-	def analyse_files(self):
-		"""Return tuple `(found, unfound)` with files that have been found and not found."""
-		found = None
-		unfound = None
-		if self.files:
-			found = [f for f in self.files if f.existence is True]
-			unfound = [f.name for f in self.files if f not in found]
-		return found, unfound
+		# ´self.found´ and ´self.unfound´ store files,
+		# depending on their existence or not.
+		self.found = [
+				f for f in files if f.existence is True
+			]  if files else []
+
+		self.unfound = [
+				f.name for f in files if f not in self.found
+			] if files else []
 
 	def add_file(self, fileid):
-		self.files.append(fileid)
+		if fileid.existence:
+			self.found.append(fileid)
+		else:
+			self.unfound.append(fileid.name)
 
 	def define_sumtype(self, sumtype):
 		if sumtype in sumtypes_list:
@@ -204,56 +208,59 @@ class Process(object):
 		else:
 			print_error(f"Unsupported sumtype: {sumtype!r}")
 
-	def check_process(self):
+	def checkfile(self):
 		"""Check and Compare the hash sum."""
-		fileid = self.files[0]
-		if not fileid.existence:
-			print_error(f"File not found: {fileid.name!r}")
-		elif not self.sumtype:
+		if not self.sumtype:
 			print_error("Sumtype is Undefined!")
+		elif not self.found and self.unfound:
+			print_error(f"File not found: {self.unfound[0]!r}")
+		elif not self.found and not self.unfound:
+			print_error("Can't checksum, lack of arguments.")
 		else:
+			fileid = self.found[0]
 			fileid.update_data(self.sumtype, fileid.gen_data())
+			print("\n -> ", end='')
 			fileid.checksum(self.sumtype)
+			print(f"Given Hash Sum:       {fileid.gsum!r}")
+			print(f"Calculated Hash Sum:  {fileid.get_hashsum(self.sumtype)!r}")
 
-	def only_show_sum(self):
-		"""Only calculates and print the file's hash sum."""
-		found, unfound = self.analyse_files()
+	def show_sum(self):
+		"""Only calculate and print the file's hash sum."""
 		if not self.sumtype:
 			print_error("Sumtype is Undefined")
-		elif found:
-			with alive_bar(len(found), bar='blocks', spinner='dots') as bar:
-				for fileid in found:
+		elif self.found:
+			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
+				for fileid in self.found:
 					fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
 					print(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}")
 					bar()
 
-		if unfound:
+		if self.unfound:
 			print("\nThe files below weren't found:")
-			for filename in unfound:
+			for filename in self.unfound:
 				print(" -> ", filename)
 
-	def check_multifiles(self):
+	def checksum_plus(self):
 		"""Checks and compare the hash sums of more than one files."""
-		found, unfound = self.analyse_files()
 		if not self.sumtype:
 			print_error("Sumtype is Undefined")
-		elif found:
-			with alive_bar(len(found), bar='blocks', spinner='dots') as bar:
-				for fileid in found:
+		elif self.found:
+			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
+				for fileid in self.found:
 					fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
 					fileid.checksum(self.sumtype)
 					bar()
 
-		if unfound:
+		if self.unfound:
 			print("\nThe files below weren't found:")
-			for filename in unfound :
+			for filename in self.unfound:
 				print(" -> ", filename)
 
-	def show_allsums(self):
+	def totalcheck(self):
 		"""Print all supported hash sums of one file."""
-		fileid = self.files[0]
+		if self.found:
+			fileid = self.found[0]
 		
-		if fileid.existence is True:
 			print("Calculating sum...")
 			generated_data = list(fileid.gen_data())
 		
@@ -262,26 +269,20 @@ class Process(object):
 				for sumtype in fileid.hlist.keys():
 					fileid.update_data(sumtype, generated_data)
 					# when lower is the sleep value, faster will be the reading,
-					sleep(0.00001)
-					# but it will increase the CPU usage
+					sleep(0.00001) # but it will increase the CPU usage
 					bar()
-
+			print("")
 			for sumtype in fileid.hlist.keys():
 				print(f"{sumtype}sum: {fileid.get_hashsum(sumtype)} {fileid.name}")
 		else:
-			print_error(f"{fileid.name!r} was not found!")
+			print_error(f"{self.unfound[0]!r} was not found!")
 
 	def write(self):
-		found, unfound = self.analyse_files()
-		if found and self.sumtype:
+		if self.found and self.sumtype:
 			textfile = self.sumtype + 'sum.txt'
 			with open(textfile, 'w') as txt:
-				for fileid in found:
+				for fileid in self.found:
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
+		else:
+			print_error("Can't write in file, unsufficient informations!")
 
-		del unfound
-		#if unfound:
-		#	print("\nThe files below weren't found:")
-		#	for filename in unfound :
-		#		print(" -> ", filename)
-			

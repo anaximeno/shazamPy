@@ -9,7 +9,7 @@ ShaZam as also other options like:
 * calculate only the file sum without compare it 
 
 Prerequesites:
-* Python version 3.2.x or higher
+* Python version 3.5.x or higher
 * termcolor version 1.1.x or higher (install it with pip or conda)
 * alive_progress version 1.6.x or higher (install it with pip or conda)
 
@@ -20,21 +20,27 @@ It calculates the file's hash sum and compares it with a given hash, if they wer
 
 ### Usage & More
 
--> How to check sum:
+-> General usage:
 	
-	$ shazam [HASHTYPE] FILENAME HASHSUM
-	
-Ex:
+	$ shazam [COMMAND] requirements..
 
-  	$ shazam sha1 linux.iso 4fe31ea2ce34ef45234fbedfca
-	
--> How to check on a file:
+#### Exemple checking and comparing hash sum:
 
-	$ shazam --read FILENAME
-	
-Ex:
+  	$ shazam check sha1 4fe31ea2ce34ef45234fbedfca linux.iso
 
-	$ shazam --read sha1sum.txt
+##### General formula:
+
+	$ shazam check [sumtype] [filesum] [filename]
+
+
+#### Exemple reading a file with hash sum and filename inside:
+
+	$ shazam read sha1sum.txt
+
+##### General formula:
+
+	$ shazam read [filename]
+
 
 **OBS:** For more options, try, after install it:
 
