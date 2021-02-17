@@ -1,15 +1,13 @@
 #!/usr/bin/python3
 """ ShaZam  can calculate a file sum and compare with a given one.
-
 ShaZam as also other options like:
 	calculate all supported hashsums of one file
-	calculate and compare file sum which is inside a text file
-	Calculate only the file sum without compare it 
-
+	read a file with hash sum and filename inside
+	calculate only the file sum without compare it 
 Prerequesites:
-	Python version 3.2.x or higher
-	termcolor version 1.1.x or higher (install it with pip or conda)
-	alive_progress version 1.6.x or higher (install it with pip or conda)
+	python version 3.2.x or higher
+	termcolor version 1.1.x or higher (can install it with pip3 or conda)
+	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
 
 
@@ -20,8 +18,8 @@ import sys
 import hashlib as hlib
 from time import sleep
 
-# Third-part libraries
 try:
+	# Third-part libraries
 	from termcolor import colored as clr
 	from alive_progress import alive_bar
 except ImportError:
@@ -39,7 +37,7 @@ if os.path.exists("/usr/share/shazam/VERSION"):
 __author__ = "Anaxímeno Brito"
 __version__ = version if version else 'Undefined'
 __license__ = "GNU General Public License v3.0"
-__copyright__ = "Copyright (c) 2021 by Anaxímeno Brito"
+__copyright__ = "Copyright (c) 2020-2021 by Anaxímeno Brito"
 
 
 # List of supported hash sums
@@ -63,8 +61,7 @@ def print_error(*err: object, exit=True):
 
 def hexa_to_int(hexa):
 	"""Receive hexadecimal string and return integer."""
-	try:	
-		return int(hexa, 16)
+	try: return int(hexa, 16)
 	except ValueError:
 		print_error(f"{hexa!r} is not an hexadecimal value!")
 
@@ -74,7 +71,7 @@ def readable(fname):
 	if not exists(fname) or not os.path.isfile(fname):
 		return False
 	try:
-		# Try to read at least one byte of the file to
+		# Try to read, at least, one byte of the file to
 		# check if it is readable.
 		with open(fname, "rb") as f: 
 			f.read(1)
@@ -99,10 +96,14 @@ def contents(txtfile):
 		print_error(f"{txtfile!r} was not found!")
 	try:
 		with open(txtfile, "rt") as txt:
-			content = [(line.split()[0], line.split()[1]) for line in txt]
-		return content
+			content = [
+				(line.split()[0], line.split()[1]) for line in txt if len(line.split()) == 2
+			]
+		if content: 
+			return content
+		raise ValueError
 	except ValueError:
-		print_error(f"Error reading {txtfile!r}")
+		print_error(f"Error reading {txtfile!r}!")
 
 
 class FileId(object):
@@ -153,20 +154,21 @@ class FileId(object):
 			self.size -= self.size % BUF_SIZE
 			times = int(self.size / BUF_SIZE + 1)
 
-		def generate_data(f):
-			file_data = f.read(BUF_SIZE)
-			# when lower is the sleep value, faster will be the reading,
-			sleep(0.00001) # but it will increase the CPU usage
-			yield file_data
+		def generate_data(f, times):
+			for _ in range(times):
+				file_data = f.read(BUF_SIZE)
+				# when lower is the sleep value, faster will be the reading,
+				sleep(0.00001) # but it will increase the CPU usage
+				yield file_data
 
 		with open(self.name, 'rb') as f:
 			for _ in range(times):
 				if bars:
 					with alive_bar(times, bar='blocks', spinner='dots') as bar:
-						yield from generate_data(f)
+						yield from generate_data(f, times)
 						bar()
 				else:
-					yield from generate_data(f)
+					yield from generate_data(f, times)
 
 	def update_data(self, sumtype, generated_data):
 		"""Updates binary data to the sumtype's class."""
@@ -176,7 +178,7 @@ class FileId(object):
 	def checksum(self, sumtype) :
 		"""Compares file's sum with givensum."""
 		if hexa_to_int(self.get_hashsum(sumtype)) == self.integer_sum:
-			print(clr(f"{self.name} O", "green"))
+			print(clr(f"{self.name}", "green"))
 		else:
 			print(clr(f"{self.name} X", "red"))
 
@@ -208,7 +210,7 @@ class Process(object):
 		else:
 			print_error(f"Unsupported sumtype: {sumtype!r}")
 
-	def checkfile(self):
+	def checkfile(self, fid=None, bars=True, verbosity=True):
 		"""Check and Compare the hash sum."""
 		if not self.sumtype:
 			print_error("Sumtype is Undefined!")
@@ -217,22 +219,24 @@ class Process(object):
 		elif not self.found and not self.unfound:
 			print_error("Can't checksum, lack of arguments.")
 		else:
-			fileid = self.found[0]
-			fileid.update_data(self.sumtype, fileid.gen_data())
+			fileid = fid if fid else self.found[0]
+			fileid.update_data(self.sumtype, fileid.gen_data(bars=bars))
 			print("\n -> ", end='')
 			fileid.checksum(self.sumtype)
-			print(f"Given Hash Sum:       {fileid.gsum!r}")
-			print(f"Calculated Hash Sum:  {fileid.get_hashsum(self.sumtype)!r}")
+			if verbosity:
+				print(f"Given Hash Sum:       {fileid.gsum!r}")
+				print(f"Calculated Hash Sum:  {fileid.get_hashsum(self.sumtype)!r}")
 
-	def show_sum(self):
-		"""Only calculate and print the file's hash sum."""
+	def show_sum(self, verbosity=True):
+		"""Calculates and prints the file's hash sum"""
 		if not self.sumtype:
 			print_error("Sumtype is Undefined")
 		elif self.found:
 			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
 					fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
-					print(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}")
+					if verbosity:
+						print(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}")
 					bar()
 
 		if self.unfound:
@@ -240,16 +244,20 @@ class Process(object):
 			for filename in self.unfound:
 				print(" -> ", filename)
 
-	def checksum_plus(self):
+	def checksum_plus(self, verbosity=False):
 		"""Checks and compare the hash sums of more than one files."""
 		if not self.sumtype:
 			print_error("Sumtype is Undefined")
 		elif self.found:
 			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
-					fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
-					fileid.checksum(self.sumtype)
+					if not verbosity:
+						fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
+						fileid.checksum(self.sumtype)
 					bar()
+			if verbosity: 
+				for fileid in self.found:
+					self.checkfile(fileid, bars=False)
 
 		if self.unfound:
 			print("\nThe files below weren't found:")
@@ -283,6 +291,7 @@ class Process(object):
 			with open(textfile, 'w') as txt:
 				for fileid in self.found:
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
+			print(f"\n*File {textfile!r} created!")
 		else:
 			print_error("Can't write in file, unsufficient informations!")
 
