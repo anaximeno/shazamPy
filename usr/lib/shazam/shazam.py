@@ -1,15 +1,13 @@
 #!/usr/bin/python3
 """ ShaZam  can calculate a file sum and compare with a given one.
-
 ShaZam as also other options like:
 	calculate all supported hashsums of one file
-	calculate and compare file sum which is inside a text file
-	Calculate only the file sum without compare it 
-
+	read a file with hash sum and filename inside
+	calculate only the file sum without compare it 
 Prerequesites:
-	Python version 3.2.x or higher
-	termcolor version 1.1.x or higher (install it with pip or conda)
-	alive_progress version 1.6.x or higher (install it with pip or conda)
+	python version 3.2.x or higher
+	termcolor version 1.1.x or higher (can install it with pip3 or conda)
+	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
 
 ### Libraries

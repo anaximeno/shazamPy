@@ -5,7 +5,7 @@
 <br>
 ShaZam as also other options like:
 * calculate all supported hashsums of one file
-* calculate and compare file sum wich is inside a text file
+* read a file with hash sum and filename inside
 * calculate only the file sum without compare it 
 
 Prerequesites:
