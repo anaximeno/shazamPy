@@ -154,21 +154,22 @@ class FileId(object):
 			self.size -= self.size % BUF_SIZE
 			times = int(self.size / BUF_SIZE + 1)
 
-		def generate_data(f, times):
-			for _ in range(times):
-				file_data = f.read(BUF_SIZE)
-				# when lower is the sleep value, faster will be the reading,
-				sleep(0.00001) # but it will increase the CPU usage
-				yield file_data
-
-		with open(self.name, 'rb') as f:
-			for _ in range(times):
-				if bars:
-					with alive_bar(times, bar='blocks', spinner='dots') as bar:
-						yield from generate_data(f, times)
+		# when lower is the sleep value, faster will be the reading,
+		SLEEP_VALUE = 0.00001  # but it will increase the CPU usage
+		if bars:
+			with alive_bar(times, bar='blocks', spinner='dots') as bar:
+				with open(self.name, 'rb') as f:
+					for _ in range(times):
+						file_data = f.read(BUF_SIZE)
+						sleep(SLEEP_VALUE)
+						yield file_data
 						bar()
-				else:
-					yield from generate_data(f, times)
+		else:
+			with open(self.name, 'rb') as f:
+				for _ in range(times):
+					file_data = f.read(BUF_SIZE)
+					sleep(SLEEP_VALUE)
+					yield file_data
 
 	def update_data(self, sumtype, generated_data):
 		"""Updates binary data to the sumtype's class."""
@@ -210,21 +211,24 @@ class Process(object):
 		else:
 			print_error(f"Unsupported sumtype: {sumtype!r}")
 
-	def checkfile(self, fid=None, bars=True, verbosity=True):
+	def checkfile(self, *, fid=None, fdata=None, bars=True, verbosity=True):
 		"""Check and Compare the hash sum."""
 		if not self.sumtype:
 			print_error("Sumtype is Undefined!")
 		elif not self.found and self.unfound:
 			print_error(f"File not found: {self.unfound[0]!r}")
 		elif not self.found and not self.unfound:
-			print_error("Can't checksum, lack of arguments.")
+			print_error("Can't checksum without files!")
 		else:
-			fileid = fid if fid else self.found[0]
-			fileid.update_data(self.sumtype, fileid.gen_data(bars=bars))
+			fileid = self.found[0] if not fid else fid
+			fileid.update_data(
+				sumtype=self.sumtype, 
+				generated_data=fileid.gen_data(bars=bars) if not fdata else fdata
+			)
 			print("\n -> ", end='')
 			fileid.checksum(self.sumtype)
 			if verbosity:
-				print(f"Given Hash Sum:       {fileid.gsum!r}")
+				print(f"Original Hash Sum:    {fileid.gsum!r}")
 				print(f"Calculated Hash Sum:  {fileid.get_hashsum(self.sumtype)!r}")
 
 	def show_sum(self, verbosity=True):
@@ -249,15 +253,17 @@ class Process(object):
 		if not self.sumtype:
 			print_error("Sumtype is Undefined")
 		elif self.found:
+			files_data = []
 			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
 					if not verbosity:
 						fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
 						fileid.checksum(self.sumtype)
+					else: files_data.append(list(fileid.gen_data(bars=False)))
 					bar()
 			if verbosity: 
-				for fileid in self.found:
-					self.checkfile(fileid, bars=False)
+				for fileid, file_data in zip(self.found, files_data):
+					self.checkfile(fid=fileid, fdata=file_data, bars=False)
 
 		if self.unfound:
 			print("\nThe files below weren't found:")
@@ -293,5 +299,5 @@ class Process(object):
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
 			print(f"\n*File {textfile!r} created!")
 		else:
-			print_error("Can't write in file, unsufficient informations!")
+			print_error("Can't write, unsufficient informations!")
 
