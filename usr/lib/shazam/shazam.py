@@ -50,7 +50,8 @@ class MainFlow(object):
 				if self.args.write: process.write()
 			elif self.subarg == 'read':
 				process = Process(
-					[FileId(fname, fsum) for fsum, fname in contents(self.args.filename)],
+					[FileId(fname, fsum) 
+						for fsum, fname in contents(self.args.filename)],
 					sumtype=get_sumtype(self.args.filename)
 				)
 				if len(contents(self.args.filename)) == 1:
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 		help='calculates and show the hash sum',
 		usage='shazam calc [-h/--help] [-w/--write] [--no-verbose] {sumtype} [files...]',
 		description='Calculates and show the hash sum.'
-		)
+	)
 	calc.add_argument('sumtype', choices=sumtypes_list)
 	calc.add_argument("-w", "--write", action='store_true', 
 		help='saves all calculated sums in a file'

@@ -1,3 +1,4 @@
+# %load common.py
 #!/usr/bin/python3
 """ ShaZam  can calculate a file sum and compare with a given one.
 ShaZam as also other options like:
@@ -17,7 +18,6 @@ import os
 import sys
 import hashlib as hlib
 from time import sleep
-
 try:
 	# Third-part libraries
 	from termcolor import colored as clr
@@ -40,9 +40,12 @@ __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by Anaxímeno Brito"
 
 
-# List of supported hash sums
+# List of all supported hash sums
 sumtypes_list = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
-BUF_SIZE = 32768 # Constant, don't change!
+BUF_SIZE = 32768  # Constant, don't change!
+# when lower is the sleep value, faster will be the reading,
+SLEEP_VALUE = 0.00001  # but it will increase the CPU usage
+
 
 
 def exists(path):
@@ -50,13 +53,12 @@ def exists(path):
 	return os.path.exists(path)
 
 
-def print_error(*err: object, exit=True):
+def print_error(*err, exit=True, err_num=1):
 	"""print error message and exit.
 	Keyword arg: exit -- bool (default True)."""
 	error_message = ' '.join(err)
 	print("shazam: error: %s" % error_message)	
-	if exit: 
-		sys.exit(1)
+	if exit: sys.exit(err_num)
 
 
 def hexa_to_int(hexa):
@@ -97,13 +99,25 @@ def contents(txtfile):
 	try:
 		with open(txtfile, "rt") as txt:
 			content = [
-				(line.split()[0], line.split()[1]) for line in txt if len(line.split()) == 2
+				(line.split()[0], line.split()[1]) for line in txt
 			]
 		if content: 
 			return content
-		raise ValueError
-	except ValueError:
+		raise IndexError
+	except IndexError:
 		print_error(f"Error reading {txtfile!r}!")
+
+
+def salutations(string, time_sleep=0.1):
+	lines = string.splitlines()
+	for line in lines:
+		lag = '\r'
+		for char in line:
+			lag += char
+			sys.stdout.write(lag)
+			sys.stdout.flush()
+			sleep(time_sleep)
+		print('')
 
 
 class FileId(object):
@@ -154,8 +168,6 @@ class FileId(object):
 			self.size -= self.size % BUF_SIZE
 			times = int(self.size / BUF_SIZE + 1)
 
-		# when lower is the sleep value, faster will be the reading,
-		SLEEP_VALUE = 0.00001  # but it will increase the CPU usage
 		if bars:
 			with alive_bar(times, bar='blocks', spinner='dots') as bar:
 				with open(self.name, 'rb') as f:
@@ -191,13 +203,8 @@ class Process(object):
 
 		# ´self.found´ and ´self.unfound´ store files,
 		# depending on their existence or not.
-		self.found = [
-				f for f in files if f.existence is True
-			]  if files else []
-
-		self.unfound = [
-				f.name for f in files if f not in self.found
-			] if files else []
+		self.found = [f for f in files if f.existence is True]
+		self.unfound = [f.name for f in files if f not in self.found]
 
 	def add_file(self, fileid):
 		if fileid.existence:
@@ -294,10 +301,15 @@ class Process(object):
 	def write(self):
 		if self.found and self.sumtype:
 			textfile = self.sumtype + 'sum.txt'
+			ch = input(f"\nThe calculated hash sum will be saved on {textfile!r}, change name? [y|N]: ")
+			if ch.lower() == 'y' or ch.lower() == 'yes':
+				textfile = input("Write the filename > ")
+				if textfile.isspace():
+					textfile = self.sumtype + 'sum.txt'
 			with open(textfile, 'w') as txt:
 				for fileid in self.found:
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
-			print(f"\n*File {textfile!r} created!")
+			salutations(f"\n* File: {textfile!r} created!", time_sleep=0.064)
 		else:
-			print_error("Can't write, unsufficient informations!")
+			print_error("Can't write: no files were found for writing!")
 
