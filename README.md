@@ -1,6 +1,6 @@
-# ShaZam
+# SHA-ZAM
 
- ShaZam is a **Comand Line Application** made in python that checks the integrity of one file by comparing it with a given hash.
+ Shazam is a **Comand Line Application** made in python that checks the integrity of one file by comparing it with a given hash.
 <br>
 <br>
 ShaZam as also other options like:
