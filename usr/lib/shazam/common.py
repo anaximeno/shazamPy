@@ -96,6 +96,8 @@ def contents(txtfile):
 	each tuple has the following structure: `(filesum, filename)`."""
 	if not exists(txtfile):
 		print_error(f"{txtfile!r} was not found!")
+	elif not readable(txtfile):
+		print_error(f"Error reading {txtfile!r}!")
 	try:
 		with open(txtfile, "rt") as txt:
 			content = [(line.split()[0], line.split()[1]) for line in txt]
