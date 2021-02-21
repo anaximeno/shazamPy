@@ -1,9 +1,9 @@
-# ShaZam
+# SHA-ZAM
 
- ShaZam is a **Comand Line Application** made in python that checks the integrity of one file by comparing it with a given hash.
+ Shazam is a **Comand Line Application** made in python that checks the integrity of one file by comparing it with a given hash.
 <br>
 <br>
-ShaZam as also other options like:
+It as also other options like:
 * calculate all supported hashsums of one file
 * read a file with hash sum and filename inside
 * calculate only the file sum without compare it 
@@ -14,7 +14,7 @@ Prerequesites:
 * alive_progress version 1.6.x or higher (install it with pip or conda)
 
 
-### How does it work ?
+### How Does Shazam Work ?
 
 It calculates the file's hash sum and compares it with a given hash, if they were equal, it will show a sucess message, else, it will show an unsucess message.
 
