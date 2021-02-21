@@ -98,13 +98,13 @@ def contents(txtfile):
 		print_error(f"{txtfile!r} was not found!")
 	try:
 		with open(txtfile, "rt") as txt:
-			content = [
-				(line.split()[0], line.split()[1]) for line in txt
-			]
-		if content: 
+			content = [(line.split()[0], line.split()[1]) for line in txt]
+		if content:
 			return content
 		raise IndexError
 	except IndexError:
+		print_error(f"Error reading {txtfile!r}!")
+	except UnicodeDecodeError:
 		print_error(f"Error reading {txtfile!r}!")
 
 
@@ -125,7 +125,7 @@ class FileId(object):
 	def __init__(self, name, givensum=None):
 		# Eliminates asteriscs if it is in the beginning of the file name
 		if name[0] == '*' and not exists(name): name = name[1:] 
-	
+
 		self.name = name
 		self.existence = exists(name)
 		self.readability = readable(name)
