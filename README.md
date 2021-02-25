@@ -25,7 +25,7 @@ It calculates the file's hash sum and compares it with a given hash, if they wer
 	$ shazam [COMMAND] [Contents..]
 
 
-#### Example for only calculating the hash sums:
+#### Example for only calculating the hash sums(1):
 
 	$ shazam calc sha1 linux.iso freebsd.iso [...]
 
@@ -35,7 +35,7 @@ It calculates the file's hash sum and compares it with a given hash, if they wer
 
 **Supported sumtypes**: *md5*, *sha1*, *sha224*, *sha256*, *sha384*, *sha512*, can use also the sumtype *all* for getting all supported sumtypes
 
-#### Example checking and comparing hash sum(1):
+#### Example checking and comparing hash sum(2):
 
   	$ shazam check sha1 4fe31ea2ce34ef45234fbedfca linux.iso
 
@@ -45,7 +45,7 @@ It calculates the file's hash sum and compares it with a given hash, if they wer
 
 *Supported sumtypes: md5, sha1, sha224, sha256, sha384, sha512.
 
-#### Example reading a file with hash sum and filename inside(2):
+#### Example reading a file with hash sum and filename inside(3):
 
 	$ shazam read sha1sum.txt
 
