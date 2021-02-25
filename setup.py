@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open("VERSION", "rt") as v:
+with open("/usr/share/shazam/VERSION", "rt") as v:
     __version__ = v.read().strip()
 
 with open("README.md", "rt") as ld:
