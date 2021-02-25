@@ -31,7 +31,7 @@ It calculates the file's hash sum and compares it with a given hash, if they wer
 
 ##### General Formula(1):
 
-	$ shazam calc [*sumtype*] [files...]
+	$ shazam calc [*sumtype] [files...]
 
 **Supported sumtypes**: *md5*, *sha1*, *sha224*, *sha256*, *sha384*, *sha512*, can use also the sumtype *all* for getting all supported sumtypes
 
