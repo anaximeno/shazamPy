@@ -10,14 +10,27 @@ Prerequesites:
 	termcolor version 1.1.x or higher (can install it with pip3 or conda)
 	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
-
-
 #### Libraries
 # Standart Libraries
 import os
 import sys
 import hashlib as hlib
 from time import sleep
+
+
+def exists(path):
+	"""Searchs for a file/path and return bool."""
+	return os.path.exists(path)
+
+
+def print_error(*err, exit=True, err_num=1):
+	"""Print the error message and exit.
+	Keyword arg: exit -- bool (default True)."""
+	error_message = ' '.join(err)
+	print("shazam: error: %s" % error_message)	
+	if exit: sys.exit(err_num)
+
+
 try:
 	# Third-part libraries
 	from termcolor import colored as clr
@@ -29,36 +42,24 @@ except ImportError:
 
 
 version = None
-if os.path.exists("/usr/share/shazam/VERSION"):
+if exists("/usr/share/shazam/VERSION"):
 	with open("/usr/share/shazam/VERSION", "rt") as ver:
 		version = str(ver.read()).strip()
-
 
 __author__ = "Anaxímeno Brito"
 __version__ = version if version else 'Undefined'
 __license__ = "GNU General Public License v3.0"
-__copyright__ = "Copyright (c) 2020-2021 by Anaxímeno Brito"
+__copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
 
-# List of all supported hash sums
+# List of all supported hash sums:
 sumtypes_list = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
-BUF_SIZE = 32768  # Constant, don't change!
-# when lower is the sleep value, faster will be the reading,
-SLEEP_VALUE = 0.00001  # but it will increase the CPU usage
-
-
-
-def exists(path):
-	"""Searchs for a file/path and return bool."""
-	return os.path.exists(path)
-
-
-def print_error(*err, exit=True, err_num=1):
-	"""print error message and exit.
-	Keyword arg: exit -- bool (default True)."""
-	error_message = ' '.join(err)
-	print("shazam: error: %s" % error_message)	
-	if exit: sys.exit(err_num)
+# BUF_SIZE is Constant, don't change it!
+BUF_SIZE = 32768
+# When lower is the sleep value, faster will be the reading,
+# but it will increase the CPU usage, it can be changed to 
+# improve the performance.
+SLEEP_VALUE = 0.0001 
 
 
 def hexa_to_int(hexa):
@@ -84,8 +85,6 @@ def readable(fname):
 
 def get_sumtype(fname):
 	"""Analyses the filename and return the sumtype."""
-	if not readable(fname):
-		print_error(f"{fname!r} is unreadable!")
 	for stype in sumtypes_list[::-1]:
 		if stype in fname: return stype
 	print_error(f"Sumtype not recognized in: {fname!r}")
@@ -101,8 +100,7 @@ def contents(txtfile):
 	try:
 		with open(txtfile, "rt") as txt:
 			content = [(line.split()[0], line.split()[1]) for line in txt]
-		if content:
-			return content
+		if content:	return content
 		raise IndexError
 	except IndexError:
 		print_error(f"Error reading {txtfile!r}!")
@@ -123,9 +121,11 @@ def salutations(string, time_sleep=0.1):
 
 
 class FileId(object):
-	"""This class holds all necessary file informations and operations."""
+	"""This class holds all necessary informations and operations 
+	for one file object."""
 	def __init__(self, name, givensum=None):
-		# Eliminates asteriscs if it is in the beginning of the file name
+		# Eliminates asteriscs if there exists one in 
+		# the beginning of the file name
 		if name[0] == '*' and not exists(name): name = name[1:] 
 
 		self.name = name
@@ -218,7 +218,7 @@ class Process(object):
 		if sumtype in sumtypes_list:
 			self.sumtype = sumtype
 		else:
-			print_error(f"Unsupported sumtype: {sumtype!r}")
+			print_error(f"Sumtype not supported: {sumtype!r}")
 
 	def checkfile(self, *, fid=None, fdata=None, bars=True, verbosity=True):
 		"""Check and Compare the hash sum."""
@@ -252,10 +252,7 @@ class Process(object):
 						print(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}")
 					bar()
 
-		if self.unfound:
-			print("\nThe files below weren't found:")
-			for filename in self.unfound:
-				print(" -> ", filename)
+		self.print_unfound()
 
 	def checksum_plus(self, verbosity=False):
 		"""Checks and compare the hash sums of more than one files."""
@@ -273,32 +270,40 @@ class Process(object):
 			if verbosity: 
 				for fileid, file_data in zip(self.found, files_data):
 					self.checkfile(fid=fileid, fdata=file_data, bars=False)
-
-		if self.unfound:
-			print("\nThe files below weren't found:")
-			for filename in self.unfound:
-				print(" -> ", filename)
+		self.print_unfound()
 
 	def totalcheck(self):
 		"""Print all supported hash sums of one file."""
 		if self.found:
-			fileid = self.found[0]
-		
-			print("Calculating sum...")
-			generated_data = list(fileid.gen_data())
-		
-			with alive_bar(len(fileid.hlist.keys()), spinner='waves') as bar:
-				print("Getting hashes...")
-				for sumtype in fileid.hlist.keys():
-					fileid.update_data(sumtype, generated_data)
-					# when lower is the sleep value, faster will be the reading,
-					sleep(0.00001) # but it will increase the CPU usage
+			generated_datas = []
+			with alive_bar(len(self.found), spinner='waves') as bar:
+				print("Calculating Hashes")
+				for fileid in self.found:
+					generated_datas.append(list(fileid.gen_data(bars=False)))
 					bar()
-			print("")
-			for sumtype in fileid.hlist.keys():
-				print(f"{sumtype}sum: {fileid.get_hashsum(sumtype)} {fileid.name}")
-		else:
-			print_error(f"{self.unfound[0]!r} was not found!")
+			print("\n")
+			for n, fileid, generated_data in zip(range(len(self.found)), self.found, generated_datas):
+				if n > 0 and n < len(self.found):
+					print("\n")		
+				with alive_bar(len(fileid.hlist.keys()), spinner='waves') as bar:
+					print("Getting '%s' Hash Sums" %fileid.name)
+					for sumtype in fileid.hlist.keys():
+						fileid.update_data(sumtype, generated_data)
+						sleep(SLEEP_VALUE)
+						bar()
+				for sumtype in fileid.hlist.keys():
+					print(f"{sumtype}sum: {fileid.get_hashsum(sumtype)} {fileid.name}")
+		self.print_unfound()
+
+	def print_unfound(self):
+		"""Prints all files that were not found."""
+		if self.unfound:
+			print("\nThe files below were not found:")
+			for filename in self.unfound:
+				path = os.path.split(filename)
+				directory, fname = path if path[0] else ('.', path[-1])
+				print(f"  -> {fname!r} in {directory}/")
+		else: pass
 
 	def write(self):
 		if self.found and self.sumtype:
@@ -313,5 +318,5 @@ class Process(object):
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
 			salutations(f"\n* File: {textfile!r} created!", time_sleep=0.064)
 		else:
-			print_error("Can't write: no files were found for writing!")
+			print_error("Cannot write: files were not found!")
 

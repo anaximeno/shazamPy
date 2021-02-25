@@ -22,7 +22,7 @@ from common import *
 __author__ = "Anaxímeno Brito"
 __version__ = version if version else 'Undefined'
 __license__ = "GNU General Public License v3.0"
-__copyright__ = "Copyright (c) 2020-2021 by Anaxímeno Brito"
+__copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
 
 class MainFlow(object):
@@ -44,10 +44,13 @@ class MainFlow(object):
 			elif self.subarg == 'calc':
 				process = Process(
 					[FileId(fname) for fname in self.args.files],
-					sumtype=self.args.sumtype
+					sumtype=self.args.sumtype if self.args.sumtype != 'all' else None
 				)
-				process.show_sum(verbosity=self.args.no_verbose)
-				if self.args.write: process.write()
+				if self.args.sumtype != 'all':
+					process.show_sum(verbosity=self.args.no_verbose)
+					if self.args.write: process.write()
+				else:
+					process.totalcheck()
 			elif self.subarg == 'read':
 				process = Process(
 					[FileId(fname, fsum) 
@@ -57,11 +60,6 @@ class MainFlow(object):
 				if len(contents(self.args.filename)) == 1:
 					process.checkfile(verbosity=self.args.verbose)
 				else: process.checksum_plus(verbosity=self.args.verbose)
-			elif self.subarg == 'all':
-				process = Process(
-					[FileId(self.args.filename)]
-				)
-				process.totalcheck()
 
 		else:
 			print_error('No option was chosen!')
@@ -71,7 +69,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
 		prog="shazam",
 		usage='%(prog)s [-h] [--version] {Sub-Command}',
-		epilog='SHA-ZAM %s' % __copyright__
+		epilog='SHA-ZAM %s' %__copyright__
 	)
 	parser.add_argument("--version",
 		help="print the current version of this program", action='version',
@@ -98,7 +96,9 @@ if __name__ == '__main__':
 		usage='shazam calc [-h/--help] [-w/--write] [--no-verbose] {sumtype} [files...]',
 		description='Calculates and show the hash sum.'
 	)
-	calc.add_argument('sumtype', choices=sumtypes_list)
+	calc_choices = sumtypes_list.copy()
+	calc_choices.append('all')
+	calc.add_argument('sumtype', choices=calc_choices)
 	calc.add_argument("-w", "--write", action='store_true', 
 		help='saves all calculated sums in a file'
 	)
@@ -122,15 +122,6 @@ if __name__ == '__main__':
 	read.add_argument('--verbose', 
 		action='store_true', help="verbose option"
 	)
-
-	# Postional arguments for calculating all
-	# sums of the file
-	all_sums = subparser.add_parser('all',
-		help='calculate and show all supported hash type of one file',
-		description='Calculate and show all supported hash type of one file.',
-		usage='shazam all filename'
-	)
-	all_sums.add_argument('filename', help="file's name")
 
 	if len(sys.argv) > 1:
 		mf = MainFlow(parser.parse_args())
