@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+#%load shazam.py
 """ ShaZam  can calculate a file sum and compare with a given one.
 ShaZam as also other options like:
 	calculate all supported hashsums of one file
@@ -48,19 +49,17 @@ class MainFlow(object):
 				)
 				if self.args.sumtype != 'all':
 					process.show_sum(verbosity=self.args.no_verbose)
-					if self.args.write: process.write()
-				else:
-					process.totalcheck()
+					if self.args.write: process.write(self.args.name)
+				else: process.totalcheck()
 			elif self.subarg == 'read':
+				content = contents(self.args.filename)
 				process = Process(
-					[FileId(fname, fsum) 
-						for fsum, fname in contents(self.args.filename)],
-					sumtype=get_sumtype(self.args.filename)
+					[FileId(fname, fsum) for fsum, fname in content],
+					sumtype=self.args.type if self.args.type else get_sumtype(self.args.filename)
 				)
-				if len(contents(self.args.filename)) == 1:
+				if len(content) == 1:
 					process.checkfile(verbosity=self.args.verbose)
-				else: process.checksum_plus(verbosity=self.args.verbose)
-
+				else: process.checkfile_plus(verbosity=self.args.verbose)
 		else:
 			print_error('No option was chosen!')
 
@@ -75,6 +74,8 @@ if __name__ == '__main__':
 		help="print the current version of this program", action='version',
 		version='%(prog)s {}'.format(__version__)
 	)
+
+	# Stores all subparsers
 	subparser = parser.add_subparsers(dest='subparser', title='Sub Commands')
 
 	# Positional arguments for check and compare hashsums
@@ -96,6 +97,9 @@ if __name__ == '__main__':
 		usage='shazam calc [-h/--help] [-w/--write] [--no-verbose] {sumtype} [files...]',
 		description='Calculates and show the hash sum.'
 	)
+	# 'calc_choices' is a list which has all sumtypes in it 
+	# plus another option (all) which we use to calculate all
+	# sumtypes/hashtypes simultaneosly.
 	calc_choices = sumtypes_list.copy()
 	calc_choices.append('all')
 	calc.add_argument('sumtype', choices=calc_choices)
@@ -104,6 +108,9 @@ if __name__ == '__main__':
 	)
 	calc.add_argument("--no-verbose", 
 		action='store_false', help="no verbose option"
+	)
+	calc.add_argument('-n', '--name', metavar='',
+		help='Use this together with write to determine the writefile\'s name'
 	)
 	calc.add_argument('files', nargs='+', 
 		help="one or more files for calculating the hash sums"
@@ -121,6 +128,9 @@ if __name__ == '__main__':
 	)
 	read.add_argument('--verbose', 
 		action='store_true', help="verbose option"
+	)
+	read.add_argument('-t', '--type', metavar='', choices=sumtypes_list,
+		help='This can be used to specify the sumtype if it was not recognized in the file\'s name.'
 	)
 
 	if len(sys.argv) > 1:

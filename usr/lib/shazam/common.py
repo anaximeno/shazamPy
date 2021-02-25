@@ -1,5 +1,5 @@
-# %load common.py
 #!/usr/bin/python3
+#%load common.py
 """ ShaZam  can calculate a file sum and compare with a given one.
 ShaZam as also other options like:
 	calculate all supported hashsums of one file
@@ -87,7 +87,7 @@ def get_sumtype(fname):
 	"""Analyses the filename and return the sumtype."""
 	for stype in sumtypes_list[::-1]:
 		if stype in fname: return stype
-	print_error(f"Sumtype not recognized in: {fname!r}")
+	return False
 
 
 def contents(txtfile):
@@ -96,16 +96,17 @@ def contents(txtfile):
 	if not exists(txtfile):
 		print_error(f"{txtfile!r} was not found!")
 	elif not readable(txtfile):
-		print_error(f"Error reading {txtfile!r}!")
+		print_error(f"Can't read {txtfile!r}!")
 	try:
 		with open(txtfile, "rt") as txt:
 			content = [(line.split()[0], line.split()[1]) for line in txt]
-		if content:	return content
-		raise IndexError
+		if content:	
+			return content
+		print_error(f"Reading Error: {txtfile!r} is empty!")
 	except IndexError:
-		print_error(f"Error reading {txtfile!r}!")
+		print_error(f"Error while reading {txtfile!r}!")
 	except UnicodeDecodeError:
-		print_error(f"Error reading {txtfile!r}!")
+		print_error(f"Can't read {txtfile!r}!")
 
 
 def salutations(string, time_sleep=0.1):
@@ -190,7 +191,7 @@ class FileId(object):
 		for file_data in generated_data:
 			self.hlist[sumtype].update(file_data)
 
-	def checksum(self, sumtype) :
+	def checksum(self, sumtype):
 		"""Compares file's sum with givensum."""
 		if hexa_to_int(self.get_hashsum(sumtype)) == self.integer_sum:
 			print(clr(f"{self.name}", "green"))
@@ -202,23 +203,12 @@ class Process(object):
 
 	def __init__(self, files: list, sumtype=None):
 		self.sumtype = sumtype
-
 		# ´self.found´ and ´self.unfound´ store files,
 		# depending on their existence or not.
 		self.found = [f for f in files if f.existence is True]
 		self.unfound = [f.name for f in files if f not in self.found]
-
-	def add_file(self, fileid):
-		if fileid.existence:
-			self.found.append(fileid)
-		else:
-			self.unfound.append(fileid.name)
-
-	def define_sumtype(self, sumtype):
-		if sumtype in sumtypes_list:
-			self.sumtype = sumtype
-		else:
-			print_error(f"Sumtype not supported: {sumtype!r}")
+		self.n_found = len(self.found)
+		self.n_unfound = len(self.unfound)
 
 	def checkfile(self, *, fid=None, fdata=None, bars=True, verbosity=True):
 		"""Check and Compare the hash sum."""
@@ -245,7 +235,7 @@ class Process(object):
 		if not self.sumtype:
 			print_error("Sumtype is Undefined")
 		elif self.found:
-			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
+			with alive_bar(self.n_found, bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
 					fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
 					if verbosity:
@@ -254,13 +244,13 @@ class Process(object):
 
 		self.print_unfound()
 
-	def checksum_plus(self, verbosity=False):
+	def checkfile_plus(self, verbosity=False):
 		"""Checks and compare the hash sums of more than one files."""
 		if not self.sumtype:
-			print_error("Sumtype is Undefined")
+			print_error("Sumtype is already undefined, you can determine it the sumtype be adding '--type sumtype' on the command call.")
 		elif self.found:
 			files_data = []
-			with alive_bar(len(self.found), bar='blocks', spinner='dots') as bar:
+			with alive_bar(self.n_found, bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
 					if not verbosity:
 						fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
@@ -276,14 +266,14 @@ class Process(object):
 		"""Print all supported hash sums of one file."""
 		if self.found:
 			generated_datas = []
-			with alive_bar(len(self.found), spinner='waves') as bar:
+			with alive_bar(self.n_found, spinner='waves') as bar:
 				print("Calculating Hashes")
 				for fileid in self.found:
 					generated_datas.append(list(fileid.gen_data(bars=False)))
 					bar()
 			print("\n")
-			for n, fileid, generated_data in zip(range(len(self.found)), self.found, generated_datas):
-				if n > 0 and n < len(self.found):
+			for n, fileid, generated_data in zip(range(self.n_found), self.found, generated_datas):
+				if n > 0 and n < self.n_found:
 					print("\n")		
 				with alive_bar(len(fileid.hlist.keys()), spinner='waves') as bar:
 					print("Getting '%s' Hash Sums" %fileid.name)
@@ -305,18 +295,20 @@ class Process(object):
 				print(f"  -> {fname!r} in {directory}/")
 		else: pass
 
-	def write(self):
+	def write(self, name=None):
 		if self.found and self.sumtype:
-			textfile = self.sumtype + 'sum.txt'
-			ch = input(f"\nThe calculated hash sum will be saved on {textfile!r}, change name? [y|N]: ")
-			if ch.lower() == 'y' or ch.lower() == 'yes':
-				textfile = input("Write the filename > ")
-				if textfile.isspace():
-					textfile = self.sumtype + 'sum.txt'
+			if not name:
+				textfile = self.sumtype + 'sum.txt'
+				ch = input(f"\nThe calculated hash sum will be saved on {textfile!r}, change name? [y|N]: ")
+				if ch.lower() == 'y' or ch.lower() == 'yes':
+					newname = input("Write the filename > ")
+					if not newname.isspace():
+						textfile = newname
+			else: textfile = name
 			with open(textfile, 'w') as txt:
 				for fileid in self.found:
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
 			salutations(f"\n* File: {textfile!r} created!", time_sleep=0.064)
 		else:
-			print_error("Cannot write: files were not found!")
+			print_error("Cannot write: no files were found!")
 

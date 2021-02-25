@@ -2,7 +2,7 @@
 
 # This file calls the principal file in $SHAZAM,
 # which makes all the processings. But if it don't
-# find the file, echo a error message
+# find the file, echoes an error message
 
 # App's path
 SHAZAM=/usr/lib/shazam/shazam.py
@@ -11,5 +11,5 @@ if [ -e $SHAZAM ]
 then
 	$SHAZAM $@
 else
-	echo 'shazam: error:' $SHAZAM 'was not found!!'
+	echo 'Error:' $SHAZAM 'was not found!! You must reinstall the programm!'
 fi
