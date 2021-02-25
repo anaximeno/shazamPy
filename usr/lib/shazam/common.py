@@ -71,7 +71,7 @@ def hexa_to_int(hexa):
 
 def readable(fname):
 	"""Analyses de readability and return bool."""
-	if not exists(fname) or not os.path.isfile(fname):
+	if not exists(fname) and not os.path.isfile(fname):
 		return False
 	try:
 		# Try to read, at least, one byte of the file to
