@@ -7,7 +7,7 @@ cdb5de58740c50628702e3cefa0fb28d376cb98c debian/control
 da39a3ee5e6b4b0d3255bfef95601890afd80709 debian/copyright
 c8bdb9fedf86b391cb4cd1c8a68122ff1b07455a debian/install
 e430223cc9bf4a71160c11bf91834e2499db69ce debian/rules
-23ace589a17ceec98943b69694ebc1e2995120ce usr/lib/shazam/common.py
-65a8a75b89b8088a0a3768288ff081f5e27a5db1 usr/lib/shazam/shazam.py
-ec76395f8ef4241b96c023a494d0d8ee0f8aeb3a usr/share/shazam/VERSION
+38fb10bb33dc0c19179d7510321f3a566acd5747 usr/lib/shazam/common.py
+89a4ae33b0af211e600710008feb6dfac4dffb3d usr/lib/shazam/shazam.py
+3b64d4166d8c566e8a31d44dc1bb530318b6ccb9 usr/share/shazam/VERSION
 cb99ca751ff2a623faa1c89ec08cadf7c93c4485 usr/bin/shazam
