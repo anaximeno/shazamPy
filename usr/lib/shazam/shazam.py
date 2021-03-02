@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """ ShaZam  can calculate a file sum and compare with a given one.
 ShaZam as also other options like:
@@ -50,8 +50,8 @@ class MainFlow(object):
 				sumtype=self.args.sumtype if self.args.sumtype != 'all' else None
 			)
 			if self.args.sumtype != 'all':
-				process.show_sum(verbosity=self.args.no_verbose)
-				if self.args.write: process.write(self.args.name)
+				process.calculate_sum(verbosity=self.args.no_verbose)
+				if self.args.write : process.write(self.args.name)
 			else: process.totalcheck()
 		elif self.subarg == 'read':
 			content = cm.contents(self.args.filename)
@@ -61,7 +61,7 @@ class MainFlow(object):
 			)
 			if len(content) == 1:
 				process.checkfile(verbosity=self.args.verbose)
-			else: process.checkfile_plus(verbosity=self.args.verbose)
+			else : process.checkfile_plus(verbosity=self.args.verbose)
 
 
 if __name__ == '__main__':
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	check.add_argument("sumtype", choices=cm.sumtypes_list)
 	check.add_argument("filesum", help="file's hash sum")
 	check.add_argument("filename", help="file's name")
-	check.add_argument("--no-verbose",
+	check.add_argument("--no-verbose", "--noverbose",
 		action='store_false', help="no verbose option"
 	)
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 	calc.add_argument("-w", "--write", action='store_true',
 		help='saves all calculated sums in a file'
 	)
-	calc.add_argument("--no-verbose",
+	calc.add_argument("--no-verbose", "--noverbose",
 		action='store_false', help="no verbose option"
 	)
 	calc.add_argument('-n', '--name', metavar='',

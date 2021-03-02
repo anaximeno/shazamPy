@@ -1,5 +1,6 @@
-#!/usr/bin/python3
-""" Common is a support module, which contains the principals methods and/or functions of this programm."""
+#!/usr/bin/env python3
+""" Common is a support module, which contains the principals methods
+and/or functions of this programm."""
 # -*- coding: utf-8 -*-
 
 import os
@@ -26,9 +27,8 @@ try:
 	from termcolor import colored as clr
 	from alive_progress import alive_bar
 except ImportError:
-	print_error("Important Modules are not installed yet: termcolor, " +
-	"alive_progress.\nInstall them with: pip (or pip3) install termcolor " +
-	"alive_progress")
+	print_error("Important Modules are not installed yet: termcolor and",
+	"alive_progress.\nInstall them with: pip3 install termcolor alive_progress")
 
 
 version = None
@@ -44,8 +44,10 @@ __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
 # List of all supported hash sums:
 sumtypes_list = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
+
 # BUF_SIZE is Constant, don't change it!
 BUF_SIZE = 32768
+
 # When lower is the sleep value, faster will be the reading,
 # but it will increase the CPU usage, it can be changed to
 # improve the performance.
@@ -54,7 +56,7 @@ SLEEP_VALUE = 0.00001
 
 def hexa_to_int(hexa):
 	"""Receive hexadecimal string and return integer."""
-	try: return int(hexa, 16)
+	try : return int(hexa, 16)
 	except ValueError:
 		print_error(f"{hexa!r} is not an hexadecimal value!")
 
@@ -77,7 +79,7 @@ def readable(fname):
 def get_sumtype(fname):
 	"""Analyses the filename and return the sumtype."""
 	for stype in sumtypes_list[::-1]:
-		if stype in fname:return stype
+		if stype in fname : return stype
 	return False
 
 
@@ -100,7 +102,7 @@ def contents(txtfile):
 		print_error(f"Reading Error: {txtfile!r} {prob}")
 
 
-def salutations(string, time_sleep=0.1):
+def salutations(string: str, time_sleep=0.1):
 	lines = string.splitlines()
 	for line in lines:
 		lag = '\r'
@@ -118,9 +120,12 @@ class FileID(object):
 	def __init__(self, name, givensum=None):
 		# Eliminates asteriscs if there exists one at the beginning
 		# of the file name.
-		if name[0] == '*' and not exists(name): name = name[1:]
+		self.name = name if name[0] != '*' or exists(name) else name[1:]
+		
+		# Directory of the file and splited name
+		path = os.path.split(name)
+		self.dir, self.only_name = path if path[0] else ('.', path[-1])
 
-		self.name = name
 		self.existence = exists(name)
 		self.readability = readable(name)
 
@@ -131,7 +136,7 @@ class FileID(object):
 		# it will be used in comparisons for checking if the values are equal.
 		self.integer_sum = hexa_to_int(givensum) if givensum else None
 
-		# This list will store all hash sums that were calculated.
+		# This list will store all hash types that were calculated.
 		self.calculated_sums = []
 
 		if readable(name):
@@ -146,6 +151,9 @@ class FileID(object):
 				"sha512": hlib.sha512()
 			}
 
+	def __str__(self):
+		return self.name
+
 	def get_hashsum(self, sumtype):
 		"""Return the file's hash sum."""
 		if sumtype in self.calculated_sums:
@@ -157,19 +165,18 @@ class FileID(object):
 		if self.readability:
 			times = (self.size // BUF_SIZE) + (self.size % BUF_SIZE)
 			if bars:
+				print("        * Calculating Binaries *")
 				with alive_bar(times, bar='blocks', spinner='dots') as bar:
 					with open(self.name, 'rb') as f:
 						for _ in range(times):
-							file_data = f.read(BUF_SIZE)
+							yield f.read(BUF_SIZE)
 							sleep(SLEEP_VALUE)
-							yield file_data
 							bar()
 			else:
 				with open(self.name, 'rb') as f:
 					for _ in range(times):
-						file_data = f.read(BUF_SIZE)
+						yield f.read(BUF_SIZE)
 						sleep(SLEEP_VALUE)
-						yield file_data
 		else:
 			print_error(f"Reading Error: {self.name!r} is not readable!")
 
@@ -180,11 +187,11 @@ class FileID(object):
 		self.calculated_sums.append(sumtype)
 
 	def checksum(self, sumtype):
-		"""Compares file's sum with givensum."""
+		"""Compares file's sum with givensum and return the results"""
 		if hexa_to_int(self.get_hashsum(sumtype)) == self.integer_sum:
-			print(clr(f"{self.name}", "green"))
+			return clr(f"{self.name}", "green")
 		else:
-			print(clr(f"{self.name} X", "red"))
+			return clr(f"{self.name} X", "red")
 
 
 class Process(object):
@@ -192,10 +199,10 @@ class Process(object):
 	def __init__(self, files: list, sumtype=None):
 		# define the sumtype to be worked with
 		self.sumtype = sumtype
-		# ´self.found´ and ´self.unfound´ store files depending on their 
-		# existence or not, and below them are their respective lengths.
-		self.found = [f for f in files if f.existence is True]
-		self.unfound = [f.name for f in files if f not in self.found]
+		# ´self.found´ and ´self.unfound´ store files depending on their
+		# existence/readability or not, and below them are their respective lengths.
+		self.found = [f for f in files if f.readability is True]
+		self.unfound = [f for f in files if f not in self.found]
 		self.n_found = len(self.found)
 		self.n_unfound = len(self.unfound)
 
@@ -213,17 +220,18 @@ class Process(object):
 				sumtype=self.sumtype,
 				generated_data=fdata or fileid.gen_data(bars=bars)
 			)
-			print("\n -> ", end='')
-			fileid.checksum(self.sumtype)
+			print("\n-----", fileid.checksum(self.sumtype))
 			if verbosity:
-				print(f"Original Hash Sum:    {fileid.gsum!r}")
-				print(f"Calculated Hash Sum:  {fileid.get_hashsum(self.sumtype)!r}")
+				print(f"|  Original  Hash Sum:  {fileid.gsum!r}")
+				print(f"| Calculated Hash Sum:  {fileid.get_hashsum(self.sumtype)!r}")
+				print("------------------")
 
-	def show_sum(self, verbosity=True):
+	def calculate_sum(self, verbosity=True):
 		"""Calculates and prints the file's hash sum"""
 		if not self.sumtype:
 			print_error("Sumtype was not defined!")
 		elif self.found:
+			print("        * Calculating Hashes *")
 			with alive_bar(self.n_found, bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
 					fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
@@ -239,12 +247,16 @@ class Process(object):
 			print_error("Sumtype was not defined!\nUse --type command to define the sumtype (ex. --type sha1).")
 		elif self.found:
 			files_data = []
+			if verbosity : print("        * Calculating Binaries *")
 			with alive_bar(self.n_found, bar='blocks', spinner='dots') as bar:
 				for fileid in self.found:
 					if not verbosity:
-						fileid.update_data(self.sumtype, fileid.gen_data(bars=False))
-						fileid.checksum(self.sumtype)
-					else: files_data.append(list(fileid.gen_data(bars=False)))
+						fileid.update_data(
+							sumtype=self.sumtype, 
+							generated_data=fileid.gen_data(bars=False)
+						)
+						print(fileid.checksum(self.sumtype))
+					else : files_data.append(list(fileid.gen_data(bars=False)))
 					bar()
 			if verbosity:
 				for fileid, file_data in zip(self.found, files_data):
@@ -253,42 +265,48 @@ class Process(object):
 
 	def totalcheck(self):
 		"""Print all supported hash sums of one file."""
-		if self.found:
-			generated_datas = []
-			print("  * Calculating Hashes *")
-			with alive_bar(self.n_found, spinner='waves') as bar:
-				for fileid in self.found:
-					generated_datas.append(list(fileid.gen_data(bars=False)))
-					bar()
-			times = len(fileid.hlist.keys())*self.n_found 
-			print("  * Getting Hash Sums *")
-			with alive_bar(times, spinner='waves') as bar:
-				for fileid, generated_data in zip(self.found, generated_datas):
-					for sumtype in fileid.hlist.keys():
-						fileid.update_data(sumtype, generated_data)
-						sleep(SLEEP_VALUE)
-						bar()
-			print("\n")
+		if not self.found:
+			self.print_unfound(exit=True)
 
-			for n, fileid in enumerate(self.found):
-				if n > 0 and n < self.n_found:
-					print("\n")
-				print("----- '%s' -----" % fileid.name)
+		generated_datas = []
+		print("        * Calculating Hashes *")
+		with alive_bar(self.n_found, spinner='waves') as bar:
+			for fileid in self.found:
+				generated_datas.append(list(fileid.gen_data(bars=False)))
+				bar()
+		times = len(fileid.hlist.keys())*self.n_found
+		print("        * Getting Hash Sums *")
+		with alive_bar(times, spinner='waves') as bar:
+			for fileid, generated_data in zip(self.found, generated_datas):
 				for sumtype in fileid.hlist.keys():
-					print(f"| {sumtype}sum: {fileid.get_hashsum(sumtype)} {fileid.name}")
-				print('---------------')
+					fileid.update_data(sumtype, generated_data)
+					sleep(SLEEP_VALUE)
+					bar()
+		print("\n")
+
+		for n, fileid in enumerate(self.found):
+			if n > 0 and n < self.n_found:
+				print("\n")
+			print("----- '%s' -----" % fileid.name)
+			for sumtype in fileid.hlist.keys():
+				print(f"| {sumtype}sum: {fileid.get_hashsum(sumtype)} {fileid.name}")
+			print('---------------')
+
 		self.print_unfound()
 
-	def print_unfound(self):
+	def print_unfound(self, exit=False):
 		"""Prints all files that were not found."""
 		if self.n_unfound == 1:
-			print_error(f"FileNotFoundError: {self.unfound[0]!r} was not found")
+			print_error(f"FileNotFoundError: {self.unfound[0].name!r} was not found", exit=False)
 		elif self.unfound:
-			print("\nFiles That Were Not Found:")
-			for filename in self.unfound:
-				path = os.path.split(filename)
-				directory, fname = path if path[0] else ('.', path[-1])
-				print(f"  -> {fname!r} in {directory}/")
+			print("\nFiles that were not found or cannot be read:")
+			for fileid in self.unfound:
+				print(f"  -> {fileid.only_name!r}", end='')
+				if fileid.dir != '.':
+					print(f" in {fileid.dir}/", end='')
+				print("")
+
+		if exit : sys.exit(0)
 
 	def write(self, name=None):
 		if self.found and self.sumtype:
@@ -298,4 +316,4 @@ class Process(object):
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
 			salutations(f"\n* File: {textfile!r} Created!", time_sleep=0.064)
 		else:
-			print_error("Possible Causes: No Files or Sumtype was not defined!")
+			print_error("Possible Causes: No Files were found or Sumtype was not defined!")
