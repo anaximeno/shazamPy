@@ -7,6 +7,7 @@ import os
 import sys
 import hashlib as hlib
 from time import sleep
+from typing import Generator
 
 
 def exists(path):
@@ -14,30 +15,41 @@ def exists(path):
 	return os.path.exists(path)
 
 
-def print_error(*err, exit=True, err_num=1):
-	"""Print the error message and exit.
-	Keyword arg: exit -- bool (default True)."""
+def print_error(*err: str, exit: bool = True, err_num: int = 1):
+	"""Print the error message and exit.\n
+	Keyword args: 
+		exit --> if is to exit after showing the error (default: True),
+		err_num --> number of the error (default: 1)."""
 	error_message = ' '.join(err)
-	print("shazam: error: %s" % error_message)
-	if exit: sys.exit(err_num)
+	print("Shazam: Error: %s" % error_message)
+	if exit: 
+		sys.exit(err_num)
 
+
+to_install = []
+
+# Third-part libraries
+try:
+	import termcolor.colored as clr
+except ImportError:
+	to_install.append('termcolor')
 
 try:
-	# Third-part libraries
-	from termcolor import colored as clr
 	from alive_progress import alive_bar
 except ImportError:
-	print_error("Important Modules are not installed yet: termcolor and",
-	"alive_progress.\nInstall them with: pip3 install termcolor alive_progress")
+	to_install.append('alive_progress')
 
+finally:
+	if any(to_install):
+		modules_to_install = ', '.join(to_install)
+		print_error(f"Must install some modules first: {modules_to_install}!",
+		"\nInstall them with pip or conda.")
+	else:
+		del to_install
 
-version = None
-if exists("/usr/share/shazam/VERSION"):
-	with open("/usr/share/shazam/VERSION", "rt") as ver:
-		version = str(ver.read()).strip()
 
 __author__ = "Anaxímeno Brito"
-__version__ = version if version else 'Undefined'
+__version__ = '0.4.4'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
@@ -54,14 +66,15 @@ BUF_SIZE = 32768
 SLEEP_VALUE = 0.00001
 
 
-def hexa_to_int(hexa):
+def hexa_to_int(hexa: str):
 	"""Receive hexadecimal string and return integer."""
-	try : return int(hexa, 16)
+	try : 
+		return int(hexa, 16)
 	except ValueError:
 		print_error(f"{hexa!r} is not an hexadecimal value!")
 
 
-def readable(fname):
+def readable(fname: str) -> bool:
 	"""Analyses de readability and return bool."""
 	if os.path.isdir(fname) or not exists(fname):
 		return False
@@ -76,14 +89,15 @@ def readable(fname):
 			return False
 
 
-def get_sumtype(fname):
+def get_sumtype(fname: str):
 	"""Analyses the filename and return the sumtype."""
 	for stype in sumtypes_list[::-1]:
-		if stype in fname : return stype
+		if stype in fname: 
+			return stype
 	return False
 
 
-def contents(txtfile):
+def contents(txtfile: str):
 	"""Return a `list with tuples` with the content of the file,
 	each tuple has the following structure: `(filesum, filename)`."""
 	if readable(txtfile):
@@ -102,7 +116,7 @@ def contents(txtfile):
 		print_error(f"Reading Error: {txtfile!r} {prob}")
 
 
-def salutations(string: str, time_sleep=0.1):
+def salutations(string: str, sleep_time: float = 0.1):
 	lines = string.splitlines()
 	for line in lines:
 		lag = '\r'
@@ -110,7 +124,7 @@ def salutations(string: str, time_sleep=0.1):
 			lag += char
 			sys.stdout.write(lag)
 			sys.stdout.flush()
-			sleep(time_sleep)
+			sleep(sleep_time)
 		print('')
 
 
@@ -154,14 +168,17 @@ class FileID(object):
 	def __str__(self):
 		return self.name
 
-	def get_hashsum(self, sumtype):
+	def get_hashsum(self, sumtype: str):
 		"""Return the file's hash sum."""
 		if sumtype in self.calculated_sums:
 			return self.hlist[sumtype].hexdigest()
 		print_error(f"{sumtype!r} was not calculated already!")
 
-	def gen_data(self, *, bars=True):
-		"""Generates binary data. Keyword arg: bars -- bool (default: True)."""
+	def gen_data(self, *, bars: bool = True):
+		"""Generates binary data. 
+		Keyword arg: 
+			bars --> bool (default: True).
+		"""
 		if self.readability:
 			times = (self.size // BUF_SIZE) + (self.size % BUF_SIZE)
 			if bars:
@@ -180,13 +197,13 @@ class FileID(object):
 		else:
 			print_error(f"Reading Error: {self.name!r} is not readable!")
 
-	def update_data(self, sumtype, generated_data):
+	def update_data(self, sumtype: str, generated_data: Generator):
 		"""Updates binary data to the sumtype's class."""
 		for file_data in generated_data:
 			self.hlist[sumtype].update(file_data)
 		self.calculated_sums.append(sumtype)
 
-	def checksum(self, sumtype):
+	def checksum(self, sumtype: str):
 		"""Compares file's sum with givensum and return the results"""
 		if hexa_to_int(self.get_hashsum(sumtype)) == self.integer_sum:
 			return clr(f"{self.name}", "green")
@@ -196,7 +213,7 @@ class FileID(object):
 
 class Process(object):
 
-	def __init__(self, files: list, sumtype=None):
+	def __init__(self, files: list, sumtype: str = None):
 		# define the sumtype to be worked with
 		self.sumtype = sumtype
 		# ´self.found´ and ´self.unfound´ store files depending on their
@@ -206,7 +223,7 @@ class Process(object):
 		self.n_found = len(self.found)
 		self.n_unfound = len(self.unfound)
 
-	def checkfile(self, *, fid=None, fdata=None, bars=True, verbosity=True):
+	def checkfile(self, *, fid: FileID = None, fdata: list = None, bars: bool = True, verbosity: bool = True):
 		"""Check and Compare the hash sum."""
 		if not self.sumtype:
 			print_error("Sumtype was not defined!")
@@ -256,7 +273,8 @@ class Process(object):
 							generated_data=fileid.gen_data(bars=False)
 						)
 						print(fileid.checksum(self.sumtype))
-					else : files_data.append(list(fileid.gen_data(bars=False)))
+					else: 
+						files_data.append(list(fileid.gen_data(bars=False)))
 					bar()
 			if verbosity:
 				for fileid, file_data in zip(self.found, files_data):
@@ -314,6 +332,6 @@ class Process(object):
 			with open(textfile, 'w') as txt:
 				for fileid in self.found:
 					txt.write(f"{fileid.get_hashsum(self.sumtype)} {fileid.name}\n")
-			salutations(f"\n* File: {textfile!r} Created!", time_sleep=0.064)
+			salutations(f"\n* File: {textfile!r} Created!", sleep_time=0.064)
 		else:
 			print_error("Possible Causes: No Files were found or Sumtype was not defined!")
