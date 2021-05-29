@@ -10,65 +10,64 @@ Prerequesites:
 	termcolor version 1.1.x or higher (can install it with pip3 or conda)
 	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
-
-### Libraries
-# Standart Libraries:
-import sys
-import argparse
-
-# Non Standart, support Module:
-import common as cm
-from common import FileID, Process
-
-
 __author__ = "Anaxímeno Brito"
-__version__ = cm.version if cm.version else 'Undefined'
+__version__ = '0.4.5-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
+from common import File, Process, Errors, get_hashtype
+import argparse
+import sys
+
+
 
 
 class MainFlow(object):
 	"""Organizes the program's processing flow."""
-	__slots__ = ["args", "subarg"]
+	__slots__ = ["args", "subarg", "_process"]
 	def __init__(self, args):
 		self.args = args
+		self._process = Process()
 		if not args.subparser:
-			cm.print_error("No Subcommands were received!")
+			Errors.print_error("No Subcommands were received!")
 		self.subarg = args.subparser
 
 	def make_process(self):
 		"""Performs specific processing depending on the arguments."""
 		if self.subarg == 'check':
-			process = Process(
-				[FileID(self.args.filename, self.args.filesum)],
-				sumtype=self.args.sumtype
-			)
-			process.checkfile(verbosity=self.args.no_verbose)
+			self._process.checkfile(
+				file=File(self.args.file_name, self.args.file_hashsum),
+				hashtype=self.args.hashtype, verbosity=self.args.no_verbose)
 		elif self.subarg == 'calc':
-			process = Process(
-				[FileID(fname) for fname in self.args.files],
-				sumtype=self.args.sumtype if self.args.sumtype != 'all' else None
-			)
-			if self.args.sumtype != 'all':
-				process.calculate_sum(verbosity=self.args.no_verbose)
-				if self.args.write : process.write(self.args.name)
-			else: process.totalcheck()
+			files = [File(fname) for fname in self.args.files]
+
+			if self.args.hashtype != 'all':
+				self._process.calculate_sum(
+					files=files, verbosity=self.args.no_verbose,
+					hashtype=self.args.hashtype if self.args.hashtype != 'all' else None)
+			else: 
+				self._process.totalcheck(files)
+
+			if self.args.write:
+				self._process.write(files, self.args.hashtype, self.args.name)
 		elif self.subarg == 'read':
-			content = cm.contents(self.args.filename)
-			process = Process(
-				[FileID(fname, fsum) for fsum, fname in content],
-				sumtype=self.args.type or cm.get_sumtype(self.args.filename)
-			)
-			if len(content) == 1:
-				process.checkfile(verbosity=self.args.verbose)
-			else : process.checkfile_plus(verbosity=self.args.verbose)
+			textfile = File(self.args.filename)
+			contents = textfile.read_content()
+			if len(contents) == 1:
+				self._process.checkfile(
+					file=File(contents[1], contents[0]),
+					verbosity=self.args.verbose)
+			else:
+				self._process.checkfiles(
+					files=[File(fname, fsum) for fsum, fname in contents], 
+					hashtype=self.args.type or get_hashtype(self.args.filename),
+					verbosity=self.args.verbose)
 
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
 		prog="shazam",
 		usage='%(prog)s [-h] [--version] {Sub-Command}',
-		epilog='SHA-ZAM %s' %__copyright__
+		epilog='SHA-ZAM %s' % __copyright__
 	)
 	parser.add_argument("--version",
 		help="print the current version of this program", action='version',
@@ -82,11 +81,11 @@ if __name__ == '__main__':
 	check = subparser.add_parser('check',
 		help="check and Compare the file's hash sum",
 		description="Check and Compare the file's hash sum.",
-		usage='shazam check [-h/--help] [--no-verbose] {sumtype} filesum filename'
+		usage='shazam check [-h/--help] [--no-verbose] {hashtype} filesum filename'
 	)
-	check.add_argument("sumtype", choices=cm.sumtypes_list)
-	check.add_argument("filesum", help="file's hash sum")
-	check.add_argument("filename", help="file's name")
+	check.add_argument("hashtype", choices=Process.HASHTYPES_LIST)
+	check.add_argument("file_hashsum", help="file's hash sum")
+	check.add_argument("file_name", help="file's name")
 	check.add_argument("--no-verbose", "--noverbose",
 		action='store_false', help="no verbose option"
 	)
@@ -94,15 +93,10 @@ if __name__ == '__main__':
 	# Positional arguments for only calculate hashsums
 	calc = subparser.add_parser('calc',
 		help='calculates and show the hash sum',
-		usage='shazam calc [-h/--help] [-w/--write] [--no-verbose] {sumtype} [files...]',
+		usage='shazam calc [-h/--help] [-w/--write] [--no-verbose] {hashtype} [files...]',
 		description='Calculates and show the hash sum.'
 	)
-	# 'calc_choices' is a list which has all sumtypes in it
-	# plus another option (all) which we use to calculate all
-	# sumtypes/hashtypes simultaneosly.
-	calc_choices = cm.sumtypes_list.copy()
-	calc_choices.append('all')
-	calc.add_argument('sumtype', choices=calc_choices)
+	calc.add_argument('hashtype', choices=Process.HASHTYPES_LIST+['all'])
 	calc.add_argument("-w", "--write", action='store_true',
 		help='saves all calculated sums in a file'
 	)
@@ -129,8 +123,8 @@ if __name__ == '__main__':
 	read.add_argument('--verbose',
 		action='store_true', help="verbose option"
 	)
-	read.add_argument('-t', '--type', metavar='', choices=cm.sumtypes_list,
-		help='This can be used to specify the sumtype if it was not recognized in the file\'s name.'
+	read.add_argument('-t', '--type', metavar='', choices=Process.HASHTYPES_LIST,
+		help='This can be used to specify the hashtype if it was not recognized in the file\'s name.'
 	)
 
 	if len(sys.argv) > 1:
