@@ -11,14 +11,12 @@ Prerequesites:
 	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.5-beta'
+__version__ = '0.4.6-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
-from common import File, Process, Errors, get_hashtype
+from common import File, TextFile, Process, Errors, get_hashtype
 import argparse
 import sys
-
-
 
 
 class MainFlow(object):
@@ -44,13 +42,13 @@ class MainFlow(object):
 				self._process.calculate_sum(
 					files=files, verbosity=self.args.no_verbose,
 					hashtype=self.args.hashtype if self.args.hashtype != 'all' else None)
+				if self.args.write:
+					self._process.write(files, self.args.hashtype, self.args.name)
 			else: 
 				self._process.totalcheck(files)
 
-			if self.args.write:
-				self._process.write(files, self.args.hashtype, self.args.name)
 		elif self.subarg == 'read':
-			textfile = File(self.args.filename)
+			textfile = TextFile(self.args.filename)
 			contents = textfile.read_content()
 			if len(contents) == 1:
 				self._process.checkfile(

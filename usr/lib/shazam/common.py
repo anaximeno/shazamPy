@@ -3,7 +3,7 @@
 and/or functions of this programm."""
 # -*- coding: utf-8 -*-
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.5-beta'
+__version__ = '0.4.6-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 import os
@@ -22,17 +22,17 @@ class Errors:
 			exit --> if is to exit after showing the error (default: True),
 			err_num --> number of the error (default: 1)."""
 		error_message = ' '.join(err)
-		print("Shazam: Error: %s" % error_message)
+		print("shazam: error: %s" % error_message)
 		if exit: 
 			sys.exit(err_num)
 
-	@staticmethod
-	def print_files_not_found(files_not_found: Iterable, exit: bool = False):
+	@classmethod
+	def print_files_not_found(cls, files_not_found: Iterable, exit: bool = False):
 		n_not_found = len(files_not_found)
 		if n_not_found == 0:
 			pass
 		elif n_not_found == 1:
-			Errors.print_error(f'FileNotFound: {files_not_found[0].get_fullpath()!r}!', exit=exit)
+			cls.print_error(f'file not found: {files_not_found[0].get_fullpath()!r}!', exit=exit)
 		else:
 			print('Files that were not found or cannot be read:')
 			
@@ -41,6 +41,11 @@ class Errors:
 
 			if exit:
 				sys.exit(1)
+
+	@classmethod
+	def file_not_readable(cls, file, exit: bool = True):
+		error = 'file not found:' if file.exists() is False else 'cannot read:' 
+		cls.print_error(f'{error} {file.get_fullname()!r}!', exit=exit)
 
 
 to_install = []
@@ -92,20 +97,19 @@ def animate(string: str, sleep_time: float = 0.1):
 class File(object):
 	"""This class holds all necessary informations and operations
 	for one file object."""
-
 	# Will store files that exists or not.
 	Found = []
 	Not_Found = []
 
-	def __init__(self, filename: str, given_hashsum: str = '', 
-		file_for_check: bool = True, **kwargs):
+	def __init__(self, filename: str, given_hashsum: str = '', file_for_check: bool = True, **kwargs):
+		self._file_is_for_check = file_for_check
 		self._dir, self._fname = os.path.split(filename)
 		if '.' in self._fname:
 			self._name, self._extension = os.path.splitext(self._fname)
 		else:
 			self._name, self._extension = self._fname, ''
 
-		if self._name[0] == '*' and not(self.exists()):
+		if len(self._name) > 1 and self._name[0] == '*' and not self.exists():
 			self._name = self._name[1:]
 
 		# ´givensum´ is the original file sum which is give at the download place.
@@ -114,7 +118,7 @@ class File(object):
 		# ´self._given_integer_sum´ is the integer value of the hash sum,
 		# it will be used in comparisons for checking if the values are equal.
 		self._given_integer_sum = hexa_to_int(self._gsum) if self._gsum else None
-		if file_for_check is True:
+		if self._file_is_for_check is True:
 			self._calculated_hashes = []
 			self.hlist = {
 				"md5": hlib.md5(),
@@ -125,42 +129,42 @@ class File(object):
 				"sha512": hlib.sha512()
 			}
 
-		if self.exists():
-			self.Found.append(self)
-		else:
-			self.Not_Found.append(self)
+			if self.exists():
+				self.Found.append(self)
+			else:
+				self.Not_Found.append(self)
 
 	def __str__(self):
 		return self.get_fullpath()
 
-	def get_name(self):
+	def get_name(self) -> str:
 		return str(self._name)
 
-	def get_extension(self):
+	def get_extension(self) -> str:
 		return str(self._extension)
 
-	def get_fullname(self):
+	def get_fullname(self) -> str:
 		return self.get_name() + self.get_extension()
 
-	def get_dir(self):
+	def get_dir(self) -> str:
 		return str(self._dir)
 
-	def get_fullpath(self):
+	def get_fullpath(self) -> str:
 		return os.path.join(self.get_dir(), self.get_fullname())
 
-	def get_size(self):
+	def get_size(self) -> int:
 		if self.exists() is True:
 			return os.path.getsize(self.get_fullpath())
 		return None
 	
-	def get_given_sum(self):
+	def get_given_sum(self) -> str:
 		return str(self._gsum)
 
-	def exists(self):
+	def exists(self) -> str:
 		return os.path.exists(self.get_fullpath())
 
-	def is_readable(self):
-		if not self.exists():
+	def is_readable(self) -> bool:
+		if not self.exists() or os.path.isdir(self.get_fullpath()):
 			return False
 		try:
 			with open(self.get_fullpath(), 'rb') as f:
@@ -181,8 +185,7 @@ class File(object):
 			bars --> bool (default: True).
 		"""
 		if self.is_readable() is False:
-			err = 'is not readable' if self.exists() else 'was not found'
-			Errors.print_error(f"Reading Error: {self.get_fullpath()!r} {err}!", exit=True)
+			Errors.file_not_readable(self, exit=True)
 
 		BUF_SIZE = 32768
 		times = (self.get_size() // BUF_SIZE) + (self.get_size() % BUF_SIZE)
@@ -197,13 +200,35 @@ class File(object):
 			with open(self.get_fullpath(), 'rb') as f:
 				for _ in range(times):
 					yield f.read(BUF_SIZE)
-					sleep(Process.SLEEP_VALUE)
+					sleep(Process.SLEEP_VALUE)	
+
+	def update_data(self, hashtype: str, generated_data: Iterable) -> None:
+		"""Updates binary data to the hashtype's class."""
+		if self.is_readable() is False:
+			Errors.file_not_readable(self, exit=True)
+
+		for file_data in generated_data:
+			self.hlist[hashtype].update(file_data)
+		self._calculated_hashes.append(hashtype)
+
+	def checksum(self, hashtype: str) -> bool:
+		"""Compares file's sum with givensum and return the results"""
+		return hexa_to_int(self.get_hashsum(hashtype)) == self._given_integer_sum
+
+
+class TextFile(File):
+
+	def __init__(self, filename: str, **kwargs):
+		super().__init__(filename,
+			given_hashsum=kwargs['given_hashsum'] if 'given_hashsum' in kwargs else '', 
+			file_for_check=kwargs['file_for_check'] if 'file_for_check' in kwargs else False, 
+			**kwargs)
 
 	def read_content(self):
 		"""Return a `list with tuples` with the content of the file,
 		each tuple has the following structure: `(filesum, filename)`."""
 		if self.is_readable() is False:
-			Errors.print_error(f'It is not possible to read {self.get_fullname()!r}!')
+			Errors.file_not_readable(self, exit=True)
 		try:
 			with open(self.get_fullpath(), 'rt') as textfile:
 				content = [
@@ -215,21 +240,7 @@ class File(object):
 		except IndexError:
 			Errors.print_error(f'error reading {self.get_fullpath()!r}!')
 		except UnicodeDecodeError:
-			Errors.print_error(f'Cannot read {self.get_fullpath()!r}!')	
-
-	def update_data(self, hashtype: str, generated_data: Iterable) -> None:
-		"""Updates binary data to the hashtype's class."""
-		if self.is_readable() is False:
-			err = 'is not readable' if self.exists() else 'was not found'
-			Errors.print_error(f"Reading Error: {self.name!r} {err}!", exit=True)
-
-		for file_data in generated_data:
-			self.hlist[hashtype].update(file_data)
-		self._calculated_hashes.append(hashtype)
-
-	def checksum(self, hashtype: str) -> bool:
-		"""Compares file's sum with givensum and return the results"""
-		return hexa_to_int(self.get_hashsum(hashtype)) == self._given_integer_sum
+			Errors.print_error(f'Cannot read {self.get_fullpath()!r}!')
 
 
 class Process(object):
