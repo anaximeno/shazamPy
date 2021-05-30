@@ -45,7 +45,7 @@ class Errors:
 	@classmethod
 	def file_not_readable(cls, file, exit: bool = True):
 		error = 'file not found:' if file.exists() is False else 'cannot read:' 
-		cls.print_error(f'{error} {file.get_fullname()!r}!', exit=exit)
+		cls.print_error(f'{error} {file.get_fullpath()!r}!', exit=exit)
 
 
 to_install = []
