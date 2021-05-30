@@ -1,61 +1,54 @@
-# SHA-ZAM
+# SHA-ZAM - Check the file hash sum
 
- Shazam is a **Comand Line Application** made in python that checks the integrity of one file by comparing it with a given hash.
-<br>
-<br>
-It as also other options like:
-* calculate all supported hashsums of one file
-* read a file with hash sum and filename inside
-* calculate only the file sum without compare it 
+Shazam is a **Command Line Application** that checks the integrity of one file by comparing it with a given hash.  
 
-Prerequesites:
-* Python version 3.5.x or higher
-* termcolor version 1.1.x or higher (install it with pip or conda)
-* alive_progress version 1.6.x or higher (install it with pip or conda)
+> Created by: Anaxímeno Brito
 
+## How Does It Work: 
 
-### How Does Shazam Work ?
+It calculates the file's hash sum and compares it with a given hash for checking if the file isn't corrupted, it can also be used for calculating the hash sums and automatically save it inside one file if wanted. 
+ 
+Shazam supports some of the most used hash types.
 
-It calculates the file's hash sum and compares it with a given hash, if they were equal, it will show a sucess message, else, it will show an unsucess message.
+### Supported hash types:  
+* md5sum
+* sha1sum 
+* sha224sum 
+* sha256sum
+* sha384sum 
+* sha512sum
 
-### Usage & More
+## Installation:
+Before the installation secure that you've installed all requirements. There isn't no builds for installing the program already so you've to manually install the files on your computer.
 
-#### General formula:
+#### Prerequisites:  
+* **Python** - version 3.6.x or higher  
+* **termcolor** - version 1.1.x or higher (install it with pip or conda)  
+* **alive_progress** - version 1.6.x or higher (install it with pip or conda)
+
+#### See how to install:
+For installing the program, you just have to download this repository and put the file '*usr/bin/shazam*' on '*/usr/bin/*' in your computer and put the directory '*urs/lib/shazam*' on '*/usr/lib*'.
+
+#### More detailed:
+On this directory:  
+  
+	$ sudo cp usr/bin/shazam /usr/bin/
+	$ sudo cp usr/lib/shazam -r /usr/lib/
+
+Try to see if it is working:
 	
-	$ shazam [COMMAND] [Contents..]
+	$ shazam
 
+## Usage:
 
-#### Example for only calculating the hash sums(1):
+### General formula:
+	
+	$ shazam {Sub-Commands} [Arguments..]
 
-	$ shazam calc sha1 linux.iso freebsd.iso [...]
-
-##### General Formula(1):
-
-	$ shazam calc [*sumtype] [files...]
-
-**Supported sumtypes**: *md5*, *sha1*, *sha224*, *sha256*, *sha384*, *sha512*, can use also the sumtype *all* for getting all supported sumtypes
-
-#### Example checking and comparing hash sum(2):
-
-  	$ shazam check sha1 4fe31ea2ce34ef45234fbedfca linux.iso
-
-##### General formula(2):
-
-	$ shazam check [*sumtype] [filesum] [filename]
-
-*Supported sumtypes: md5, sha1, sha224, sha256, sha384, sha512.
-
-#### Example reading a file with hash sum and filename inside(3):
-
-	$ shazam read sha1sum.txt
-
-##### General formula(3):
+### If wanted to read and check the sum on a file:
 
 	$ shazam read [filename]
 
-
-**OBS:** For more options, try, after install it:
+### For more options, try, after install it:
 
 	$ shazam --help
-
-**I am open to sugestion, so, if you have one send it to me, or make it yourself.**
