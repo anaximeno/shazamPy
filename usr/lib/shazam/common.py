@@ -109,7 +109,7 @@ class File(object):
 		else:
 			self._name, self._extension = self._fname, ''
 
-		if len(self._name) > 1 and self._name[0] == '*' and not self.exists():
+		if len(self._name) > 1 and self._name.startswith('*') and not self.exists():
 			self._name = self._name[1:]
 
 		# ´givensum´ is the original file sum which is give at the download place.
@@ -120,7 +120,7 @@ class File(object):
 		self._given_integer_sum = hexa_to_int(self._gsum) if self._gsum else None
 		if self._file_is_for_check is True:
 			self._calculated_hashes = []
-			self.hlist = {
+			self._hlist = {
 				"md5": hlib.md5(),
 				"sha1": hlib.sha1(),
 				"sha224": hlib.sha224(),
@@ -176,7 +176,7 @@ class File(object):
 	def get_hashsum(self, hashtype: str):
 		"""Return the file's hash sum."""
 		if hashtype in self._calculated_hashes:
-			return self.hlist[hashtype].hexdigest()
+			return self._hlist[hashtype].hexdigest()
 		return None
 
 	def gen_data(self, *, bar_animation: bool = True) -> Generator:
@@ -208,7 +208,7 @@ class File(object):
 			Errors.file_not_readable(self, exit=True)
 
 		for file_data in generated_data:
-			self.hlist[hashtype].update(file_data)
+			self._hlist[hashtype].update(file_data)
 		self._calculated_hashes.append(hashtype)
 
 	def checksum(self, hashtype: str) -> bool:
@@ -344,9 +344,9 @@ class Process(object):
 		generated_datas = [list(file.gen_data()) for file in found]
 
 		print("\n\tGetting Hash Sums...")
-		with alive_bar(len(found[0].hlist.keys()) * n_found, spinner='waves') as bar:
+		with alive_bar(len(found[0]._hlist.keys()) * n_found, spinner='waves') as bar:
 			for file, generated_data in zip(found, generated_datas):
-				for hashtype in file.hlist.keys():
+				for hashtype in file._hlist.keys():
 					file.update_data(hashtype, generated_data)
 					sleep(Process.SLEEP_VALUE)
 					bar()
@@ -356,7 +356,7 @@ class Process(object):
 			if n > 0 and n < n_found:
 				print("\n")
 			print(f"--> {file.get_fullname()!r}:")
-			for hashtype in file.hlist.keys():
+			for hashtype in file._hlist.keys():
 				print(f"| {hashtype}sum: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
 			print('---------------')
 
@@ -370,7 +370,7 @@ class Process(object):
 
 	def write(self, files: Iterable, hashtype: str, name: str = None):
 		found, _ = self._search_files(files)
-		if len(found) != 0:
+		if len(found) != 0:  # TODO: not working when there are unfound files, on calc
 			filename = name or hashtype + 'sum.txt'
 			with open(filename, 'w') as txt:
 				for file in found:

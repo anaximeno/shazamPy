@@ -21,12 +21,15 @@ import sys
 
 class MainFlow(object):
 	"""Organizes the program's processing flow."""
+
 	__slots__ = ["args", "subarg", "_process"]
 	def __init__(self, args):
 		self.args = args
 		self._process = Process()
+
 		if not args.subparser:
 			Errors.print_error("No Subcommands were received!")
+
 		self.subarg = args.subparser
 
 	def make_process(self):
@@ -41,12 +44,11 @@ class MainFlow(object):
 			if self.args.hashtype != 'all':
 				self._process.calculate_sum(
 					files=files, verbosity=self.args.no_verbose,
-					hashtype=self.args.hashtype if self.args.hashtype != 'all' else None)
+					hashtype=self.args.hashtype)
 				if self.args.write:
 					self._process.write(files, self.args.hashtype, self.args.name)
 			else: 
 				self._process.totalcheck(files)
-
 		elif self.subarg == 'read':
 			textfile = TextFile(self.args.filename)
 			contents = textfile.read_content()
