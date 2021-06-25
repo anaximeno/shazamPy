@@ -8,6 +8,7 @@ __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 import os
 import sys
+import string
 import hashlib as hlib
 from time import sleep
 from typing import Generator, Iterable
@@ -60,7 +61,7 @@ except ImportError:
 finally:
 	if any(to_install):
 		modules_to_install = ', '.join(to_install)
-		Errors.print_error(f"Must install some modules first: {modules_to_install}!",
+		Errors.print_error(f"Some modules must be installed: {modules_to_install}!",
 			"\nInstall them with pip or conda.", exit=True)
 	else:
 		del to_install
@@ -68,10 +69,9 @@ finally:
 
 def hexa_to_int(hexa: str):
 	"""Receive hexadecimal string and return integer."""
-	try: 
-		return int(hexa, 16)
-	except ValueError:
-		Errors.print_error(f"{hexa!r} is not an hexadecimal value!")
+	if set(hexa).issubset(string.hexdigits):
+		return int(hexa)
+	Errors.print_error(f"{hexa!r} is not an hexadecimal value!")
 
 
 def get_hashtype(filename: str):
