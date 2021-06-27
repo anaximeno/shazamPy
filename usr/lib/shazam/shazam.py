@@ -53,8 +53,10 @@ class MainFlow(object):
 			textfile = TextFile(self.args.filename)
 			contents = textfile.read_content()
 			if len(contents) == 1:
+				fsum, fname = contents[0]
 				self._process.checkfile(
-					file=File(contents[1], contents[0]),
+					file=File(fname, fsum),
+					hashtype=self.args.type or get_hashtype(self.args.filename),
 					verbosity=self.args.verbose)
 			else:
 				self._process.checkfiles(

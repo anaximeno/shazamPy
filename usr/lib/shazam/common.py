@@ -70,7 +70,7 @@ finally:
 def hexa_to_int(hexa: str):
 	"""Receive hexadecimal string and return integer."""
 	if set(hexa).issubset(string.hexdigits):
-		return int(hexa)
+		return int(hexa, 16)
 	Errors.print_error(f"{hexa!r} is not an hexadecimal value!")
 
 
@@ -83,15 +83,12 @@ def get_hashtype(filename: str):
 
 
 def animate(string: str, sleep_time: float = 0.1):
-	lines = string.splitlines()
-	for line in lines:
-		lag = '\r'
-		for char in line:
-			lag += char
-			sys.stdout.write(lag)
-			sys.stdout.flush()
+	for char in string:
+		if char != '\n' and char != '\t':
 			sleep(sleep_time)
-		print('')
+		sys.stdout.write(char)
+		sys.stdout.flush()
+	print('')	# Go to new line
 
 
 class File(object):
@@ -375,7 +372,7 @@ class Process(object):
 			with open(filename, 'w') as txt:
 				for file in found:
 					txt.write(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}\n")
-			animate(f"\nFile: {filename!r} Created!", sleep_time=0.064)			
+			animate(f"\nFile: {filename!r} Created!", sleep_time=0.045)			
 		else:
 			Errors.print_error('Files not found, cannot save the file!')
 
