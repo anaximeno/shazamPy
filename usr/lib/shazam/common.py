@@ -23,7 +23,7 @@ class Errors:
 			exit --> if is to exit after showing the error (default: True),
 			err_num --> number of the error (default: 1)."""
 		error_message = ' '.join(err)
-		print("shazam: error: %s" % error_message)
+		print("\n shazam: error: %s" % error_message)
 		if exit: 
 			sys.exit(err_num)
 
@@ -33,10 +33,10 @@ class Errors:
 		if n_not_found == 0:
 			pass
 		elif n_not_found == 1:
-			cls.print_error(f'file not found: {files_not_found[0].get_fullpath()!r}!', exit=exit)
+			cls.print_error(f'File not Found: {files_not_found[0].get_fullpath()!r}!', exit=exit)
 		else:
-			print('Files that were not found or cannot be read:')
-			
+			cls.print_error('Files that were not Found or cannot be read:', exit=False)
+
 			for file in files_not_found:
 				print(f'  -> {file.get_fullpath()!r}')	
 
@@ -135,33 +135,48 @@ class File(object):
 		return self.get_fullpath()
 
 	def get_name(self) -> str:
+		"""Returns the name of the file without its extension, and without its the full path address."""
 		return str(self._name)
 
 	def get_extension(self) -> str:
+		"""Returns the extension of the file."""
 		return str(self._extension)
 
 	def get_fullname(self) -> str:
+		"""Returns the name of the file plus its extension, but without his full path address."""
 		return self.get_name() + self.get_extension()
 
 	def get_dir(self) -> str:
+		"""Returns the current directory of this file."""
 		return str(self._dir)
 
 	def get_fullpath(self) -> str:
+		"""Returns the full path of this file."""
 		return os.path.join(self.get_dir(), self.get_fullname())
 
 	def get_size(self) -> int:
+		"""Returns the size in bytes of the file, only if it exists, else None."""
 		if self.exists() is True:
 			return os.path.getsize(self.get_fullpath())
 		return None
 	
 	def get_given_sum(self) -> str:
+		"""Returns the given sum of the file which will be used to compare with the calculated one, 
+		for checking this file integrity."""
 		return str(self._gsum)
 
 	def exists(self) -> str:
+		"""Returns if this objects exists on his directory."""
 		return os.path.exists(self.get_fullpath())
+	
+	def is_dir(self) -> bool:
+		"""Returns if this object is a directory."""
+		return os.path.isdir(self.get_fullpath())
 
 	def is_readable(self) -> bool:
-		if not self.exists() or os.path.isdir(self.get_fullpath()):
+		"""Returns if the file is readable or not. It must: exist on its directory, not be a directory and 
+		be readable in the binary mode."""
+		if not self.exists() or self.is_dir():
 			return False
 		try:
 			with open(self.get_fullpath(), 'rb') as f:
@@ -254,11 +269,14 @@ class Process(object):
 		self._files_found = File.Found
 		self._files_not_found = File.Not_Found
 
-		self._calculted_files = []
-
 	def _show_file_result(self, file: File, hashtype: str):
-		color = "green" if file.checksum(hashtype) is True else "red"
-		print(clr(f"{file.get_fullpath()}", color))
+		if file.checksum(hashtype) is True:
+			color = "green"
+			post_msg = 'not modified.'
+		else:
+			color = "red"
+			post_msg = 'probably modified!!'
+		print(clr(f"{file.get_fullpath()!r} was {post_msg}", color))
 
 	def checkfile(self, file: File, hashtype: str, **kwargs):
 		"""Check and Compare the hash sum."""
@@ -272,27 +290,28 @@ class Process(object):
 
 		file.update_data(hashtype=hashtype,
 			generated_data=file_data or file.gen_data(bar_animation=bar_animation))
-		print('\n--> File: ', end='')
+		print('\n --> Result: ', end='')
 		self._show_file_result(file, hashtype)
 		if verbosity:
-			print(f"| Given      Hash Sum:  {file.get_given_sum()!r}")
-			print(f"| Calculated Hash Sum:  {file.get_hashsum(hashtype)!r}")
-			print("-------------")
+			print(f" | Given      Hash Sum:  {file.get_given_sum()!r}")
+			print(f" | Calculated Hash Sum:  {file.get_hashsum(hashtype)!r}")
+			print(" -------------")
 
 	def calculate_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
-		"""Calculates and prints the file's hash sum"""
+		"""Calculates and prints the file's hash sum."""
 		found, not_found = self._search_files(files)
 		n_found = len(found)
 
 		if n_found != 0:
-			print("\t\tCalculating Hashes...")
+			# TODO: mostra o tipo de hash sum que está a ser calculado, e em outros lugares tmb!
+			print("\t\tCALCULATING THE HASH SUM\n")
 			with alive_bar(n_found, bar='blocks', spinner='dots') as bar:
 				for file in found:
 					file.update_data(hashtype, file.gen_data(bar_animation=False))
 					if verbosity:
 						print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
 					bar()
-		
+
 		if found and not_found:
 			print()  # Skip one line
 
@@ -309,7 +328,7 @@ class Process(object):
 			self.checkfile(found[0], hashtype, verbosity=verbosity)
 		else:
 			if verbosity:
-				print("\tCalculating Binaries...")
+				print("\tCalculating Binaries")
 				files_data = []
 
 			with alive_bar(n_found, bar='blocks', spinner='dots') as bar:
@@ -337,10 +356,10 @@ class Process(object):
 		if n_found == 0:
 			Errors.print_files_not_found(not_found, exit=True)
 
-		print("\tCalculating Hashes...")
+		print("\tCalculating Hashes")
 		generated_datas = [list(file.gen_data()) for file in found]
 
-		print("\n\tGetting Hash Sums...")
+		print("\n\tGetting Hash Sums")
 		with alive_bar(len(found[0]._hlist.keys()) * n_found, spinner='waves') as bar:
 			for file, generated_data in zip(found, generated_datas):
 				for hashtype in file._hlist.keys():
@@ -352,27 +371,30 @@ class Process(object):
 		for n, file in enumerate(found):
 			if n > 0 and n < n_found:
 				print("\n")
-			print(f"--> {file.get_fullname()!r}:")
+			print(f" --> {file.get_fullname()!r}:")
 			for hashtype in file._hlist.keys():
-				print(f"| {hashtype}sum: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
-			print('---------------')
+				print(f" | {hashtype}: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
+			print(' ---------------')
 
 		Errors.print_files_not_found(not_found)
 
 	def _search_files(self, files: Iterable):
 		files = set(files)
+
 		found = list(files.intersection(self._files_found))
 		not_found = list(files.intersection(self._files_not_found))
+
 		return found, not_found
 
 	def write(self, files: Iterable, hashtype: str, name: str = None):
 		found, _ = self._search_files(files)
+	
 		if len(found) != 0:  # TODO: not working when there are unfound files, on calc
-			filename = name or hashtype + 'sum.txt'
-			with open(filename, 'w') as txt:
+			filename = name or (hashtype + 'sum.txt')
+			with open(filename, 'wt') as txt:
 				for file in found:
 					txt.write(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}\n")
-			animate(f"\nFile: {filename!r} Created!", sleep_time=0.045)			
+			animate(f"\nFile {filename!r} was created!", sleep_time=0.045)			
 		else:
 			Errors.print_error('Files not found, cannot save the file!')
 
