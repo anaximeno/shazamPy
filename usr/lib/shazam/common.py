@@ -62,7 +62,7 @@ finally:
 	if any(to_install):
 		modules_to_install = ', '.join(to_install)
 		Errors.print_error(f"Some modules must be installed: {modules_to_install}!",
-			"\nInstall them with pip or conda.", exit=True)
+			"\n Install them with pip or conda.", exit=True)
 	else:
 		del to_install
 
@@ -97,6 +97,7 @@ class File(object):
 	# Will store files that exists or not.
 	Found = []
 	Not_Found = []
+	Unreadable = []
 
 	def __init__(self, filename: str, given_hashsum: str = '', file_for_check: bool = True, **kwargs):
 		self._file_is_for_check = file_for_check
@@ -126,8 +127,11 @@ class File(object):
 				"sha512": hlib.sha512()
 			}
 
-			if self.exists():
-				self.Found.append(self)
+			if self.exists() is True:
+				if self.is_readable() is True:
+					self.Found.append(self)
+				else:
+					self.Unreadable.append(self)
 			else:
 				self.Not_Found.append(self)
 
@@ -267,7 +271,8 @@ class Process(object):
 		# ´self.found´ and ´self.unfound´ store files depending on their
 		# existence/readability or not, and below them are their respective lengths.
 		self._files_found = File.Found
-		self._files_not_found = File.Not_Found
+		#TODO: Melhor tratamento para unreadable!
+		self._files_not_found = File.Not_Found + File.Unreadable
 
 	def _show_file_result(self, file: File, hashtype: str):
 		if file.checksum(hashtype) is True:
