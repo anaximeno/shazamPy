@@ -130,7 +130,7 @@ if __name__ == '__main__':
 	)
 
 	if len(sys.argv) > 1:
-		mf = MainFlow(parser.parse_args())
+		mf = MainFlow(parser.parse_args()) #TODO: add args --type/-t for determining the type of sum wanted!
 		mf.make_process()
 	else:
 		print("usage: shazam [-h] [--version] {Sub-Command}")
