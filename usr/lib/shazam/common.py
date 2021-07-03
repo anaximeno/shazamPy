@@ -295,12 +295,12 @@ class Process(object):
 
 		file.update_data(hashtype=hashtype,
 			generated_data=file_data or file.gen_data(bar_animation=bar_animation))
-		print('\n --> Result: ', end='')
+		print('\n ┌──> ', end='')
 		self._show_file_result(file, hashtype)
 		if verbosity:
-			print(f" | Given      Hash Sum:  {file.get_given_sum()!r}")
-			print(f" | Calculated Hash Sum:  {file.get_hashsum(hashtype)!r}")
-			print(" -------------")
+			print(f" │ Given      Hash Sum:  {file.get_given_sum()!r}")
+			print(f" │ Calculated Hash Sum:  {file.get_hashsum(hashtype)!r}")
+			print(' └────────────────────')
 
 	def calculate_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
 		"""Calculates and prints the file's hash sum."""
@@ -376,10 +376,10 @@ class Process(object):
 		for n, file in enumerate(found):
 			if n > 0 and n < n_found:
 				print("\n")
-			print(f" --> {file.get_fullname()!r}:")
+			print(f" ┌──> {file.get_fullname()!r}")
 			for hashtype in file._hlist.keys():
-				print(f" | {hashtype}: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
-			print(' ---------------')
+				print(f" │ {hashtype}: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
+			print(' └────────────────────')
 
 		Errors.print_files_not_found(not_found)
 
