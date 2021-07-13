@@ -36,17 +36,17 @@ class MainFlow(object):
 		"""Performs specific processing depending on the arguments."""
 		if self.subarg == 'check':
 			self._process.checkfile(
-				file=File(self.args.file_name, self.args.file_hashsum),
-				hashtype=self.args.hashtype, verbosity=self.args.no_verbose)
+				file=File(self.args.FILE, self.args.HASH_SUM),
+				hashtype=self.args.type, verbosity=self.args.no_verbose)
 		elif self.subarg == 'calc':
-			files = [File(fname) for fname in self.args.files]
+			files = [File(fname) for fname in self.args.FILES]
 
-			if self.args.hashtype != 'all':
+			if self.args.type != 'all':
 				self._process.calculate_sum(
 					files=files, verbosity=self.args.no_verbose,
-					hashtype=self.args.hashtype)
+					hashtype=self.args.type)
 				if self.args.write:
-					self._process.write(files, self.args.hashtype, self.args.name)
+					self._process.write(files, self.args.type, self.args.name)
 			else: 
 				self._process.totalcheck(files)
 		elif self.subarg == 'read':
@@ -66,10 +66,12 @@ class MainFlow(object):
 
 
 if __name__ == '__main__':
+	hash_types = Process.HASHTYPES_LIST+['all']
+
 	parser = argparse.ArgumentParser(
 		prog="shazam",
-		usage='%(prog)s [-h] [--version] {Sub-Command}',
-		epilog='SHA-ZAM %s' % __copyright__
+		usage='%(prog)s {sub-command}',
+		epilog='SHAZAM *License* %s' % __license__
 	)
 	parser.add_argument("--version",
 		help="print the current version of this program", action='version',
@@ -82,34 +84,38 @@ if __name__ == '__main__':
 	# Positional arguments for check and compare hashsums
 	check = subparser.add_parser('check',
 		help="check and Compare the file's hash sum",
-		description="Check and Compare the file's hash sum.",
-		usage='shazam check [-h/--help] [--no-verbose] {hashtype} filesum filename'
+		description="Verifies the integrity of the file.",
+		usage='shazam check HASH_SUM FILE {--type/-t}'
 	)
-	check.add_argument("hashtype", choices=Process.HASHTYPES_LIST)
-	check.add_argument("file_hashsum", help="file's hash sum")
-	check.add_argument("file_name", help="file's name")
+	check.add_argument("-t", "--type", help=f"The type of hash sum, it must be one these: {Process.HASHTYPES_LIST}",
+		choices=Process.HASHTYPES_LIST, metavar='TYPE', required=True)
+	#check.add_argument("hashtype", choices=Process.HASHTYPES_LIST)
+	check.add_argument("HASH_SUM", help="file's hash sum")
+	check.add_argument("FILE", help="file's full or relative location")
 	check.add_argument("--no-verbose", "--noverbose",
-		action='store_false', help="no verbose option"
+		action='store_false'
 	)
 
 	# Positional arguments for only calculate hashsums
 	calc = subparser.add_parser('calc',
 		help='calculates and show the hash sum',
-		usage='shazam calc [-h/--help] [-w/--write] [--no-verbose] {hashtype} [files...]',
+		usage='shazam calc {-t/--type} FILES (...)',
 		description='Calculates and show the hash sum.'
 	)
-	calc.add_argument('hashtype', choices=Process.HASHTYPES_LIST+['all'])
+	calc.add_argument("-t", "--type", help=f"The type of hash sum, it must be one these: {hash_types}",
+		choices=hash_types, metavar='TYPE')
+	# calc.add_argument('hashtype', choices=Process.HASHTYPES_LIST+['all'])
 	calc.add_argument("-w", "--write", action='store_true',
-		help='saves all calculated sums in a file'
+		help='Saves all calculated hash sums inside one file'
 	)
 	calc.add_argument("--no-verbose", "--noverbose",
-		action='store_false', help="no verbose option"
+		action='store_false'
 	)
-	calc.add_argument('-n', '--name', metavar='',
-		help='Use this together with write to determine the writefile\'s name'
+	calc.add_argument('-n', '--name', metavar='NAME',
+		help='Use this with the argument --write for determining the file\'s name.'
 	)
-	calc.add_argument('files', nargs='+',
-		help="one or more files for calculating the hash sums"
+	calc.add_argument('FILES', nargs='+',
+		help="One or more files for calculating the hash sums"
 	)
 
 	# Positional arguments for reading a file which
@@ -132,6 +138,7 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		mf = MainFlow(parser.parse_args()) #TODO: add args --type/-t for determining the type of sum wanted!
 		mf.make_process()
+		# print('\n')
 	else:
 		print("usage: shazam [-h] [--version] {Sub-Command}")
 		print("       shazam --help         display the help section and exit")

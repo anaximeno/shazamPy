@@ -55,9 +55,9 @@ try:
 except ImportError:
 	to_install.append('termcolor')
 try:
-	from alive_progress import alive_bar
+	from tqdm import tqdm
 except ImportError:
-	to_install.append('alive_progress')
+	to_install.append('tqdm')
 finally:
 	if any(to_install):
 		modules_to_install = ', '.join(to_install)
@@ -195,7 +195,7 @@ class File(object):
 			return self._hlist[hashtype].hexdigest()
 		return None
 
-	def gen_data(self, *, bar_animation: bool = True) -> Generator:
+	def gen_data(self, *, bar_anim: bool = True) -> Generator:
 		"""Generates binary data. 
 		Keyword arg: 
 			bars --> bool (default: True).
@@ -205,18 +205,11 @@ class File(object):
 
 		BUF_SIZE = 32768
 		times = (self.get_size() // BUF_SIZE) + (self.get_size() % BUF_SIZE)
-		if bar_animation:
-			with alive_bar(times, bar='blocks', spinner='dots') as bar:
-				with open(self.get_fullpath(), 'rb') as f:
-					for _ in range(times):
-						yield f.read(BUF_SIZE)
-						sleep(Process.SLEEP_VALUE)
-						bar()
-		else:
-			with open(self.get_fullpath(), 'rb') as f:
-				for _ in range(times):
-					yield f.read(BUF_SIZE)
-					sleep(Process.SLEEP_VALUE)	
+		loop = tqdm(range(times), ncols=80, desc='CALCULATING BINARIES') if bar_anim else range(times)
+		with open(self.get_fullpath(), 'rb') as f:
+			for _ in loop:
+				yield f.read(BUF_SIZE)
+				sleep(Process.SLEEP_VALUE)	
 
 	def update_data(self, hashtype: str, generated_data: Iterable) -> None:
 		"""Updates binary data to the hashtype's class."""
@@ -263,7 +256,7 @@ class Process(object):
 	# When lower is the sleep value, faster will be the reading,
 	# but it will increase the CPU usage, it can be changed to
 	# improve the performance.
-	SLEEP_VALUE = 0.00001
+	SLEEP_VALUE = 1e-7
 	# List of all supported hash sums:
 	HASHTYPES_LIST = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
 
@@ -286,21 +279,21 @@ class Process(object):
 	def checkfile(self, file: File, hashtype: str, **kwargs):
 		"""Check and Compare the hash sum."""
 		file_data = kwargs['file_data'] if 'file_data' in kwargs else None
-		bar_animation  = kwargs['bar_animation'] if 'bar_animation' in kwargs else True
+		bar_anim  = kwargs['bar_anim'] if 'bar_anim' in kwargs else True
 		verbosity = kwargs['verbosity'] if 'verbosity' in kwargs else True
 		found, _ = self._search_files([file])
 
-		if any(found) is False:
+		if not any(found):
 			Errors.print_error(f'{file.get_fullpath()!r} was not found!')
 
 		file.update_data(hashtype=hashtype,
-			generated_data=file_data or file.gen_data(bar_animation=bar_animation))
-		print('\n ┌──> ', end='')
+			generated_data=file_data or file.gen_data(bar_anim=bar_anim))
+		print(f"\n { '┌──' if verbosity else '──' } ", end='')
 		self._show_file_result(file, hashtype)
 		if verbosity:
-			print(f" │ Given      Hash Sum:  {file.get_given_sum()!r}")
-			print(f" │ Calculated Hash Sum:  {file.get_hashsum(hashtype)!r}")
-			print(' └────────────────────')
+			print(f" │ ORIGINAL {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
+			print(f" │ CURRENT  {hashtype.upper()}SUM:  {file.get_hashsum(hashtype)!r}")
+			print(' └──────────────')
 
 	def calculate_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
 		"""Calculates and prints the file's hash sum."""
@@ -309,13 +302,18 @@ class Process(object):
 
 		if n_found != 0:
 			# TODO: mostra o tipo de hash sum que está a ser calculado, e em outros lugares tmb!
-			print("\t\tCALCULATING THE HASH SUM\n")
-			with alive_bar(n_found, bar='blocks', spinner='dots') as bar:
+			if n_found == 1:
+				file = found[0]
+				file.update_data(hashtype, file.gen_data(bar_anim=True))
+				if verbosity:
+					print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
+			else:
+				for file in tqdm(found, desc='CALCULATING BINARIES', ncols=80):
+					file.update_data(hashtype, file.gen_data(bar_anim=False))
+				print('')
 				for file in found:
-					file.update_data(hashtype, file.gen_data(bar_animation=False))
-					if verbosity:
-						print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
-					bar()
+					print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
+					
 
 		if found and not_found:
 			print()  # Skip one line
@@ -332,25 +330,26 @@ class Process(object):
 		elif n_found == 1:
 			self.checkfile(found[0], hashtype, verbosity=verbosity)
 		else:
-			if verbosity:
-				print("\tCalculating Binaries")
-				files_data = []
+			allData = []
+			for file in tqdm(found, desc='CALCULATING BINARIES', ncols=80):
+				if verbosity is False:
+					file.update_data(
+						hashtype=hashtype, 
+						generated_data=file.gen_data(bar_anim=False))
+				elif verbosity is True:
+					allData.append(list(file.gen_data(bar_anim=False)))
+				else:
+					Errors.print_error('Verbose type (True or False) must be set!')
 
-			with alive_bar(n_found, bar='blocks', spinner='dots') as bar:
+
+			if verbosity is True:
+				for file, file_data in zip(found, allData):
+					self.checkfile(file, hashtype, file_data=file_data, bar_anim=False)
+				print('')  # new line at the end
+			else:
 				for file in found:
-					if verbosity:
-						files_data.append(list(file.gen_data(bar_animation=False)))
-					else:
-						file.update_data(
-							hashtype=hashtype, 
-							generated_data=file.gen_data(bar_animation=False))
-						self._show_file_result(file, hashtype)
-					bar()
-
-			if verbosity:
-				for file, file_data in zip(found, files_data):
-					self.checkfile(file, hashtype, file_data=file_data, bar_animation=False)
-		
+					self._show_file_result(file, hashtype)
+	
 		Errors.print_files_not_found(not_found)
 
 	def totalcheck(self, files: Iterable):
@@ -361,22 +360,29 @@ class Process(object):
 		if n_found == 0:
 			Errors.print_files_not_found(not_found, exit=True)
 
-		print("\tCalculating Hashes")
-		generated_datas = [list(file.gen_data()) for file in found]
+		generated_datas = [
+			list(file.gen_data(bar_anim=False))
+			for file in tqdm(found, ncols=71, desc='Calculating Binaries')
+		]
 
-		print("\n\tGetting Hash Sums")
-		with alive_bar(len(found[0]._hlist.keys()) * n_found, spinner='waves') as bar:
+
+		def update_generator():
 			for file, generated_data in zip(found, generated_datas):
 				for hashtype in file._hlist.keys():
 					file.update_data(hashtype, generated_data)
 					sleep(Process.SLEEP_VALUE)
-					bar()
-		print("\n")
+					yield
+
+		ug = update_generator()
+
+		for _ in tqdm(range(len(found[0]._hlist.keys())*n_found), ncols=75, desc='Getting Hash Sums'):
+			next(ug)
+		print('\n')
 
 		for n, file in enumerate(found):
 			if n > 0 and n < n_found:
 				print("\n")
-			print(f" ┌──> {file.get_fullname()!r}")
+			print(f" ┌── {file.get_fullname()!r}")
 			for hashtype in file._hlist.keys():
 				print(f" │ {hashtype}: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
 			print(' └────────────────────')
