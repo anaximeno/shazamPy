@@ -263,7 +263,7 @@ class Process(object):
 	# When lower is the sleep value, faster will be the reading,
 	# but it will increase the CPU usage, it can be changed to
 	# improve the performance.
-	SLEEP_VALUE = 0.00001
+	SLEEP_VALUE = 0.000001
 	# List of all supported hash sums:
 	HASHTYPES_LIST = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
 
