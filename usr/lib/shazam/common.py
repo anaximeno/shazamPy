@@ -3,7 +3,7 @@
 and/or functions of this programm."""
 # -*- coding: utf-8 -*-
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.6-beta'
+__version__ = '0.4.7-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 import os
@@ -197,8 +197,9 @@ class File(object):
 
 	def gen_data(self, *, bar_anim: bool = True) -> Generator:
 		"""Generates binary data. 
-		Keyword arg: 
-			bars --> bool (default: True).
+		
+        Keyword arg: 
+			bars_anim -- if True the function will show progress bars when generating the data.
 		"""
 		if self.is_readable() is False:
 			Errors.file_not_readable(self, exit=True)
@@ -288,7 +289,7 @@ class Process(object):
 
 		file.update_data(hashtype=hashtype,
 			generated_data=file_data or file.gen_data(bar_anim=bar_anim))
-		print(f"\n { '┌──' if verbosity else '──' } ", end='')
+		print(f"\n{ ' ┌──' if verbosity else '' } ", end='')
 		self._show_file_result(file, hashtype)
 		if verbosity:
 			print(f" │ ORIGINAL {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
@@ -305,6 +306,7 @@ class Process(object):
 			if n_found == 1:
 				file = found[0]
 				file.update_data(hashtype, file.gen_data(bar_anim=True))
+				print('')
 				if verbosity:
 					print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
 			else:
@@ -326,7 +328,6 @@ class Process(object):
 		n_found = len(found)
 		if n_found == 0:
 			Errors.print_files_not_found(not_found, exit=True)
-			Errors.print_error('Files not recognized!')
 		elif n_found == 1:
 			self.checkfile(found[0], hashtype, verbosity=verbosity)
 		else:
