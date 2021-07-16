@@ -11,7 +11,7 @@ Prerequesites:
 	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.6-beta'
+__version__ = '0.4.7-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 from common import File, TextFile, Process, Errors, get_hashtype
@@ -64,14 +64,14 @@ class MainFlow(object):
 					hashtype=self.args.type or get_hashtype(self.args.filename),
 					verbosity=self.args.verbose)
 
-
+# TODO: add option --no-bars for the commands (type: store_false!)
 if __name__ == '__main__':
 	hash_types = Process.HASHTYPES_LIST+['all']
 
 	parser = argparse.ArgumentParser(
 		prog="shazam",
 		usage='%(prog)s {sub-command}',
-		epilog='SHAZAM *License* %s' % __license__
+		epilog='SHAZAM - %s' % __copyright__
 	)
 	parser.add_argument("--version",
 		help="print the current version of this program", action='version',
@@ -104,7 +104,6 @@ if __name__ == '__main__':
 	)
 	calc.add_argument("-t", "--type", help=f"The type of hash sum, it must be one these: {hash_types}",
 		choices=hash_types, metavar='TYPE', required=True)
-	# calc.add_argument('hashtype', choices=Process.HASHTYPES_LIST+['all'])
 	calc.add_argument("-w", "--write", action='store_true',
 		help='Saves all calculated hash sums inside one file'
 	)
@@ -136,9 +135,10 @@ if __name__ == '__main__':
 	)
 
 	if len(sys.argv) > 1:
-		mf = MainFlow(parser.parse_args()) #TODO: add args --type/-t for determining the type of sum wanted!
+		# TODO: add feature to predict the type of sum despite the lenght of the sha string
+		mf = MainFlow(parser.parse_args())
 		mf.make_process()
-		print('\n')
+		# print('\n')
 	else:
 		print("usage: shazam [-h] [--version] {Sub-Command}")
 		print("       shazam --help         display the help section and exit")
