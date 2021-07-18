@@ -97,7 +97,7 @@ if __name__ == '__main__':
 		choices=Process.HASHTYPES_LIST, metavar='TYPE')
 	check.add_argument("HASH_SUM", help="file's hash sum")
 	check.add_argument("FILE", help="file's full or relative location")
-	check.add_argument("--verbose", action='store_true')
+	check.add_argument("-V", "--verbose", action='store_true')
 	# Positional arguments for only calculate hashsums
 	calc = subparser.add_parser('calc',
 		help='calculates and show the hash sum',
@@ -109,9 +109,7 @@ if __name__ == '__main__':
 	calc.add_argument("-w", "--write", action='store_true',
 		help='Saves all calculated hash sums inside one file'
 	)
-	calc.add_argument("--no-verbose", "--noverbose",
-		action='store_false'
-	)
+	calc.add_argument("--no-verbose", "--noverbose", action='store_false')
 	calc.add_argument('-n', '--name', metavar='NAME',
 		help='Use this with the argument --write for determining the file\'s name.'
 	)
@@ -129,9 +127,7 @@ if __name__ == '__main__':
 	read.add_argument('filename',
 		help="file to read in, and check the hash sum of the files inside"
 	)
-	read.add_argument('--verbose',
-		action='store_true', help="verbose option"
-	)
+	read.add_argument('-V', '--verbose', action='store_true', help="verbose option")
 	read.add_argument('-t', '--type', metavar='', choices=Process.HASHTYPES_LIST,
 		help='This can be used to specify the hashtype if it was not recognized in the file\'s name.'
 	)

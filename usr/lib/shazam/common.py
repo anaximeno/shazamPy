@@ -314,11 +314,11 @@ class Process(object):
 
 		file.update_data(hashtype=hashtype,
 			generated_data=file_data or file.gen_data(bar_anim=bar_anim))
-		print(f"\n{ ' ┌───────────' if verbosity else '' } {self._show_file_result(file, hashtype)}")
+		print(f"\n{ ' ┌──' if verbosity else '' } {self._show_file_result(file, hashtype)}")
 		if verbosity:
 			print(f" │ ORIGINAL {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
 			print(f" │ CURRENT  {hashtype.upper()}SUM:  {file.get_hashsum(hashtype)!r}")
-			print(' └─────')
+			print(' └──────────────')
 
 	def calculate_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
 		"""Calculates and prints the file's hash sum."""
@@ -336,9 +336,11 @@ class Process(object):
 			else:
 				for file in tqdm(found, desc='CALCULATING BINARIES', ncols=80):
 					file.update_data(hashtype, file.gen_data(bar_anim=False))
-				print('')
-				for file in found:
-					print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
+
+				if verbosity:
+					print('')
+					for file in found:
+						print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
 					
 
 		if any(found) and any(not_found):
