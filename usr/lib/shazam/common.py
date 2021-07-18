@@ -17,13 +17,15 @@ from typing import Generator, Iterable
 class Errors:
 
 	@staticmethod
-	def print_error(*err: str, exit: bool = True, err_num: int = 1):
+	def print_error(*err: str, exit: bool = True, err_num: int = 1, sep: str = '\n'):
 		"""Print the error message and exit.\n
 		Keyword args: 
 			exit --> if is to exit after showing the error (default: True),
 			err_num --> number of the error (default: 1)."""
-		error_message = ' '.join(err)
-		print("\n shazam: error: %s" % error_message)
+		error_message = sep.join(err)
+
+		print(f"shazam: error: %s" % error_message)
+
 		if exit: 
 			sys.exit(err_num)
 
@@ -32,8 +34,10 @@ class Errors:
 		n_not_found = len(files_not_found)
 		if n_not_found == 0:
 			pass
+
 		elif n_not_found == 1:
 			cls.print_error(f'File not Found: {files_not_found[0].get_fullpath()!r}!', exit=exit)
+
 		else:
 			cls.print_error('Files that were not Found or cannot be read:', exit=False)
 
@@ -60,9 +64,11 @@ except ImportError:
 	to_install.append('tqdm')
 finally:
 	if any(to_install):
-		modules_to_install = ', '.join(to_install)
-		Errors.print_error(f"Some modules must be installed: {modules_to_install}!",
-			"\n Install them with pip or conda.", exit=True)
+		modules_to_install = ' and '.join(to_install)
+		Errors.print_error(
+			f"The package(s) {modules_to_install!r} must be installed before using the program!",
+			f"\nInstall them with:\n\n\t $ pip install {' '.join(to_install)}\n", exit=True
+		)
 	else:
 		del to_install
 
@@ -74,12 +80,32 @@ def hexa_to_int(hexa: str):
 	Errors.print_error(f"{hexa!r} is not an hexadecimal value!")
 
 
-def get_hashtype(filename: str):
+def get_hashtype_from_filename(filename: str):
 	"""Analyses the filename and return the hashtype."""
 	for stype in Process.HASHTYPES_LIST[::-1]:
 		if stype in filename: 
 			return stype
-	return False
+	else:
+		return None
+
+
+def get_hashtype_from_string_length(string: str):
+	"""Return the hashtype from the length of the string"""
+	type_tab = {
+		32: 'md5',
+		40: 'sha1',
+		56: 'sha224',
+		64: 'sha256',
+		96: 'sha384',
+		128: 'sha512'
+	}
+
+	l = len(string)
+
+	if l in type_tab:
+		return type_tab[l]
+	else:
+		return None
 
 
 def animate(string: str, sleep_time: float = 0.1):

@@ -14,7 +14,7 @@ __author__ = "Anaxímeno Brito"
 __version__ = '0.4.7-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
-from common import File, TextFile, Process, Errors, get_hashtype
+from common import File, TextFile, Process, Errors, get_hashtype_from_filename, get_hashtype_from_string_length
 import argparse
 import sys
 
@@ -35,9 +35,14 @@ class MainFlow(object):
 	def make_process(self):
 		"""Performs specific processing depending on the arguments."""
 		if self.subarg == 'check':
+			hashtype = self.args.type or get_hashtype_from_string_length(self.args.HASH_SUM)
+
+			if hashtype is None:
+				Errors.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>')
+
 			self._process.checkfile(
 				file=File(self.args.FILE, self.args.HASH_SUM),
-				hashtype=self.args.type, verbosity=self.args.no_verbose)
+				hashtype=hashtype, verbosity=self.args.no_verbose)
 		elif self.subarg == 'calc':
 			files = [File(fname) for fname in self.args.FILES]
 
@@ -56,12 +61,12 @@ class MainFlow(object):
 				fsum, fname = contents[0]
 				self._process.checkfile(
 					file=File(fname, fsum),
-					hashtype=self.args.type or get_hashtype(self.args.filename),
+					hashtype=self.args.type or get_hashtype_from_filename(self.args.filename),
 					verbosity=self.args.verbose)
 			else:
 				self._process.checkfiles(
 					files=[File(fname, fsum) for fsum, fname in contents], 
-					hashtype=self.args.type or get_hashtype(self.args.filename),
+					hashtype=self.args.type or get_hashtype_from_filename(self.args.filename),
 					verbosity=self.args.verbose)
 
 # TODO: add option --no-bars for the commands (type: store_false!)
@@ -85,21 +90,19 @@ if __name__ == '__main__':
 	check = subparser.add_parser('check',
 		help="check and Compare the file's hash sum",
 		description="Verifies the integrity of the file.",
-		usage='shazam check HASH_SUM FILE {--type/-t}'
+		usage='shazam check <HASH_SUM> <FILE> {--type/-t <HASH_TYPE>}'
 	)
 	check.add_argument("-t", "--type", help=f"The type of hash sum, it must be one these: {Process.HASHTYPES_LIST}",
-		choices=Process.HASHTYPES_LIST, metavar='TYPE', required=True)
-	#check.add_argument("hashtype", choices=Process.HASHTYPES_LIST)
+		choices=Process.HASHTYPES_LIST, metavar='TYPE')
 	check.add_argument("HASH_SUM", help="file's hash sum")
 	check.add_argument("FILE", help="file's full or relative location")
 	check.add_argument("--no-verbose", "--noverbose",
 		action='store_false'
 	)
-## TODO: pensa na necessidade de baras de animação!!
 	# Positional arguments for only calculate hashsums
 	calc = subparser.add_parser('calc',
 		help='calculates and show the hash sum',
-		usage='shazam calc {-t/--type} FILES (...)',
+		usage='shazam calc {-t/--type} <FILES> (...)',
 		description='Calculates and show the hash sum.'
 	)
 	calc.add_argument("-t", "--type", help=f"The type of hash sum, it must be one these: {hash_types}",
@@ -138,7 +141,6 @@ if __name__ == '__main__':
 		# TODO: add feature to predict the type of sum despite the lenght of the sha string
 		mf = MainFlow(parser.parse_args())
 		mf.make_process()
-		# print('\n')
 	else:
 		print("usage: shazam [-h] [--version] {Sub-Command}")
 		print("       shazam --help         display the help section and exit")
