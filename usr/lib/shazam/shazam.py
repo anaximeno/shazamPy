@@ -14,7 +14,9 @@ __author__ = "Anaxímeno Brito"
 __version__ = '0.4.7-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
-from common import File, TextFile, Process, Errors, get_hashtype_from_filename, get_hashtype_from_string_length
+from common import  get_hashtype_from_filename, get_hashtype_from_string_length
+from common import File, TextFile, Process
+from common import Errors as E
 import argparse
 import sys
 
@@ -28,7 +30,7 @@ class MainFlow(object):
 		self._process = Process()
 
 		if not args.subparser:
-			Errors.print_error("No Subcommands were received!")
+			E.print_error("No Subcommands were received!")
 
 		self.subarg = args.subparser
 
@@ -38,11 +40,11 @@ class MainFlow(object):
 			hashtype = self.args.type or get_hashtype_from_string_length(self.args.HASH_SUM)
 
 			if hashtype is None:
-				Errors.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>')
+				E.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>')
 
 			self._process.checkfile(
 				file=File(self.args.FILE, self.args.HASH_SUM),
-				hashtype=hashtype, verbosity=self.args.no_verbose)
+				hashtype=hashtype, verbosity=self.args.verbose)
 		elif self.subarg == 'calc':
 			files = [File(fname) for fname in self.args.FILES]
 
@@ -69,7 +71,6 @@ class MainFlow(object):
 					hashtype=self.args.type or get_hashtype_from_filename(self.args.filename),
 					verbosity=self.args.verbose)
 
-# TODO: add option --no-bars for the commands (type: store_false!)
 if __name__ == '__main__':
 	hash_types = Process.HASHTYPES_LIST+['all']
 
@@ -96,9 +97,7 @@ if __name__ == '__main__':
 		choices=Process.HASHTYPES_LIST, metavar='TYPE')
 	check.add_argument("HASH_SUM", help="file's hash sum")
 	check.add_argument("FILE", help="file's full or relative location")
-	check.add_argument("--no-verbose", "--noverbose",
-		action='store_false'
-	)
+	check.add_argument("--verbose", action='store_true')
 	# Positional arguments for only calculate hashsums
 	calc = subparser.add_parser('calc',
 		help='calculates and show the hash sum',
@@ -138,7 +137,7 @@ if __name__ == '__main__':
 	)
 
 	if len(sys.argv) > 1:
-		# TODO: add feature to predict the type of sum despite the lenght of the sha string
+		# TODO: add option --no-bars for the commands (type: store_false!)
 		mf = MainFlow(parser.parse_args())
 		mf.make_process()
 	else:

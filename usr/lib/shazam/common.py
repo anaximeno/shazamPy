@@ -13,7 +13,7 @@ import hashlib as hlib
 from time import sleep
 from typing import Generator, Iterable
 
-
+# TODO: add type of the error when showing it, is should be one parameter of the function print_error
 class Errors:
 
 	@staticmethod
@@ -36,7 +36,7 @@ class Errors:
 			pass
 
 		elif n_not_found == 1:
-			cls.print_error(f'File not Found: {files_not_found[0].get_fullpath()!r}!', exit=exit)
+			cls.print_error(f'cannot read: {files_not_found[0].get_fullpath()!r}', exit=exit)
 
 		else:
 			cls.print_error('Files that were not Found or cannot be read:', exit=False)
@@ -291,8 +291,7 @@ class Process(object):
 		# ´self.found´ and ´self.unfound´ store files depending on their
 		# existence/readability or not, and below them are their respective lengths.
 		self._files_found = File.Found
-		#TODO: Melhor tratamento para unreadable!
-		self._files_not_found = File.Not_Found + File.Unreadable
+		self._files_not_found = File.Not_Found
 
 	def _show_file_result(self, file: File, hashtype: str):
 		if file.checksum(hashtype) is True:
@@ -301,7 +300,7 @@ class Process(object):
 		else:
 			color = "red"
 			post_msg = 'probably modified!!'
-		print(clr(f"{file.get_fullpath()!r} was {post_msg}", color))
+		return clr(f"{file.get_fullpath()!r} was {post_msg}", color)
 
 	def checkfile(self, file: File, hashtype: str, **kwargs):
 		"""Check and Compare the hash sum."""
@@ -315,12 +314,11 @@ class Process(object):
 
 		file.update_data(hashtype=hashtype,
 			generated_data=file_data or file.gen_data(bar_anim=bar_anim))
-		print(f"\n{ ' ┌──' if verbosity else '' } ", end='')
-		self._show_file_result(file, hashtype)
+		print(f"\n{ ' ┌───────────' if verbosity else '' } {self._show_file_result(file, hashtype)}")
 		if verbosity:
 			print(f" │ ORIGINAL {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
 			print(f" │ CURRENT  {hashtype.upper()}SUM:  {file.get_hashsum(hashtype)!r}")
-			print(' └──────────────')
+			print(' └─────')
 
 	def calculate_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
 		"""Calculates and prints the file's hash sum."""
@@ -343,7 +341,7 @@ class Process(object):
 					print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
 					
 
-		if found and not_found:
+		if any(found) and any(not_found):
 			print()  # Skip one line
 
 		Errors.print_files_not_found(not_found)
@@ -352,30 +350,31 @@ class Process(object):
 		"""Checks and compare the hash sums of more than one files."""
 		found, not_found = self._search_files(files)
 		n_found = len(found)
+
 		if n_found == 0:
 			Errors.print_files_not_found(not_found, exit=True)
 		elif n_found == 1:
 			self.checkfile(found[0], hashtype, verbosity=verbosity)
 		else:
-			allData = []
+			storedData = []
 			for file in tqdm(found, desc='CALCULATING BINARIES', ncols=80):
 				if verbosity is False:
 					file.update_data(
 						hashtype=hashtype, 
 						generated_data=file.gen_data(bar_anim=False))
 				elif verbosity is True:
-					allData.append(list(file.gen_data(bar_anim=False)))
+					storedData.append(list(file.gen_data(bar_anim=False)))
 				else:
 					Errors.print_error('Verbose type (True or False) must be set!')
 
 
 			if verbosity is True:
-				for file, file_data in zip(found, allData):
+				for file, file_data in zip(found, storedData):
 					self.checkfile(file, hashtype, file_data=file_data, bar_anim=False)
 				print('')  # new line at the end
 			else:
 				for file in found:
-					self._show_file_result(file, hashtype)
+					print(self._show_file_result(file, hashtype))
 	
 		Errors.print_files_not_found(not_found)
 
@@ -419,20 +418,24 @@ class Process(object):
 	def _search_files(self, files: Iterable):
 		files = set(files)
 
-		found = list(files.intersection(self._files_found))
-		not_found = list(files.intersection(self._files_not_found))
+		found = list(files.intersection(File.Found))
 
-		return found, not_found
+		not_found = files.intersection(File.Not_Found)
+		unreadable = files.intersection(File.Unreadable)
+
+		not_found_and_ureadable = list(not_found.union(unreadable))
+
+		return found, not_found_and_ureadable
 
 	def write(self, files: Iterable, hashtype: str, name: str = None):
 		found, _ = self._search_files(files)
 	
-		if len(found) != 0:  # TODO: not working when there are unfound files, on calc
+		if len(found) != 0:
 			filename = name or (hashtype + 'sum.txt')
 			with open(filename, 'wt') as txt:
 				for file in found:
 					txt.write(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}\n")
 			animate(f"\nFile {filename!r} was created!", sleep_time=0.045)			
 		else:
-			Errors.print_error('Files not found, cannot save the file!')
+			Errors.print_error('No avaliable files for saving hash sums!')
 
