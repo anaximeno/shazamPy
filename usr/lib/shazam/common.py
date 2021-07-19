@@ -288,6 +288,8 @@ class Process(object):
 	HASHTYPES_LIST = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
 
 	def __init__(self):
+		# TODO: Check this init!!
+
 		# ´self.found´ and ´self.unfound´ store files depending on their
 		# existence/readability or not, and below them are their respective lengths.
 		self._files_found = File.Found
