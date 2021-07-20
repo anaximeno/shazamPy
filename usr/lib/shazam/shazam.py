@@ -15,8 +15,7 @@ __version__ = '0.4.7-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 from common import  get_hashtype_from_filename, get_hashtype_from_string_length
-from common import File, TextFile, Process
-from common import Errors as E
+from common import File, TextFile, Process, Errors
 import argparse
 import sys
 
@@ -30,7 +29,8 @@ class MainFlow(object):
 		self._process = Process()
 
 		if not args.subparser:
-			E.print_error("No Subcommands were received!")
+			e = Errors(to_exit=True, error_type='input error')
+			e.print_error("subcommands were not given!")
 
 		self.subarg = args.subparser
 
@@ -40,7 +40,9 @@ class MainFlow(object):
 			hashtype = self.args.type or get_hashtype_from_string_length(self.args.HASH_SUM)
 
 			if hashtype is None:
-				E.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>')
+				e = Errors(to_exit=True, error_type='input error')
+				e.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>', 
+				f'Available Hash Types: {", ".join(Process.HASHTYPES_LIST)}')
 
 			self._process.checkfile(
 				file=File(self.args.FILE, self.args.HASH_SUM),
@@ -49,7 +51,7 @@ class MainFlow(object):
 			files = [File(fname) for fname in self.args.FILES]
 
 			if self.args.type != 'all':
-				self._process.calculate_sum(
+				self._process.calculate_hash_sum(
 					files=files, verbosity=self.args.no_verbose,
 					hashtype=self.args.type)
 				if self.args.write:
@@ -57,17 +59,20 @@ class MainFlow(object):
 			else: 
 				self._process.totalcheck(files)
 		elif self.subarg == 'read':
-			textfile = TextFile(self.args.filename)
-			contents = textfile.read_content()
-			if len(contents) == 1:
-				fsum, fname = contents[0]
+			t = TextFile(self.args.filename)
+			contents = t.get_content()
+
+			if not any(contents):
+				e = Errors(to_exit=True, error_type='reading error')
+				e.print_error(f'{self.args.filename!r} is empty!')
+			elif len(contents) == 1:
 				self._process.checkfile(
-					file=File(fname, fsum),
+					file=File(*contents[0]),
 					hashtype=self.args.type or get_hashtype_from_filename(self.args.filename),
 					verbosity=self.args.verbose)
 			else:
 				self._process.checkfiles(
-					files=[File(fname, fsum) for fsum, fname in contents], 
+					files=[File(*file_attrs) for file_attrs in contents], 
 					hashtype=self.args.type or get_hashtype_from_filename(self.args.filename),
 					verbosity=self.args.verbose)
 
@@ -134,6 +139,7 @@ if __name__ == '__main__':
 
 	if len(sys.argv) > 1:
 		# TODO: add option --no-bars for the commands (type: store_false!)
+		# TODO: confirm given type with hash sum length!
 		mf = MainFlow(parser.parse_args())
 		mf.make_process()
 	else:
