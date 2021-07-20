@@ -3,7 +3,7 @@
 and/or functions of this programm."""
 # -*- coding: utf-8 -*-
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.7-beta'
+__version__ = '0.4.7.1-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 import os

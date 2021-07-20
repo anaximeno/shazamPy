@@ -11,7 +11,7 @@ Prerequesites:
 	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
 """
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.7-beta'
+__version__ = '0.4.7.1-beta'
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 from common import  get_hashtype_from_filename, get_hashtype_from_string_length
