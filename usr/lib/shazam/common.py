@@ -13,14 +13,10 @@ import hashlib as hlib
 from time import sleep
 from typing import Generator, Iterable
 
-# TODO: add type of the error when showing it, is should be one parameter of the function print_error
 class Errors:
-	# TODO: add errors feature?
-	# TODO: Use logs when this class is called
-	# TODO: Implemet the show in time feature.
-	# NOTE: show in time feature should display the error message in time, if set to True, 
+	# NOTE: show in time feature should display the error message in time, if set to True,
 	# else in the end of this program execution if set to False.
-	
+
 	# Erros to be shown at the final of this program execution.
 	_FINAL_ERRORS = []
 
@@ -37,14 +33,14 @@ class Errors:
 			sys.exit(self._error_num)
 		else:
 			pass
-	
+
 	def force_exit(self, err_num: int):
 		exit(err_num)
 
 	def print_error(self, *errors: str, sep: str = '\n'):
 		"""Print the error message and exit.
 
-		Keyword args: 
+		Keyword args:
 			exit --> if is to exit after showing the error (default: True),
 			err_num --> number of the error (default: 1)."""
 
@@ -63,7 +59,7 @@ class Errors:
 			self.print_error('files that were not found:')
 
 			for file in files:
-				print(f'  -> {file.get_fullpath()!r}')	
+				print(f'  -> {file.get_fullpath()!r}')
 
 		self._exit_handler()
 
@@ -78,7 +74,7 @@ class Errors:
 			self.print_error('some files that were not possible to read:')
 
 			for file in files:
-				print(f'  -> {file.get_fullpath()!r}')	
+				print(f'  -> {file.get_fullpath()!r}')
 
 		self._exit_handler()
 
@@ -116,7 +112,7 @@ def hexa_to_int(hexa: str):
 
 def get_hashtype_from_string_length(string: str):
 	"""Return the hashtype from the length of the string"""
-	type_tab = {
+	length_type_dict = {
 		32: 'md5',
 		40: 'sha1',
 		56: 'sha224',
@@ -127,8 +123,8 @@ def get_hashtype_from_string_length(string: str):
 
 	l = len(string)
 
-	if l in type_tab:
-		return type_tab[l]
+	if l in length_type_dict:
+		return length_type_dict[l]
 	else:
 		return None
 
@@ -136,7 +132,7 @@ def get_hashtype_from_string_length(string: str):
 def get_hashtype_from_filename(filename: str):
 	"""Analyses the filename and return the hashtype."""
 	for stype in Process.HASHTYPES_LIST[::-1]:
-		if stype in filename: 
+		if stype in filename:
 			return stype
 	else:
 		t = TextFile(filename)
@@ -157,14 +153,8 @@ def animate(string: str, sleep_time: float = 0.1):
 
 
 class File(object):
-	"""This class holds all necessary informations and operations
-	for one file object."""
-	# Will store files that exists or not.
-	Found = []
-	Not_Found = []
-	Unreadable = []
-
 	def __init__(self, filename: str, given_hashsum: str = '', file_for_check: bool = True, **kwargs):
+		"""This class holds all necessary informations and operations for one file object."""
 		self._file_is_for_check = file_for_check
 		self._dir, self._fname = os.path.split(filename)
 		if '.' in self._fname:
@@ -192,13 +182,6 @@ class File(object):
 				"sha512": hlib.sha512()
 			}
 
-			if self.exists() is True:
-				if self.is_readable() is True:
-					self.Found.append(self)
-				else:
-					self.Unreadable.append(self)
-			else:
-				self.Not_Found.append(self)
 
 	def __str__(self):
 		return self.get_fullpath()
@@ -228,22 +211,22 @@ class File(object):
 		if self.exists() is True:
 			return os.path.getsize(self.get_fullpath())
 		return None
-	
+
 	def get_given_sum(self) -> str:
-		"""Returns the given sum of the file which will be used to compare with the calculated one, 
+		"""Returns the given sum of the file which will be used to compare with the calculated one,
 		for checking this file integrity."""
 		return str(self._gsum)
 
 	def exists(self) -> str:
 		"""Returns if this objects exists on his directory."""
 		return os.path.exists(self.get_fullpath())
-	
+
 	def is_dir(self) -> bool:
 		"""Returns if this object is a directory."""
 		return os.path.isdir(self.get_fullpath())
 
 	def is_readable(self) -> bool:
-		"""Returns if the file is readable or not. It must: exist on its directory, not be a directory and 
+		"""Returns if the file is readable or not. It must: exist on its directory, not be a directory and
 		be readable in the binary mode."""
 		if not self.exists() or self.is_dir():
 			return False
@@ -261,9 +244,9 @@ class File(object):
 		return None
 
 	def gen_data(self, *, bar_anim: bool = True) -> Generator:
-		"""Generates binary data. 
-		
-        Keyword arg: 
+		"""Generates binary data.
+
+        Keyword arg:
 			bars_anim -- if True the function will show progress bars when generating the data.
 		"""
 		if self.is_readable() is False:
@@ -276,7 +259,7 @@ class File(object):
 		with open(self.get_fullpath(), 'rb') as f:
 			for _ in loop:
 				yield f.read(BUF_SIZE)
-				sleep(Process.SLEEP_VALUE)	
+				sleep(Process.SLEEP_VALUE)
 
 	def update_data(self, hashtype: str, generated_data: Iterable) -> None:
 		"""Updates binary data to the hashtype's class."""
@@ -297,8 +280,8 @@ class TextFile(File):
 
 	def __init__(self, filename: str, **kwargs):
 		super().__init__(filename,
-			given_hashsum=kwargs['given_hashsum'] if 'given_hashsum' in kwargs else '', 
-			file_for_check=kwargs['file_for_check'] if 'file_for_check' in kwargs else False, 
+			given_hashsum=kwargs['given_hashsum'] if 'given_hashsum' in kwargs else '',
+			file_for_check=kwargs['file_for_check'] if 'file_for_check' in kwargs else False,
 			**kwargs)
 
 		e = Errors(to_exit=True)
@@ -315,7 +298,7 @@ class TextFile(File):
 		try:
 			with open(self.get_fullpath(), 'rt') as textfile:
 				content = [self._split_line(line) for line in textfile]
-			
+
 			return content
 		except IndexError:
 			e = Errors(to_exit=True, error_type='reading error')
@@ -326,7 +309,7 @@ class TextFile(File):
 			e.files_not_readable_error([self])
 
 		return None
-	
+
 	def _split_line(self, line: str) -> tuple:
 		"""Split the line read and return the file's name and hash sum inside a tuple."""
 		content = line.split()
@@ -347,11 +330,7 @@ class Process(object):
 
 	def __init__(self):
 		# TODO: Check this init!!
-
-		# ´self.found´ and ´self.unfound´ store files depending on their
-		# existence/readability or not, and below them are their respective lengths.
-		self._files_found = File.Found
-		self._files_not_found = File.Not_Found
+		pass
 
 	def _format_file_result(self, file: File, hashtype: str):
 		if file.checksum(hashtype) is True:
@@ -388,7 +367,7 @@ class Process(object):
 	def calculate_hash_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
 		"""Calculates and prints the file's hash sum."""
 		found, not_found, unreadable = self._analyse_files(files)
-		
+
 		if any(found):
 			if len(found) == 1:
 				file = found[0]
@@ -425,7 +404,7 @@ class Process(object):
 			for file in tqdm(found, desc='CALCULATING BINARIES', ncols=80):
 				if verbosity is False:
 					file.update_data(
-						hashtype=hashtype, 
+						hashtype=hashtype,
 						generated_data=file.gen_data(bar_anim=False))
 				elif verbosity is True:
 					storedData.append(list(file.gen_data(bar_anim=False)))
@@ -495,14 +474,13 @@ class Process(object):
 
 	def write(self, files: Iterable, hashtype: str, name: str = None):
 		found, _, _ = self._analyse_files(files)
-	
+
 		if len(found) != 0:
 			filename = name or (hashtype + 'sum.txt')
 			with open(filename, 'wt') as txt:
 				for file in found:
 					txt.write(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}\n")
-			animate(f"\nFile {filename!r} was created!", sleep_time=0.045)			
+			animate(f"\nFile {filename!r} was created!", sleep_time=0.045)
 		else:
 			e = Errors('save error')
 			e.print_error('there are no avaliable files for saving hash sums!')
-
