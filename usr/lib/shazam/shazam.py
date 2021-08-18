@@ -41,7 +41,7 @@ class MainFlow(object):
 
 			if hashtype is None:
 				e = Errors(to_exit=True, error_type='input error')
-				e.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>', 
+				e.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>',
 				f'Available Hash Types: {", ".join(Process.HASHTYPES_LIST)}')
 
 			self._process.checkfile(
@@ -56,7 +56,7 @@ class MainFlow(object):
 					hashtype=self.args.type)
 				if self.args.write:
 					self._process.write(files, self.args.type, self.args.name)
-			else: 
+			else:
 				self._process.totalcheck(files)
 		elif self.subarg == 'read':
 			t = TextFile(self.args.filename)
@@ -72,11 +72,12 @@ class MainFlow(object):
 					verbosity=self.args.verbose)
 			else:
 				self._process.checkfiles(
-					files=[File(*file_attrs) for file_attrs in contents], 
+					files=[File(*file_attrs) for file_attrs in contents],
 					hashtype=self.args.type or get_hashtype_from_filename(self.args.filename),
 					verbosity=self.args.verbose)
 
-if __name__ == '__main__':
+
+def get_args():
 	hash_types = Process.HASHTYPES_LIST+['all']
 
 	parser = argparse.ArgumentParser(
@@ -137,11 +138,14 @@ if __name__ == '__main__':
 		help='This can be used to specify the hashtype if it was not recognized in the file\'s name.'
 	)
 
+	return parser.parse_args()
+
+
+if __name__ == '__main__':
+	# If there are more than one arguments it will execute the program else send the usage message to the user
 	if len(sys.argv) > 1:
-		# TODO: add option --no-bars for the commands (type: store_false!)
-		# TODO: confirm given type with hash sum length!
-		mf = MainFlow(parser.parse_args())
-		mf.make_process()
+		args = get_args()
+		MainFlow(args).make_process()
 	else:
 		print("usage: shazam [-h] [--version] {Sub-Command}")
 		print("       shazam --help         display the help section and exit")
