@@ -3,7 +3,7 @@
 and/or functions of this programm."""
 # -*- coding: utf-8 -*-
 __author__ = "Anaxímeno Brito"
-__version__ = '0.4.7.1-beta'
+__version__ = "0.4.7.1-beta"
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 import os
@@ -138,15 +138,16 @@ def get_hashtype_from_filename(filename: str):
 		t = TextFile(filename)
 		content = t.get_content()
 		if any(content):
-			return get_hashtype_from_string_length(content[0][1])
+			_, hashsum = content[0]
+			return get_hashtype_from_string_length(hashsum)
 		else:
 			return None
 
 
-def animate(string: str, sleep_time: float = 0.1):
+def animate(string: str, secs: float = 0.1):
 	for char in string:
 		if char != '\n' and char != '\t':
-			sleep(sleep_time)
+			sleep(secs)
 		sys.stdout.write(char)
 		sys.stdout.flush()
 	print('')	# Go to new line
@@ -334,12 +335,14 @@ class Process(object):
 
 	def _format_file_result(self, file: File, hashtype: str):
 		if file.checksum(hashtype) is True:
+			prefix = ''
 			color = "green"
-			post_msg = 'not modified.'
+			result = "not modified"
 		else:
+			prefix = clr("* ", "red")
 			color = "red"
-			post_msg = 'probably modified!!'
-		return clr(f"{file.get_fullpath()!r} was {post_msg}", color)
+			result = "probably modified!!"
+		return prefix + clr(f'{file.get_fullpath()}', "white") + clr(f" was {result}", color)
 
 	def checkfile(self, file: File, hashtype: str, **kwargs):
 		"""Check and Compare the hash sum."""
@@ -480,7 +483,7 @@ class Process(object):
 			with open(filename, 'wt') as txt:
 				for file in found:
 					txt.write(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}\n")
-			animate(f"\nFile {filename!r} was created!", sleep_time=0.045)
+			animate(f"\nFile {filename!r} was created!", secs=0.045)
 		else:
 			e = Errors('save error')
 			e.print_error('there are no avaliable files for saving hash sums!')

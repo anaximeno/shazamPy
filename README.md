@@ -1,10 +1,10 @@
-# SHA-ZAM - Check the file hash sum
+# SHAZAM - Check the file's integrity
 
-Shazam is a **Command Line Application** that checks the integrity of one file by comparing it with a given hash.
+Shazam is a **Command Line Application** that checks the integrity of the file by comparing it with a given hash.
 
 > Created by: Anaxímeno Brito
 
-## How Does It Work:
+## How Does It Work?
 
 It calculates the file's hash sum and compares it with a given hash for checking if the file isn't corrupted, it can also be used for calculating the hash sums and automatically save it inside one file if wanted.
 
@@ -19,39 +19,34 @@ Shazam supports some of the most used hash types.
 * sha384sum
 * sha512sum
 
+---
+
 ## Installation:
 
-Before the installation secure that you've installed all requirements. There isn't no builds for installing the program already so you've to manually install the files on your computer.
-
-#### Prerequisites:
+Before the installation secure that you've installed all requirements:
 
 * **Python** - version 3.6.x or higher
 * **termcolor** - version 1.1.x or higher (install it with pip or conda)
 * **tqdm** - version 4.x or higher (install it with pip or conda)
 
-#### How to install:
-For installing the program, you just have to download this repository and put the file '*usr/bin/shazam*' on '*/usr/bin/*' in your computer and put the directory '*urs/lib/shazam*' on '*/usr/lib*'.
-Or artenatively run the installation script named *install.sh* with the command below:
+### How to install:
+
+For installing the program run the installation script '**install.sh**' which is on the root directory of this program as shown below:
 
     $ sudo sh install.sh
 
-#### More detailed:
-On this directory:
+Or on the root directory:
 
 	$ sudo cp usr/bin/shazam /usr/bin/
 	$ sudo cp usr/lib/shazam -r /usr/lib/
 
-Try to see if it is working:
+After installing it, see if it is working using the following command:
 
 	$ shazam
 
 ## Usage:
 
 	$ shazam {Sub-Commands} [Arguments..]
-
-### If wanted to read and check the sum on a file:
-
-	$ shazam read [filename]
 
 ### For more options, try, after install it:
 
