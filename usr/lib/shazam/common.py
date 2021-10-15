@@ -2,16 +2,19 @@
 """ Common is a support module, which contains the principals methods
 and/or functions of this programm."""
 # -*- coding: utf-8 -*-
+
 __author__ = "Anaxímeno Brito"
 __version__ = "0.4.7.1-beta"
 __license__ = "GNU General Public License v3.0"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
+
 import os
 import sys
 import string
 import hashlib as hlib
 from time import sleep
 from typing import Generator, Iterable
+
 
 class Errors:
 	# NOTE: show in time feature should display the error message in time, if set to True,
@@ -299,7 +302,6 @@ class TextFile(File):
 		try:
 			with open(self.get_fullpath(), 'rt') as textfile:
 				content = [self._split_line(line) for line in textfile]
-
 			return content
 		except IndexError:
 			e = Errors(to_exit=True, error_type='reading error')
@@ -359,8 +361,7 @@ class Process(object):
 			pass
 
 		file.update_data(hashtype=hashtype,
-			generated_data=file_data or file.gen_data(bar_anim=bar_anim)
-		)
+			generated_data=file_data or file.gen_data(bar_anim=bar_anim))
 		print(f"\n{ ' ┌──' if verbosity else '' } {self._format_file_result(file, hashtype)}")
 		if verbosity:
 			print(f" │ ORIGINAL {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
