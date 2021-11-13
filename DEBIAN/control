@@ -1,0 +1,12 @@
+Source: shazam
+Package: shazam
+Priority: optional
+Version: 0.4.7.3-beta
+Architecture: all
+Section: misc
+Maintainer: Anaxímeno Brito, <anaximenobrito@gmail.com>
+Installed-Size: 40
+Depends: python3,
+	 python3-termcolor,
+	 python3-tqdm
+Description: Shazam is a Command Line Application that checks the integrity of the file by comparing it with a given hash.
