@@ -1,105 +1,156 @@
 #!/usr/bin/env python3
-""" Common is a support module, which contains the principals methods
-and/or functions of this programm."""
 # -*- coding: utf-8 -*-
 
-__author__ = "Anaxímeno Brito"
-__version__ = "0.4.7.1-beta"
 __license__ = "GNU General Public License v3.0"
-__copyright__ = "Copyright (c) 2020-2021 by " + __author__
+__version__ = "0.4.7.3-beta"
 
 import os
 import sys
 import string
 import hashlib as hlib
 from time import sleep
-from typing import Generator, Iterable
+from typing import Any, Generator, Iterable, Text
 
 
-class Errors:
-	# NOTE: show in time feature should display the error message in time, if set to True,
-	# else in the end of this program execution if set to False.
+__author__ = "Anaxímeno J. A. Brito"
+__copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
-	# Erros to be shown at the final of this program execution.
-	_FINAL_ERRORS = []
 
-	def __init__(self, to_exit: bool = True, error_type: str = 'error', error_num: int = 1, show_in_time: bool = True) -> None:
-		"""if show_in_time is False, the error message will be shown at the end of the execution!
-		""" # TODO: Improve this docstring!
-		self._to_exit = to_exit
-		self._error_num = error_num
-		self._error_type = error_type
-		self._show_in_time = show_in_time
+class Stack:
 
-	def _exit_handler(self):
-		if self._to_exit is True:
-			sys.exit(self._error_num)
+	def __init__(self, limit: int = None, input_type = None) -> None:
+		if type(limit) is int or limit is None:
+			self._limit = limit
 		else:
-			pass
+			raise TypeError('The type of the parameter argument limit must be int or None!')
+		self._input_type = input_type
+		self._stack = []
+		self._top = -1
 
-	def force_exit(self, err_num: int):
-		exit(err_num)
+	@property
+	def limit(self) -> int:
+		return self._limit
 
-	def print_error(self, *errors: str, sep: str = '\n'):
-		"""Print the error message and exit.
-
-		Keyword args:
-			exit --> if is to exit after showing the error (default: True),
-			err_num --> number of the error (default: 1)."""
-
-		error_message = sep.join(errors)
-		print(f"shazam: {self._error_type.lower()}: {error_message}")
-		self._exit_handler()
-
-	def files_not_found_error(self, files: Iterable):
-		self._error_type = 'file not found error'
-
-		if not any(files):
-			pass
-		elif len(files) == 1:
-			self.print_error(f'{files[0].get_fullpath()!r} was not found!')
+	@property
+	def number_of_elements(self) -> int:
+		return self._top + 1
+	
+	def _walk(self, inc: int) -> bool:
+		prev_top = self._top
+		if type(inc) is int:
+			if inc == -1:
+				self._top = self._top + inc if not self.isempty() else self._top
+			elif inc == 1:
+				self._top = self._top + inc if not self.isfull() else self._top
+			else:
+				raise ValueError('The value of the parameter inc must be -1 or 1')
 		else:
-			self.print_error('files that were not found:')
+			raise TypeError('The type of the inc value must be int!') 
+		return not self._top == prev_top
+		
+	
+	def isfull(self) -> bool:
+		return self.limit == self.number_of_elements if self.limit is not None else False
 
-			for file in files:
-				print(f'  -> {file.get_fullpath()!r}')
-
-		self._exit_handler()
-
-	def files_not_readable_error(self, files: Iterable):
-		self._error_type = 'reading error'
-
-		if not any(files):
-			pass
-		elif len(files) == 1:
-			self.print_error(f'{files[0].get_fullpath()!r} is not possible to read!')
+	def isempty(self) -> bool:
+		return not bool(self.number_of_elements)
+	
+	def push(self, value: Any) -> bool:
+		if not self.isfull():
+			if self._input_type is None or type(value) is self._input_type:
+				self._stack.append(value)
+				self._walk(1)
+				return True
+			else:
+				raise TypeError(f'This stack only acepts inputs of the type {str(self._input_type)}')
 		else:
-			self.print_error('some files that were not possible to read:')
+			return False
+	
+	def pop(self) -> Any:
+		if not self.isempty():
+			self._walk(-1)
+			out = self._stack.pop()
+			return out
+		return None
 
-			for file in files:
-				print(f'  -> {file.get_fullpath()!r}')
-
-		self._exit_handler()
 
 
-to_install = []
+class ShazamWarningHandler:
+	"""Class that displays an Error in a way it gets integrated with the program.
+
+	Arguments:
+		`name`: (str, default: 'Error') the name of the Error.
+
+		`halt`: (bool, default: True) if set to True the program will be stoped and the Error will be shown, 
+		else the Error will only be shown at the end of the execution.
+
+		`value`: (int, default: 1) the number of the Error that will be returned to the system.
+	
+	Methods:
+		(...)
+	"""
+	STACK: Stack = Stack(limit=None, input_type=str)
+	EMISSOR: str = 'Shazam'
+	def __init__(self, halt: bool = True,  value: int = 1) -> None:
+		self._halt = halt
+		self._swh_value = value
+	
+	def __str__(self) -> str:
+		return "{} ({}), Halt: {}".format(self.emissor, self._swh_value, str(self._halt))
+
+	def __repr__(self) -> str:
+		pass
+
+	@staticmethod
+	def halt_execution(value: int = 1) -> None:
+		"""Exits and returns the value parameter (default: 1) to the system."""
+		sys.exit(value)
+
+	@property
+	def emissor(self) -> str:
+		return str(self.EMISSOR)
+
+	def add(self, message: str) -> None:
+		"""Add an Error to the Error's stack, if the class argument `halt` was set to true, 
+		the execution will be stoped and this Error will be shown else it will only be show
+		at the end of the execution.
+		"""
+		self.STACK.push(message)
+		if self._halt is True:
+			self.unstack_all()
+			self.halt_execution(self._swh_value)
+
+	@classmethod
+	def display_mensage(cls, msg) -> bool:
+		print(f"{cls.EMISSOR}: {msg}")
+	
+	@classmethod
+	def unstack_all(cls):
+		while (msg := cls.STACK.pop()) is not None:
+			cls.display_mensage(msg)
+
+
+requiredPackages: list = []
+
+
 try:
 	from termcolor import colored as clr
 except ImportError:
-	to_install.append('termcolor')
+	requiredPackages.append('termcolor')
 try:
 	from tqdm import tqdm
 except ImportError:
-	to_install.append('tqdm')
+	requiredPackages.append('tqdm')
 finally:
-	if any(to_install):
-		modules_to_install = ' and '.join(to_install)
-		modules_to_install_instructions = ' '.join(to_install)
-		e = Errors(to_exit=True, error_type='module not found error')
-		e.print_error(f"The package(s) {modules_to_install!r} must be installed before using the program!",
-			f"\nInstall them with:\n\n\t $ pip install {modules_to_install_instructions}\n")
+	if any(requiredPackages):
+		swh = ShazamWarningHandler(halt=True, value=1)
+		swh.add(
+			'{} '.format(',' if len(requiredPackages) > 2 else ' and').join(requiredPackages) + 
+			' {} not installed in your computer!'.format('are' if len(requiredPackages) > 1 else 'is')
+		)
 	else:
-		del to_install
+		del requiredPackages
+
 
 
 def hexa_to_int(hexa: str):
@@ -108,20 +159,18 @@ def hexa_to_int(hexa: str):
 		return int(hexa, 16)
 	else:
 		# TODO: to_exit should be False here below!
-		e = Errors(to_exit=True, error_type='input error')
-		e.print_error(f"{hexa!r} is not an hexadecimal value!")
+		swh = ShazamWarningHandler(halt=True)
+		swh.add('"{}" is not an hexadecimal value!'.format(''.join(
+				clr(h, 'red') if h not in string.hexdigits else h for h in hexa
+			)))
 		return None
 
 
 def get_hashtype_from_string_length(string: str):
 	"""Return the hashtype from the length of the string"""
 	length_type_dict = {
-		32: 'md5',
-		40: 'sha1',
-		56: 'sha224',
-		64: 'sha256',
-		96: 'sha384',
-		128: 'sha512'
+		32: 'md5', 40: 'sha1', 56: 'sha224',
+		64: 'sha256', 96: 'sha384', 128: 'sha512'
 	}
 
 	l = len(string)
@@ -159,6 +208,8 @@ def animate(string: str, secs: float = 0.1):
 class File(object):
 	def __init__(self, filename: str, given_hashsum: str = '', file_for_check: bool = True, **kwargs):
 		"""This class holds all necessary informations and operations for one file object."""
+		self._swh_handler = ShazamWarningHandler(halt=True, value=1)
+		
 		self._file_is_for_check = file_for_check
 		self._dir, self._fname = os.path.split(filename)
 		if '.' in self._fname:
@@ -188,7 +239,7 @@ class File(object):
 
 
 	def __str__(self):
-		return self.get_fullpath()
+		return self.fullpath
 
 	def get_name(self) -> str:
 		"""Returns the name of the file without its extension, and without its the full path address."""
@@ -206,14 +257,15 @@ class File(object):
 		"""Returns the current directory of this file."""
 		return str(self._dir)
 
-	def get_fullpath(self) -> str:
+	@property
+	def fullpath(self) -> str:
 		"""Returns the full path of this file."""
 		return os.path.join(self.get_dir(), self.get_fullname())
 
 	def get_size(self) -> int:
 		"""Returns the size in bytes of the file, only if it exists, else None."""
 		if self.exists() is True:
-			return os.path.getsize(self.get_fullpath())
+			return os.path.getsize(self.fullpath)
 		return None
 
 	def get_given_sum(self) -> str:
@@ -223,11 +275,11 @@ class File(object):
 
 	def exists(self) -> str:
 		"""Returns if this objects exists on his directory."""
-		return os.path.exists(self.get_fullpath())
+		return os.path.exists(self.fullpath)
 
 	def is_dir(self) -> bool:
 		"""Returns if this object is a directory."""
-		return os.path.isdir(self.get_fullpath())
+		return os.path.isdir(self.fullpath)
 
 	def is_readable(self) -> bool:
 		"""Returns if the file is readable or not. It must: exist on its directory, not be a directory and
@@ -235,7 +287,7 @@ class File(object):
 		if not self.exists() or self.is_dir():
 			return False
 		try:
-			with open(self.get_fullpath(), 'rb') as f:
+			with open(self.fullpath, 'rb') as f:
 				f.read(1)
 			return True
 		except UnicodeDecodeError:
@@ -253,23 +305,21 @@ class File(object):
         Keyword arg:
 			bars_anim -- if True the function will show progress bars when generating the data.
 		"""
-		if self.is_readable() is False:
-			e = Errors(to_exit=True)
-			e.files_not_readable_error([self])
+		if not self.is_readable():
+			self._swh_handler.add(f'Cannot read {self.get_fullname()}!')
 
 		BUF_SIZE = 32768
 		times = (self.get_size() // BUF_SIZE) + (self.get_size() % BUF_SIZE)
 		loop = tqdm(range(times), ncols=80, desc='CALCULATING BINARIES') if bar_anim else range(times)
-		with open(self.get_fullpath(), 'rb') as f:
+		with open(self.fullpath, 'rb') as f:
 			for _ in loop:
 				yield f.read(BUF_SIZE)
 				sleep(Process.SLEEP_VALUE)
 
 	def update_data(self, hashtype: str, generated_data: Iterable) -> None:
 		"""Updates binary data to the hashtype's class."""
-		if self.is_readable() is False:
-			e = Errors(to_exit=True)
-			e.files_not_readable_error([self])
+		if not self.is_readable():
+			self._swh_handler.add(f'Cannot read {self.get_fullname()}!')
 
 		for file_data in generated_data:
 			self._hlist[hashtype].update(file_data)
@@ -282,36 +332,27 @@ class File(object):
 
 class TextFile(File):
 
-	def __init__(self, filename: str, **kwargs):
-		super().__init__(filename,
-			given_hashsum=kwargs['given_hashsum'] if 'given_hashsum' in kwargs else '',
-			file_for_check=kwargs['file_for_check'] if 'file_for_check' in kwargs else False,
-			**kwargs)
+	def __init__(self, filename: str, file_for_check: bool = False, **kwargs):
+		super(TextFile, self).__init__(filename, file_for_check=file_for_check, **kwargs)
 
-		e = Errors(to_exit=True)
-		if self.exists() is True and self.is_readable() is False:
-			e.files_not_readable_error([self])
-		elif self.exists() is False:
-			e.files_not_found_error([self])
-		else:
-			pass
+		if not self.exists():
+			self._swh_handler.add(f'File {self.get_fullname()} was not found!')
+		elif not self.is_readable():
+			self._swh_handler.add(f'File {self.get_fullname()} is not readable!')
 
 	def get_content(self):
 		"""Return a `list with tuples` with the content of the file,
 		each tuple has the following structure: ``(file name, file hash sum)``."""
 		try:
-			with open(self.get_fullpath(), 'rt') as textfile:
+			with open(self.fullpath, 'rt') as textfile:
 				content = [self._split_line(line) for line in textfile]
-			return content
 		except IndexError:
-			e = Errors(to_exit=True, error_type='reading error')
-			e.print_error(f"error reading file {self.get_fullpath()!r}:",
-				 " - Each line of the file should only have the file hash sum and file name!")
+			self._swh_handler.add(
+				f"Error reading {self.fullpath}: Each line of the file must only have the file hash sum and file name, respectively."
+				)
 		except UnicodeDecodeError:
-			e = Errors(to_exit=True)
-			e.files_not_readable_error([self])
-
-		return None
+			self._swh_handler.add(f'File {self.get_fullname()} is not readable!')
+		return content
 
 	def _split_line(self, line: str) -> tuple:
 		"""Split the line read and return the file's name and hash sum inside a tuple."""
@@ -324,61 +365,58 @@ class TextFile(File):
 
 
 class Process(object):
-	# When lower is the sleep value, faster will be the reading,
-	# but it will increase the CPU usage, it can be changed to
-	# improve the performance.
-	SLEEP_VALUE = 1e-7
-	# List of all supported hash sums:
-	HASHTYPES_LIST = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
-
+	SLEEP_VALUE: float = 1e-7
+	HASHTYPES_LIST: list = ["md5", "sha1",
+	"sha224", "sha256", "sha384", "sha512"
+		]
+	COLORS: dict = {
+		'sucess': 'green',
+		'failure': 'red'
+		}
 	def __init__(self):
-		# TODO: Check this init!!
-		pass
+		self._swh_handler = ShazamWarningHandler(halt=False)
 
 	def _format_file_result(self, file: File, hashtype: str):
 		if file.checksum(hashtype) is True:
-			prefix = ''
-			color = "green"
-			result = "not modified"
+			prefix = clr("-> ", self.COLORS['sucess'])
+			color = self.COLORS['sucess']
+			result = "not modified."
 		else:
-			prefix = clr("* ", "red")
-			color = "red"
-			result = "probably modified!!"
-		return prefix + clr(f'{file.get_fullpath()}', "white") + clr(f" was {result}", color)
+			prefix = clr("-> ", self.COLORS['failure'])
+			color = self.COLORS['failure']
+			result = "modified."
+		return prefix + clr(f'{file.fullpath}', "white") + clr(f" was {result}", color)
 
 	def checkfile(self, file: File, hashtype: str, **kwargs):
 		"""Check and Compare the hash sum."""
 		file_data = kwargs['file_data'] if 'file_data' in kwargs else None
 		bar_anim  = kwargs['bar_anim'] if 'bar_anim' in kwargs else True
 		verbosity = kwargs['verbosity'] if 'verbosity' in kwargs else True
-
-		e = Errors(to_exit=True)
-		if file.exists() is True and file.is_readable() is False:
-			e.files_not_readable_error([file])
-		elif file.exists() is False:
-			e.files_not_found_error([file])
-		else:
-			pass
+		swh = ShazamWarningHandler(halt=True)
+		if not file.exists():
+			swh.add('File {!r} was not found!'.format(file.fullpath))
+		elif not file.is_readable():
+			swh.add('File {!r} is not readable!'.format(file.fullpath))
 
 		file.update_data(hashtype=hashtype,
 			generated_data=file_data or file.gen_data(bar_anim=bar_anim))
 		print(f"\n{ ' ┌──' if verbosity else '' } {self._format_file_result(file, hashtype)}")
 		if verbosity:
-			print(f" │ ORIGINAL {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
-			print(f" │ CURRENT  {hashtype.upper()}SUM:  {file.get_hashsum(hashtype)!r}")
+			print(f" │ O: {hashtype.upper()}SUM:  {file.get_given_sum()!r}")
+			print(f" │ C: {hashtype.upper()}SUM:  {file.get_hashsum(hashtype)!r}")
 			print(' └──────────────')
 
 	def calculate_hash_sum(self, files: Iterable, hashtype: str, verbosity: bool = True):
 		"""Calculates and prints the file's hash sum."""
 		found, not_found, unreadable = self._analyse_files(files)
-
+		# TODO: store file in the stack or a queue
 		if any(found):
 			if len(found) == 1:
 				file = found[0]
 				file.update_data(hashtype, file.gen_data(bar_anim=True))
 				print()
 				if verbosity:
-					print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
+					print(f"{file.get_hashsum(hashtype)} {file.fullpath}")
 			else:
 				for file in tqdm(found, desc='CALCULATING BINARIES', ncols=80):
 					file.update_data(hashtype, file.gen_data(bar_anim=False))
@@ -386,16 +424,15 @@ class Process(object):
 				if verbosity:
 					print()
 					for file in found:
-						print(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}")
+						print(f"{file.get_hashsum(hashtype)} {file.fullpath}")
 
 			if any(not_found) or any(unreadable):
 				print()  # Skip one line
 
-		e = Errors(to_exit=False)
 		if any(not_found):
-			e.files_not_found_error(not_found)
+			self._swh_handler.add('Files that were not found: {}'.format(', '.join(f'{file.fullpath!r}' for file in not_found)))
 		if any(unreadable):
-			e.files_not_readable_error(unreadable)
+			self._swh_handler.add('Could not read: {}'.format(', '.join(f'{file.fullpath!r}' for file in unreadable)))
 
 	def checkfiles(self, files: Iterable, hashtype: str, verbosity=False):
 		"""Checks and compare the hash sums of more than one files."""
@@ -410,11 +447,8 @@ class Process(object):
 					file.update_data(
 						hashtype=hashtype,
 						generated_data=file.gen_data(bar_anim=False))
-				elif verbosity is True:
+				elif verbosity:
 					storedData.append(list(file.gen_data(bar_anim=False)))
-				else:
-					e = Errors(to_exit=True, error_type='internal funtion call error')
-					e.print_error('verbosity in function checkfiles from common.py must be bool (True or False)!')
 
 			if verbosity is True:
 				for file, file_data in zip(found, storedData):
@@ -426,11 +460,11 @@ class Process(object):
 					print(self._format_file_result(file, hashtype))
 
 
-		e = Errors(to_exit=False)
-		if any(not_found) or any(unreadable):
-			print('')
-			e.files_not_found_error(not_found)
-			e.files_not_readable_error(unreadable)
+		print()
+		if any(not_found):
+			self._swh_handler.add('Files that were not found: {}'.format(', '.join(f'{file.fullpath!r}' for file in not_found)))
+		if any(unreadable):
+			self._swh_handler.add('Could not read: {}'.format(', '.join(f'{file.fullpath!r}' for file in unreadable)))
 
 	def totalcheck(self, files: Iterable):
 		"""Print all supported hash sums of one file."""
@@ -461,13 +495,13 @@ class Process(object):
 
 				print(f" ┌── {file.get_fullname()!r}")
 				for hashtype in file._hlist.keys():
-					print(f" │ {hashtype}: {file.get_hashsum(hashtype)} {file.get_fullpath()}")
+					print(f" │ {hashtype}: {file.get_hashsum(hashtype)} {file.fullpath}")
 				print(' └────────────────────')
 
-		e = Errors(to_exit=False)
-		if any(not_found) or any(unreadable):
-			e.files_not_found_error(not_found)
-			e.files_not_readable_error(unreadable)
+		if any(not_found):
+			self._swh_handler.add('Files that were not found: {}'.format(', '.join(f'{file.fullpath!r}' for file in not_found)))
+		if any(unreadable):
+			self._swh_handler.add('Could not read: {}'.format(', '.join(f'{file.fullpath!r}' for file in unreadable)))
 
 	def _analyse_files(self, files: Iterable):
 		not_found = [file for file in files if not file.exists()]
@@ -483,8 +517,6 @@ class Process(object):
 			filename = name or (hashtype + 'sum.txt')
 			with open(filename, 'wt') as txt:
 				for file in found:
-					txt.write(f"{file.get_hashsum(hashtype)} {file.get_fullpath()}\n")
+					txt.write(f"{file.get_hashsum(hashtype)} {file.fullpath}\n")
 			animate(f"\nFile {filename!r} was created!", secs=0.045)
-		else:
-			e = Errors('save error')
-			e.print_error('there are no avaliable files for saving hash sums!')
+		# TODO: should I put else here?

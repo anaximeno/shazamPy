@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-""" ShaZam  can calculate a file sum and compare with a given one.
-ShaZam as also other options like:
-	calculate all supported hashsums of one file
-	read a file with hash sum and filename inside
-	calculate only the file sum without compare it
-Prerequesites:
-	python version 3.2.x or higher
-	termcolor version 1.1.x or higher (can install it with pip3 or conda)
-	alive_progress version 1.6.x or higher (can install it with pip3 or conda)
-"""
-__author__ = "Anaxímeno Brito"
-__version__ = '0.4.7.1-beta'
+
 __license__ = "GNU General Public License v3.0"
+__version__ = '0.4.7.1-beta'
+__author__ = 'Anaxímeno Brito'
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
+
+
 from common import  get_hashtype_from_filename, get_hashtype_from_string_length
-from common import File, TextFile, Process, Errors
+from common import File, TextFile, Process, ShazamWarningHandler
+from argparse import Namespace
 import argparse
 import sys
 
@@ -29,8 +23,8 @@ class MainFlow(object):
 		self._process = Process()
 
 		if not args.subparser:
-			e = Errors(to_exit=True, error_type='input error')
-			e.print_error("subcommands were not given!")
+			err = ShazamWarningHandler(halt=True, value=1)
+			err.add("subcommands were not given!")
 
 		self.subarg = args.subparser
 
@@ -38,18 +32,16 @@ class MainFlow(object):
 		"""Performs specific processing depending on the arguments."""
 		if self.subarg == 'check':
 			hashtype = self.args.type or get_hashtype_from_string_length(self.args.HASH_SUM)
-
 			if hashtype is None:
-				e = Errors(to_exit=True, error_type='input error')
-				e.print_error('the hash type was not recognized, please specify it using -t/--type <TYPE>',
-				f'Available Hash Types: {", ".join(Process.HASHTYPES_LIST)}')
-
+				err = ShazamWarningHandler(halt=True)
+				err.add('the hash type was not recognized, please specify it using -t/--type <TYPE>'
+					f'Available Hash Types: {", ".join(Process.HASHTYPES_LIST)}'
+				)
 			self._process.checkfile(
 				file=File(self.args.FILE, self.args.HASH_SUM),
 				hashtype=hashtype, verbosity=self.args.verbose)
 		elif self.subarg == 'calc':
 			files = [File(fname) for fname in self.args.FILES]
-
 			if self.args.type != 'all':
 				self._process.calculate_hash_sum(
 					files=files, verbosity=self.args.no_verbose,
@@ -63,8 +55,8 @@ class MainFlow(object):
 			contents = t.get_content()
 
 			if not any(contents):
-				e = Errors(to_exit=True, error_type='reading error')
-				e.print_error(f'{self.args.filename!r} is empty!')
+				e = ShazamWarningHandler(halt=True)
+				e.add(f'{self.args.filename!r} is empty!')
 			elif len(contents) == 1:
 				self._process.checkfile(
 					file=File(*contents[0]),
@@ -146,6 +138,7 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		args = get_args()
 		MainFlow(args).make_process()
+		ShazamWarningHandler.unstack_all()
 	else:
 		print("usage: shazam [-h] [--version] {Sub-Command}")
 		print("       shazam --help         display the help section and exit")
