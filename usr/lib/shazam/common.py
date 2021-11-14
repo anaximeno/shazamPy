@@ -16,7 +16,7 @@ __author__ = "Anaxímeno J. A. Brito"
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
 
-class Stack:
+class Stack(object):
 
 	def __init__(self, limit: int = None, input_type = None) -> None:
 		if type(limit) is int or limit is None:
@@ -34,7 +34,7 @@ class Stack:
 	@property
 	def number_of_elements(self) -> int:
 		return self._top + 1
-	
+
 	def _walk(self, inc: int) -> bool:
 		prev_top = self._top
 		if type(inc) is int:
@@ -47,14 +47,14 @@ class Stack:
 		else:
 			raise TypeError('The type of the inc value must be int!') 
 		return not self._top == prev_top
-		
-	
+
+
 	def isfull(self) -> bool:
 		return self.limit == self.number_of_elements if self.limit is not None else False
 
 	def isempty(self) -> bool:
 		return not bool(self.number_of_elements)
-	
+
 	def push(self, value: Any) -> bool:
 		if not self.isfull():
 			if self._input_type is None or type(value) is self._input_type:
@@ -65,7 +65,7 @@ class Stack:
 				raise TypeError(f'This stack only acepts inputs of the type {str(self._input_type)}')
 		else:
 			return False
-	
+
 	def pop(self) -> Any:
 		if not self.isempty():
 			self._walk(-1)
@@ -144,13 +144,10 @@ except ImportError:
 finally:
 	if any(requiredPackages):
 		swh = ShazamWarningHandler(halt=True, value=1)
-		swh.add(
-			'{} '.format(',' if len(requiredPackages) > 2 else ' and').join(requiredPackages) + 
-			' {} not installed in your computer!'.format('are' if len(requiredPackages) > 1 else 'is')
-		)
+		swh.add(f"{(', ' if len(requiredPackages) > 2 else ' and ').join(requiredPackages)}"
+			f" {'are' if len(requiredPackages) > 1 else 'is'} not installed in your computer!")
 	else:
 		del requiredPackages
-
 
 
 def hexa_to_int(hexa: str):
