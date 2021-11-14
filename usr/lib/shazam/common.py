@@ -157,6 +157,7 @@ def animate(string: str, secs: float = 0.1):
 
 
 class File(object):
+
 	def __init__(self, filename: str, given_hashsum: str = '', file_for_check: bool = True, **kwargs):
 		"""This class holds all necessary informations and operations for one file object."""
 		self._file_is_for_check = file_for_check
@@ -238,7 +239,7 @@ class File(object):
 			with open(self.get_fullpath(), 'rb') as f:
 				f.read(1)
 			return True
-		except UnicodeDecodeError:
+		except (UnicodeDecodeError, PermissionError):
 			return False
 
 	def get_hashsum(self, hashtype: str):
