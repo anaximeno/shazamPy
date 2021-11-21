@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __license__ = "GNU General Public License v3.0"
-__version__ = "0.4.7.3-beta"
+__version__ = "0.4.7.4-beta"
 
 import os
 import sys
@@ -10,6 +10,7 @@ import string
 import hashlib as hlib
 from time import sleep
 from typing import Any, Generator, Iterable, Text
+from collections import deque
 
 
 __author__ = "Anaxímeno J. A. Brito"
@@ -24,7 +25,7 @@ class Stack(object):
 		else:
 			raise TypeError('The type of the parameter argument limit must be int or None!')
 		self._input_type = input_type
-		self._stack = []
+		self._stack = deque()
 		self._top = -1
 
 	@property
@@ -59,12 +60,9 @@ class Stack(object):
 		if not self.isfull():
 			if self._input_type is None or type(value) is self._input_type:
 				self._stack.append(value)
-				self._walk(1)
-				return True
 			else:
 				raise TypeError(f'This stack only acepts inputs of the type {str(self._input_type)}')
-		else:
-			return False
+		return self._walk(1)
 
 	def pop(self) -> Any:
 		if not self.isempty():
@@ -126,8 +124,11 @@ class ShazamWarningHandler:
 	
 	@classmethod
 	def unstack_all(cls):
-		while (msg := cls.STACK.pop()) is not None:
-			cls.display_mensage(msg)
+		try:
+			while (msg := cls.STACK.pop()):
+				cls.display_mensage(msg)
+		except IndexError:
+			pass
 
 
 requiredPackages: list = []
@@ -136,16 +137,16 @@ requiredPackages: list = []
 try:
 	from termcolor import colored as clr
 except ImportError:
-	requiredPackages.append('termcolor')
+	requiredPackages.append("'termcolor'")
 try:
 	from tqdm import tqdm
 except ImportError:
-	requiredPackages.append('tqdm')
+	requiredPackages.append("'tqdm'")
 finally:
 	if any(requiredPackages):
 		swh = ShazamWarningHandler(halt=True, value=1)
 		swh.add(f"{(', ' if len(requiredPackages) > 2 else ' and ').join(requiredPackages)}"
-			f" {'are' if len(requiredPackages) > 1 else 'is'} not installed in your computer!")
+			f" {'are' if len(requiredPackages) > 1 else 'is'} not installed on your computer!")
 	else:
 		del requiredPackages
 
