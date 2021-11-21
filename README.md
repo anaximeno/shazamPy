@@ -33,21 +33,21 @@ Before the installation secure that you've installed all requirements:
 
 For installing the program run the installation script '**install.sh**' which is on the root directory of this program as shown below:
 
-    $ sudo sh install.sh
+    sudo sh install.sh
 
 Or on the root directory:
 
-	$ sudo cp usr/bin/shazam /usr/bin/
-	$ sudo cp usr/lib/shazam -r /usr/lib/
+	sudo cp usr/bin/shazam /usr/bin/
+	sudo cp usr/lib/shazam -r /usr/lib/
 
 After installing it, see if it is working using the following command:
 
-	$ shazam
+	shazam
 
 ## Usage:
 
-	$ shazam {Sub-Commands} [Arguments..]
+	shazam {Sub-Commands} [Arguments..]
 
 ### For more options, try, after install it:
 
-	$ shazam --help
+	shazam --help
