@@ -1,154 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-__license__ = "GNU General Public License v3.0"
-__version__ = "0.4.7.4-beta"
-
 import os
 import sys
 import string
 import hashlib as hlib
 from time import sleep
-from typing import Any, Generator, Iterable, Text
-from collections import deque
+from typing import Generator, Iterable, List
+from handlers import ShazamWarningHandler, Stack
 
 
-__author__ = "Anaxímeno J. A. Brito"
-__copyright__ = "Copyright (c) 2020-2021 by " + __author__
-
-
-class Stack(object):
-
-	def __init__(self, limit: int = None, input_type = None) -> None:
-		if type(limit) is int or limit is None:
-			self._limit = limit
-		else:
-			raise TypeError('The type of the parameter argument limit must be int or None!')
-		self._input_type = input_type
-		self._stack = deque()
-		self._top = -1
-
-	@property
-	def limit(self) -> int:
-		return self._limit
-
-	@property
-	def number_of_elements(self) -> int:
-		return self._top + 1
-
-	def _walk(self, inc: int) -> bool:
-		prev_top = self._top
-		if type(inc) is int:
-			if inc == -1:
-				self._top = self._top + inc if not self.isempty() else self._top
-			elif inc == 1:
-				self._top = self._top + inc if not self.isfull() else self._top
-			else:
-				raise ValueError('The value of the parameter inc must be -1 or 1')
-		else:
-			raise TypeError('The type of the inc value must be int!') 
-		return not self._top == prev_top
-
-
-	def isfull(self) -> bool:
-		return self.limit == self.number_of_elements if self.limit is not None else False
-
-	def isempty(self) -> bool:
-		return not bool(self.number_of_elements)
-
-	def push(self, value: Any) -> bool:
-		if not self.isfull():
-			if self._input_type is None or type(value) is self._input_type:
-				self._stack.append(value)
-			else:
-				raise TypeError(f'This stack only acepts inputs of the type {str(self._input_type)}')
-		return self._walk(1)
-
-	def pop(self) -> Any:
-		if not self.isempty():
-			self._walk(-1)
-			out = self._stack.pop()
-			return out
-		return None
-
-
-
-class ShazamWarningHandler:
-	"""Class that displays an Error in a way it gets integrated with the program.
-
-	Arguments:
-		`name`: (str, default: 'Error') the name of the Error.
-
-		`halt`: (bool, default: True) if set to True the program will be stoped and the Error will be shown, 
-		else the Error will only be shown at the end of the execution.
-
-		`value`: (int, default: 1) the number of the Error that will be returned to the system.
-	
-	Methods:
-		(...)
-	"""
-	STACK: Stack = Stack(limit=None, input_type=str)
-	EMISSOR: str = 'Shazam'
-	def __init__(self, halt: bool = True,  value: int = 1) -> None:
-		self._halt = halt
-		self._swh_value = value
-	
-	def __str__(self) -> str:
-		return "{} ({}), Halt: {}".format(self.emissor, self._swh_value, str(self._halt))
-
-	def __repr__(self) -> str:
-		pass
-
-	@staticmethod
-	def halt_execution(value: int = 1) -> None:
-		"""Exits and returns the value parameter (default: 1) to the system."""
-		sys.exit(value)
-
-	@property
-	def emissor(self) -> str:
-		return str(self.EMISSOR)
-
-	def add(self, message: str) -> None:
-		"""Add an Error to the Error's stack, if the class argument `halt` was set to true, 
-		the execution will be stoped and this Error will be shown else it will only be show
-		at the end of the execution.
-		"""
-		self.STACK.push(message)
-		if self._halt is True:
-			self.unstack_all()
-			self.halt_execution(self._swh_value)
-
-	@classmethod
-	def display_mensage(cls, msg) -> bool:
-		print(f"{cls.EMISSOR}: {msg}")
-	
-	@classmethod
-	def unstack_all(cls):
-		try:
-			while (msg := cls.STACK.pop()):
-				cls.display_mensage(msg)
-		except IndexError:
-			pass
-
-
-requiredPackages: list = []
-
+importWarner = ShazamWarningHandler(halt=False, value=2)
 
 try:
 	from termcolor import colored as clr
 except ImportError:
-	requiredPackages.append("'termcolor'")
+	importWarner.add("Package 'termcolor' is required. Install it with the command: 'pip install termcolor'")
 try:
 	from tqdm import tqdm
 except ImportError:
-	requiredPackages.append("'tqdm'")
+	importWarner.add("Package 'tqdm' is required. Install it with the command: 'pip install tqdm'")
 finally:
-	if any(requiredPackages):
-		swh = ShazamWarningHandler(halt=True, value=1)
-		swh.add(f"{(', ' if len(requiredPackages) > 2 else ' and ').join(requiredPackages)}"
-			f" {'are' if len(requiredPackages) > 1 else 'is'} not installed on your computer!")
-	else:
-		del requiredPackages
+	importWarner.unstack_and_halt()
 
 
 def hexa_to_int(hexa: str):
@@ -208,7 +80,7 @@ class File(object):
 	def __init__(self, filename: str, given_hashsum: str = '', file_for_check: bool = True, **kwargs):
 		"""This class holds all necessary informations and operations for one file object."""
 		self._swh_handler = ShazamWarningHandler(halt=True, value=1)
-		
+
 		self._file_is_for_check = file_for_check
 		self._dir, self._fname = os.path.split(filename)
 		if '.' in self._fname:
@@ -363,11 +235,29 @@ class TextFile(File):
 			return (content[1], content[0])
 
 
+def search_files(files: List[File]):
+	"""Search for files and returns the ones that were found, not_found and are unreadable,
+	stored inside a stack class.
+
+	`returns` (found, not_found, unreadable)
+	"""
+	found = Stack(input_type=File)
+	not_found = Stack(input_type=File)
+	unreadable = Stack(input_type=File)
+	for file in files:
+		if file.exists():
+			if file.is_readable():
+				found.push(file)
+			else:
+				unreadable.push(file)
+		else:
+			not_found.push(file)
+	return found, not_found, unreadable
+
+
 class Process(object):
 	SLEEP_VALUE: float = 1e-7
-	HASHTYPES_LIST: list = ["md5", "sha1",
-	"sha224", "sha256", "sha384", "sha512"
-		]
+	HASHTYPES_LIST: list = ["md5", "sha1", "sha224", "sha256", "sha384", "sha512"]
 	COLORS: dict = {
 		'sucess': 'green',
 		'failure': 'red'
