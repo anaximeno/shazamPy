@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 
 __license__ = "GNU General Public License v3.0"
-__version__ = '0.4.7.4-beta'
+__version__ = '0.4.7.5-alpha'
 __author__ = 'Anaxímeno Brito'
 __copyright__ = "Copyright (c) 2020-2021 by " + __author__
 
 
 from common import  get_hashtype_from_filename, get_hashtype_from_string_length
 from common import File, TextFile, Process, ShazamWarningHandler
-from argparse import Namespace
 import argparse
 import sys
 
