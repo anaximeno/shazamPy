@@ -8,9 +8,9 @@ class Stack(object):
 		if type(limit) is int or limit is None:
 			self._limit = limit
 		else:
-			raise TypeError('The type of the parameter argument limit must be int or None!')
+			raise TypeError('Limit if given must be an integer value!')
 		self._input_type = input_type
-		self._stack = deque(maxlen=self._limit)
+		self._stack_block = deque(maxlen=self._limit)
 		self._top = -1
 
 	@property
@@ -44,7 +44,7 @@ class Stack(object):
 	def push(self, value: Any) -> bool:
 		if not self.isfull():
 			if self._input_type is None or type(value) is self._input_type:
-				self._stack.append(value)
+				self._stack_block.append(value)
 			else:
 				raise TypeError(f'This stack only acepts inputs of the type {str(self._input_type)}')
 		return self._walk(1)
@@ -52,13 +52,13 @@ class Stack(object):
 	def pop(self) -> Any:
 		if not self.isempty():
 			self._walk(-1)
-			out = self._stack.pop()
+			out = self._stack_block.pop()
 			return out
 		return None
 
 
 
-class ShazamWarningHandler:
+class ShazamWarningHandler(Stack):
 	"""Class that displays an Error in a way it gets integrated with the program.
 
 	Arguments:
@@ -74,12 +74,12 @@ class ShazamWarningHandler:
 	"""
 	STACK: Stack = Stack(limit=None, input_type=str)
 	EMISSOR: str = 'Shazam'
-	def __init__(self, halt: bool = True,  value: int = 1) -> None:
-		self._halt = halt
-		self._swh_value = value
+	def __init__(self, value: int = 1) -> None:
+		super(ShazamWarningHandler, self).__init__(input_type=str)
+		self._err_value = value
 
 	def __str__(self) -> str:
-		return "{} ({}), Halt: {}".format(self.emissor, self._swh_value, str(self._halt))
+		return "{} ({})".format(self.emissor, self._err_value)
 
 	def __repr__(self) -> str:
 		pass
@@ -101,7 +101,7 @@ class ShazamWarningHandler:
 		self.STACK.push(message)
 		if self._halt is True:
 			self.unstack_all()
-			self.halt_execution(self._swh_value)
+			self.halt_execution(self._err_value)
 
 	@classmethod
 	def display_mensage(cls, msg) -> bool:
@@ -130,3 +130,11 @@ class ShazamWarningHandler:
 				cls.display_mensage(msg)
 		except IndexError:
 			pass
+
+s = ShazamWarningHandler()
+
+class GlobalWarner(ShazamWarningHandler):
+	pass
+
+class LocalWarner(ShazamWarningHandler):
+	pass
