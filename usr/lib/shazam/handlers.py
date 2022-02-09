@@ -1,6 +1,6 @@
 from collections import deque
 from typing import Any
-import sys, os
+import sys
 
 
 class Stack(object):
@@ -132,7 +132,6 @@ class ShazamWarningHandler(Stack):
 		except IndexError:
 			pass
 
-s = ShazamWarningHandler()
 
 class GlobalWarner(ShazamWarningHandler):
 	pass
